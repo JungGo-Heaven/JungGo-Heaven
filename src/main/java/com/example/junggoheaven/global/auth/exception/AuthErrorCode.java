@@ -1,0 +1,34 @@
+package com.example.junggoheaven.global.auth.exception;
+
+import org.springframework.http.HttpStatus;
+
+import com.example.junggoheaven.global.common.exception.ErrorCode;
+
+public enum AuthErrorCode implements ErrorCode {
+	UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", HttpStatus.FORBIDDEN, "접근할 수 있는 권한이 없습니다.");
+
+	private String code;
+	private HttpStatus httpStatus;
+	private String message;
+
+	AuthErrorCode(String code, HttpStatus status, String message) {
+		this.code = code;
+		this.httpStatus = status;
+		this.message = message;
+	}
+
+	@Override
+	public String getCode() {
+		return this.code;
+	}
+
+	@Override
+	public HttpStatus getHttpStatus() {
+		return this.httpStatus;
+	}
+
+	@Override
+	public String getDefaultMessage() {
+		return this.message;
+	}
+}
