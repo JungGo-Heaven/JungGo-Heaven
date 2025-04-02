@@ -39,4 +39,15 @@ public class User extends TimeStamp {
 	@Enumerated(EnumType.STRING)
 	private UserStatus status;
 	private LocalDateTime deletedAt;
+
+	@Builder
+	public User(String email, String password, String name, String phoneNumber, String address) {
+		this.email = email;
+		this.password = password;
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.address = address;
+		this.role = UserRole.ROLE_USER;
+		this.status = UserStatus.ACTIVE;
+	}
 }
