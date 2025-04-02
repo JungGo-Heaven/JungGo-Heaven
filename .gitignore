@@ -43,3 +43,6 @@ src/main/resources/*.yml
 
 ### .env ###
 .env
+
+### 맥북 ###
+.DS_Store

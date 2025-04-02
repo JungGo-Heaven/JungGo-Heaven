@@ -1,4 +1,4 @@
-package com.example.junggoheaven.common.entity;
+package com.example.junggoheaven.global.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
