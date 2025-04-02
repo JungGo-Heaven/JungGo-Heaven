@@ -1,8 +1,11 @@
 package com.example.junggoheaven.domain.user.service.component;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -16,5 +19,13 @@ public class UserReader {
 
 	public Boolean existsByUserEmail(String email){
 		return userRepository.existsByEmail(email);
+	}
+
+	public Boolean existsByUserId(Long userId){
+		return userRepository.existsById(userId);
+	}
+
+	public Optional<User> findByUserEmail(String email){
+		return userRepository.findByEmail(email);
 	}
 }

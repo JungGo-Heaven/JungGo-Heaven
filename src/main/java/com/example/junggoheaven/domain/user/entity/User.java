@@ -50,4 +50,12 @@ public class User extends TimeStamp {
 		this.role = UserRole.ROLE_USER;
 		this.status = UserStatus.ACTIVE;
 	}
+
+	public User(String email, String name, String phoneNumber) {
+		this.email = email;
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.role = UserRole.ROLE_GUEST;
+		this.status = UserStatus.ACTIVE;
+	}
 }

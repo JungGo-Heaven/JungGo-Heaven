@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import com.example.junggoheaven.global.common.exception.ErrorCode;
 
 public enum UserErrorCode implements ErrorCode {
+	USER_NOT_FOUND("USER_NOT_FOUND", HttpStatus.NOT_FOUND, "해당 유저는 존재하지 않습니다."),
 	EMAIL_NOT_FOUND("EMAIL_NOT_FOUND", HttpStatus.BAD_REQUEST, "존재하지 않는 이메일 입니다.");
 
 	private String code;
