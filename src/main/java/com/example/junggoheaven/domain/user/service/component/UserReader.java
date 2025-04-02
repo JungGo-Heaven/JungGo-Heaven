@@ -14,4 +14,7 @@ public class UserReader {
 
 	private final UserRepository userRepository;
 
+	public Boolean existsByUserEmail(String email){
+		return userRepository.existsByEmail(email);
+	}
 }

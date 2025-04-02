@@ -38,14 +38,4 @@ public class SignupRequestDto {
 		this.phoneNumber = phoneNumber;
 		this.address = address;
 	}
-
-	public User from() {
-		return User.builder()
-			.email(this.getEmail())
-			.password(this.getPassword())
-			.name(this.getName())
-			.phoneNumber(this.getPhoneNumber())
-			.address(this.getAddress())
-			.build();
-	}
 }
