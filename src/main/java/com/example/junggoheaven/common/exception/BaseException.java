@@ -1,0 +1,17 @@
+package com.example.junggoheaven.common.exception;
+
+import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
+
+@Getter
+public class BaseException extends RuntimeException {
+	private ErrorCode errorCode;
+	private HttpStatus status;
+
+	BaseException(ErrorCode errorCode) {
+		super(errorCode.getDefaultMessage());
+		this.errorCode = errorCode;
+		this.status = errorCode.getHttpStatus();
+	}
+}
