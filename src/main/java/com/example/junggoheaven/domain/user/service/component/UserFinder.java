@@ -19,4 +19,8 @@ public class UserFinder {
 	public User findByUserId(Long id){
 		return userRepository.findById(id).orElseThrow(RuntimeException::new);
 	}
+
+	public User FindByUserEmail(String email){
+		return userRepository.findByEmail(email).orElseThrow(RuntimeException::new);
+	}
 }
