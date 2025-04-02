@@ -1,4 +1,4 @@
-package com.example.junggoheaven.common.exception;
+package com.example.junggoheaven.global.common.exception;
 
 import org.springframework.http.HttpStatus;
 
