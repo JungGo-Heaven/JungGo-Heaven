@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.product.entity;
 
 import com.example.junggoheaven.domain.product.enums.SellStatus;
+import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +10,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -29,9 +32,9 @@ public class Product extends TimeStamp {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	//@ManyToOne
-	//@JoinColumn(name = "users_id")
-	//private Users users;
+	@ManyToOne
+	@JoinColumn(name = "users_id")
+	private User user;
 
 	@Column(nullable = false)
 	private String name;
