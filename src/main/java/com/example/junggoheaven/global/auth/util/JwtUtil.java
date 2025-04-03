@@ -133,7 +133,7 @@ public class JwtUtil {
 	}
 
 	public void refreshSetCookie(String refreshToken, HttpServletResponse response) {
-		Cookie cookie = new Cookie("token", refreshToken);
+		Cookie cookie = new Cookie("refresh", refreshToken);
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		response.addCookie(cookie);

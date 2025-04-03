@@ -64,10 +64,6 @@ public class SecurityConfig {
 			.logout(AbstractHttpConfigurer::disable)
 			.rememberMe(AbstractHttpConfigurer::disable)
 
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**")).permitAll()
-				.anyRequest().authenticated())
-
 			.oauth2Login(oauth2 -> oauth2
 				.authorizationEndpoint(endpoint -> endpoint
 					.authorizationRequestRepository(authorizationRequestRepository())
@@ -77,6 +73,10 @@ public class SecurityConfig {
 				.successHandler(oAuth2AuthenticationSuccessHandler)
 				.failureHandler(oAuth2AuthenticationFailureHandler)
 			)
+
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**")).permitAll()
+				.anyRequest().authenticated())
 
 			.build();
 	}
