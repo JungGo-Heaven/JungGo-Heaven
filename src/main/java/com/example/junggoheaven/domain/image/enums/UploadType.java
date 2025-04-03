@@ -4,7 +4,7 @@ import static com.example.junggoheaven.domain.user.enums.UserRole.*;
 
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.global.common.exception.BaseException;
-import com.example.junggoheaven.global.common.exception.ImageErrorCode;
+import com.example.junggoheaven.domain.image.exception.ImageErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

@@ -1,7 +1,8 @@
-package com.example.junggoheaven.global.common.exception;
+package com.example.junggoheaven.domain.image.exception;
 
 import static org.springframework.http.HttpStatus.*;
 
+import com.example.junggoheaven.global.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
