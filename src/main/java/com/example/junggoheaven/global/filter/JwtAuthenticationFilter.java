@@ -52,14 +52,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			String access = jwtUtil.substringToken(authorizationHeader);
 
 			String refresh = Arrays.stream(request.getCookies())
-				.filter(cookie -> cookie.getName().equals("token"))
+				.filter(cookie -> cookie.getName().equals("refresh"))
 				.findFirst()
 				.map(Cookie::getValue)
 				.orElseThrow(TokenNotFoundException::new);
 
 			try {
 				Claims claims = jwtUtil.extractClaims(access);
-				UserRole userRole = claims.get("userRole", UserRole.class);
+				UserRole userRole = UserRole.of(claims.get("userRole", String.class));
 				if(userRole == UserRole.ROLE_GUEST){
 					log.error("GUSET 유저는 이용할 수 없습니다.");
 					throw new GuestNotAllowedException();
