@@ -8,6 +8,9 @@ import com.example.junggoheaven.domain.product.repository.ProductRepository;
 import com.example.junggoheaven.domain.product.service.component.ProductChecker;
 import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.product.service.component.ProductWriter;
+import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,18 +27,22 @@ public class ProductService {
 	private final ProductWriter productWriter;
 	private final ProductChecker productChecker;
 
+	private final UserFinder userFinder;
+
 
 	/*
 		상품 등록 메서드
 	*/
 	@Transactional
-	public ProductResponseDto saveProduct(ProductRequestDto productRequestDto) {
+	public ProductResponseDto saveProduct(AuthUser authUser, ProductRequestDto productRequestDto) {
 
 		/*
 		// 등록할 멤버(회원) 정보
 		Member member = memberRepository.findById(authUser.getId())
 			.orElseThrow(() -> new BaseException(ErrorCode.NOT_FOUND_MEMBER));
 		*/
+
+		User user = userFinder.findByUserId(authUser.getId());
 
 
 		Product product = new Product(

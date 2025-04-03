@@ -3,6 +3,7 @@ package com.example.junggoheaven.domain.product.controller;
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
 import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
 import com.example.junggoheaven.domain.product.service.ProductService;
+import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,10 +29,10 @@ public class ProductController {
 	*/
 	@PostMapping("/v1/products")
 	public ResponseDto<ProductResponseDto> saveProduct(
-		@AuthenticationPrincipal AuthUser authUser
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestBody ProductRequestDto productRequestDto
 	){
-		ProductResponseDto productResponseDto = productService.saveProduct(productRequestDto);
+		ProductResponseDto productResponseDto = productService.saveProduct(authUser, productRequestDto);
 
 		return ResponseDto.success(productResponseDto);
 	}
