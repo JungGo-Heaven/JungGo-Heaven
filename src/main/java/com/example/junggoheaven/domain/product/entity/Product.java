@@ -52,5 +52,19 @@ public class Product extends TimeStamp {
 	@ColumnDefault("null")
 	private LocalDateTime deletedAt;
 
+	public Product(
+		User user,
+		String name,
+		String information,
+		Long price
+	) {
+		this.user = user;
+		this.name = name;
+		this.information = information;
+		this.price = price;
+		this.sellStatus = SellStatus.ONSALE;
+		//this.deletedAt = null;
+	}
+
 
 }
