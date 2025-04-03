@@ -1,5 +1,7 @@
 package com.example.junggoheaven.domain.user.service.component;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +19,15 @@ public class UserFinder {
 
 	private final UserRepository userRepository;
 
+	public Optional<User> findByUserEmailOpt(String email) {
+		return userRepository.findByEmail(email);
+	}
+
 	public User findByUserId(Long id) {
 		return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
 	}
 
-	public User FindByUserEmail(String email) {
+	public User findByUserEmail(String email) {
 		return userRepository.findByEmail(email).orElseThrow(EmailNotFoundException::new);
 	}
 }
