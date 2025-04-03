@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.junggoheaven.global.auth.exception.AuthException;
+import com.example.junggoheaven.global.auth.exception.GuestNotAllowedException;
 import com.example.junggoheaven.global.common.exception.ErrorCode;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +40,8 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding("UTF-8");
 
-		ResponseDto<Object> errorResponse = ResponseDto.fail(errorCode.getHttpStatus(), errorCode.getCode(), errorCode.getDefaultMessage());
+		ResponseDto<Object> errorResponse = ResponseDto.fail(errorCode.getHttpStatus(), errorCode.getCode(),
+			errorCode.getDefaultMessage());
 		String jsonError = objectMapper.writeValueAsString(errorResponse);
 
 		PrintWriter writer = response.getWriter();

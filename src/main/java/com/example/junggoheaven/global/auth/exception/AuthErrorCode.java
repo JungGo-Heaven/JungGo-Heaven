@@ -14,7 +14,8 @@ public enum AuthErrorCode implements ErrorCode {
 	INVALID_REFRESH_TOKEN("INVALID_REFRESH_TOKEN", HttpStatus.UNAUTHORIZED, "로그인 토큰이 잘못 되었습니다. 다시 로그인 해주세요."),
 	EXPIRED_JWT("EXPIRED_JWT", HttpStatus.UNAUTHORIZED, "만료된 JWT 토큰 입니다."),
 	INVALID_JWT_SIGNATURE("INVALID_JWT_SIGNATURE", HttpStatus.UNAUTHORIZED, "유효하지 않는 JWT 서명 입니다."),
-	UNSUPPORTED_JWT("UNSUPPORTED_JWT", HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 토큰입니다.");
+	UNSUPPORTED_JWT("UNSUPPORTED_JWT", HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 토큰입니다."),
+	GUEST_NOT_ALLOWED("GUEST_NOT_ALLOWED", HttpStatus.FOUND, "GUEST 사용자는 이용할 수 없습니다. redirect: /api/v/users/additional-info");
 
 	private String code;
 	private HttpStatus httpStatus;
