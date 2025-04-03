@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.domain.user.exception.EmailNotFoundException;
+import com.example.junggoheaven.domain.user.exception.UserNotFoundException;
 import com.example.junggoheaven.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,12 @@ public class UserReader {
 		return userRepository.existsById(userId);
 	}
 
-	public Optional<User> findByUserEmail(String email){
-		return userRepository.findByEmail(email);
+	public User findByUserEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(EmailNotFoundException::new);
 	}
+
+	public User findByUserId(Long id) {
+		return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+	}
+
 }

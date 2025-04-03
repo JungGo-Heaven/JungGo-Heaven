@@ -5,10 +5,12 @@ import com.example.junggoheaven.domain.user.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class SignupRequestDto {
 
 	@Email(message = "이메일 양식에 맞지 않습니다.")
@@ -29,13 +31,4 @@ public class SignupRequestDto {
 
 	@NotBlank(message = "주소 입력은 필수 입니다.")
 	private String address;
-
-	@Builder
-	private SignupRequestDto(String email, String password, String name, String phoneNumber, String address) {
-		this.email = email;
-		this.password = password;
-		this.name = name;
-		this.phoneNumber = phoneNumber;
-		this.address = address;
-	}
 }

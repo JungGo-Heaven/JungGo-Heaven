@@ -4,9 +4,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.junggoheaven.domain.user.entity.User;
-import com.example.junggoheaven.domain.user.repository.UserRepository;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
-import com.example.junggoheaven.domain.user.service.component.UserReader;
+import com.example.junggoheaven.domain.user.service.component.UserChecker;
 import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.dto.reqeust.LoginRequestDto;
 import com.example.junggoheaven.global.auth.dto.reqeust.SignupRequestDto;
@@ -16,7 +15,6 @@ import com.example.junggoheaven.global.auth.exception.InvalidEmailPasswordExcept
 import com.example.junggoheaven.global.auth.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,7 +24,7 @@ public class AuthService {
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final JwtUtil jwtUtil;
 	private final UserWriter userWriter;
-	private final UserReader userReader;
+	private final UserChecker userReader;
 	private final UserFinder userFinder;
 
 	public SignupResponseDto signup(SignupRequestDto requestDto) {
@@ -50,8 +48,8 @@ public class AuthService {
 		String email = requestDto.getEmail();
 		String password = requestDto.getPassword();
 
-		User user = userFinder.FindByUserEmail(email);
-		if(bCryptPasswordEncoder.matches(password, user.getPassword())) {
+		User user = userFinder.findByUserEmail(email);
+		if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
 			throw new InvalidEmailPasswordException();
 		}
 
@@ -61,6 +59,5 @@ public class AuthService {
 		String refreshToken = jwtUtil.createRefreshToken(user.getId());
 		jwtUtil.accessSetHeader(refreshToken, response);
 	}
-
 
 }
