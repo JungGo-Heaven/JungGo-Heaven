@@ -1,0 +1,55 @@
+package com.example.junggoheaven.global.filter;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.example.junggoheaven.global.auth.exception.AuthException;
+import com.example.junggoheaven.global.auth.exception.GuestNotAllowedException;
+import com.example.junggoheaven.global.common.exception.ErrorCode;
+import com.example.junggoheaven.global.common.response.ResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+public class ExceptionHandlerFilter extends OncePerRequestFilter {
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+		FilterChain filterChain) throws ServletException, IOException {
+		try {
+			filterChain.doFilter(request, response);
+		} catch (AuthException e) {
+			log.error("인증 관련 오류 발생: {}", e.getClass().getSimpleName());
+			setErrorResponse(response, e.getErrorCode());
+		}
+	}
+
+	private void setErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		response.setStatus(errorCode.getHttpStatus().value());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.setCharacterEncoding("UTF-8");
+
+		ResponseDto<Object> errorResponse = ResponseDto.fail(errorCode.getHttpStatus(), errorCode.getCode(),
+			errorCode.getDefaultMessage());
+		String jsonError = objectMapper.writeValueAsString(errorResponse);
+
+		PrintWriter writer = response.getWriter();
+		writer.write(jsonError);
+		writer.flush();
+
+		// front에게 error를 알리기 위해 sendError 작성
+		response.sendError(errorCode.getHttpStatus().value(), errorCode.getDefaultMessage());
+		log.error("Error Response: {}", jsonError);
+	}
+}
