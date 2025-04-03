@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.domain.user.service.component.UserChecker;
 import com.example.junggoheaven.global.auth.exception.TokenNotFoundException;
 
 import io.jsonwebtoken.Claims;
@@ -32,6 +33,7 @@ public class JwtUtil {
 	private static final String BEARER_PREFIX = "Bearer ";
 	private static final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L; // 60분
 	private static final long REFRESH_TOKEN_TIME = 60 * 60 * 24 * 1000L; // 1일
+	private final UserChecker userReader;
 
 	@Value("${jwt.secret.key}")
 	private String secretKey;
@@ -133,6 +135,7 @@ public class JwtUtil {
 	public void refreshSetCookie(String refreshToken, HttpServletResponse response) {
 		Cookie cookie = new Cookie("token", refreshToken);
 		cookie.setPath("/");
+		cookie.setHttpOnly(true);
 		response.addCookie(cookie);
 	}
 }

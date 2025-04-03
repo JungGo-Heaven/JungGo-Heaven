@@ -10,6 +10,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.auth.exception.AuthenticationExpiredException;
+import com.example.junggoheaven.global.auth.exception.GuestNotAllowedException;
 import com.example.junggoheaven.global.auth.exception.InvalidJwtSignatureException;
 import com.example.junggoheaven.global.auth.exception.InvalidTokenException;
 import com.example.junggoheaven.global.auth.exception.TokenNotFoundException;
@@ -58,6 +59,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			try {
 				Claims claims = jwtUtil.extractClaims(access);
+				UserRole userRole = claims.get("userRole", UserRole.class);
+				if(userRole == UserRole.ROLE_GUEST){
+					log.error("GUSET 유저는 이용할 수 없습니다.");
+					throw new GuestNotAllowedException();
+				}
 
 				if (claims == null) {
 					throw new InvalidTokenException();

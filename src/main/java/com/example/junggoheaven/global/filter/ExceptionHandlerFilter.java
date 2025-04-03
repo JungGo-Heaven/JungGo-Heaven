@@ -46,6 +46,8 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 		writer.write(jsonError);
 		writer.flush();
 
+		// front에게 error를 알리기 위해 sendError 작성
+		response.sendError(errorCode.getHttpStatus().value(), errorCode.getDefaultMessage());
 		log.error("Error Response: {}", jsonError);
 	}
 }

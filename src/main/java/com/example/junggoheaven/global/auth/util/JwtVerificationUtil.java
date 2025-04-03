@@ -3,7 +3,7 @@ package com.example.junggoheaven.global.auth.util;
 import org.springframework.stereotype.Component;
 
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
-import com.example.junggoheaven.domain.user.service.component.UserReader;
+import com.example.junggoheaven.domain.user.service.component.UserChecker;
 import com.example.junggoheaven.global.auth.exception.InvalidAccessToken;
 import com.example.junggoheaven.global.auth.exception.InvalidRefreshToken;
 
@@ -18,7 +18,7 @@ public class JwtVerificationUtil {
 
 	private final JwtUtil jwtUtil;
 	private final UserFinder userFinder;
-	private final UserReader userReader;
+	private final UserChecker userReader;
 
 	public void accessVerify(String accessToken) {
 		Claims claims = jwtUtil.extractClaims(accessToken);
@@ -27,7 +27,7 @@ public class JwtVerificationUtil {
 		Long userId = Long.valueOf(subject);
 		String email = (String)claims.get("email");
 
-		if (!userFinder.findByUserId(userId).equals(userFinder.FindByUserEmail(email))) {
+		if (!userFinder.findByUserId(userId).equals(userFinder.findByUserEmail(email))) {
 			log.info("access token이 유효하지 않습니다.");
 			throw new InvalidAccessToken();
 		}
