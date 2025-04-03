@@ -46,3 +46,6 @@ src/main/resources/*.yml
 
 ### 맥북 ###
 .DS_Store
+
+### 의존성 ###
+build.gradle

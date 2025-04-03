@@ -10,8 +10,15 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class UserReader {
+public class UserChecker {
 
 	private final UserRepository userRepository;
 
+	public Boolean existsByUserEmail(String email){
+		return userRepository.existsByEmail(email);
+	}
+
+	public Boolean existsByUserId(Long userId){
+		return userRepository.existsById(userId);
+	}
 }
