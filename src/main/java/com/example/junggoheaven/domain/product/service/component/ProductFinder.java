@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.product.service.component;
 
 import com.example.junggoheaven.domain.product.entity.Product;
+import com.example.junggoheaven.domain.product.exception.ProductNotFoundException;
 import com.example.junggoheaven.domain.product.repository.ProductRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class ProductFinder {
 
 	public Product findProductById(Long id) {
 		return productRepository.findById(id)
-			.orElseThrow();
+			.orElseThrow(ProductNotFoundException::new);
 	}
 
 
