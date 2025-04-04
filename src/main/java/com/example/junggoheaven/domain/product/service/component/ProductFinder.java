@@ -17,8 +17,8 @@ public class ProductFinder {
 
 	private final ProductRepository productRepository;
 
-
-	public Page<Product> findAllProductOpt(Pageable pageable) {
+	// Opt 제거
+	public Page<Product> findAllProduct(Pageable pageable) {
 		return productRepository.findByDeletedAtNull(pageable);
 	}
 

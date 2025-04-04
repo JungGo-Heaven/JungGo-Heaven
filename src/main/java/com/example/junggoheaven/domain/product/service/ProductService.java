@@ -4,6 +4,7 @@ package com.example.junggoheaven.domain.product.service;
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
 import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
 import com.example.junggoheaven.domain.product.entity.Product;
+import com.example.junggoheaven.domain.product.exception.ProductNotYourException;
 import com.example.junggoheaven.domain.product.repository.ProductRepository;
 import com.example.junggoheaven.domain.product.service.component.ProductChecker;
 import com.example.junggoheaven.domain.product.service.component.ProductFinder;
@@ -58,7 +59,7 @@ public class ProductService {
 	@Transactional(readOnly = true)
 	public Page<ProductResponseDto> findAllProduct(Pageable pageable) {
 
-		Page<Product> productPage = productFinder.findAllProductOpt(pageable);
+		Page<Product> productPage = productFinder.findAllProduct(pageable);
 
 		List<ProductResponseDto> dtoList = productPage.getContent().stream()
 			.map(ProductResponseDto::toDto)
@@ -95,6 +96,34 @@ public class ProductService {
 		return new ProductResponseDto(product);
 	}
 
+
+	/*
+		상품 정보 수정 메서드
+	*/
+	@Transactional
+	public ProductResponseDto editProduct(AuthUser authUser, Long productId, ProductRequestDto productRequest){
+
+		User user = userFinder.findByUserId(authUser.getId());
+
+		// 수정하려는 상품 찾기 -> productFinder 에서 없는 상품일경우 예외처리
+		Product product = productFinder.findProductById(productId);
+
+		// 다른 유저의 상품 수정을 방지하는 기능
+		if(! (productChecker.isMyProduct(user, product)) ){
+			throw new ProductNotYourException();
+		}
+
+
+		// 상품 수정
+		product.setName(productRequest.getName());
+		product.setInformation(productRequest.getInformation());
+		product.setPrice(productRequest.getPrice());
+
+		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+
+	}
 
 
 
