@@ -37,12 +37,6 @@ public class ProductService {
 	@Transactional
 	public ProductResponseDto saveProduct(AuthUser authUser, ProductRequestDto productRequestDto) {
 
-		/*
-		// 등록할 멤버(회원) 정보
-		Member member = memberRepository.findById(authUser.getId())
-			.orElseThrow(() -> new BaseException(ErrorCode.NOT_FOUND_MEMBER));
-		*/
-
 		User user = userFinder.findByUserId(authUser.getId());
 
 		Product product = new Product(
@@ -53,7 +47,6 @@ public class ProductService {
 		);
 
 		productWriter.saveProduct(product);
-		//productRepository.save(product);
 
 		return new ProductResponseDto(product);
 	}
@@ -85,6 +78,26 @@ public class ProductService {
 
 		return new ProductResponseDto(product);
 	}
+
+
+	/*
+		상품 소프트딜리트 메서드
+	*/
+	@Transactional
+	public ProductResponseDto softDeleteProduct(Long id) {
+
+		Product product = productFinder.findProductById(id);
+
+		product.setDeletedAt(LocalDateTime.now()); // 소프트 딜리트 변수에 현재시간 대입 -> null 이 아니므로 더이상 DB에 레코드가 논리적으로 존재하지 않음
+
+		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+	}
+
+
+
+
 
 
 }

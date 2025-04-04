@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,6 +64,22 @@ public class ProductController {
 
 		return ResponseDto.success(productResponseDto);
 	}
+
+
+	/*
+		상품 삭제 소프트딜리트 메서드
+	*/
+	@DeleteMapping("/v1/products/{productId}")
+	public ResponseDto<ProductResponseDto> softDeleteProduct(
+		@PathVariable("productId") Long productId) {
+
+		ProductResponseDto productResponseDto = productService.softDeleteProduct(productId);
+
+		return ResponseDto.success(productResponseDto);
+	}
+
+
+
 
 
 }
