@@ -45,7 +45,6 @@ public class Product extends TimeStamp {
 	private Long price;
 
 	@Enumerated(EnumType.STRING)
-	//@ColumnDefault("ONSALE")
 	private SellStatus sellStatus;
 
 	@Column

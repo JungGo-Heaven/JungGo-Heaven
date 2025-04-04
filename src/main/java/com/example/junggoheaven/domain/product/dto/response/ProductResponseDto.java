@@ -43,7 +43,7 @@ public class ProductResponseDto {
 	public static ProductResponseDto toDto(Product product) {
 		return new ProductResponseDto(
 			product.getId(),
-			product.getUser(),//MemberResponse.from(product.getMember()),
+			product.getUser(),
 			product.getName(),
 			product.getInformation(),
 			product.getPrice(),

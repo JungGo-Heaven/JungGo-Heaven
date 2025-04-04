@@ -11,6 +11,7 @@ import com.example.junggoheaven.domain.product.service.component.ProductWriter;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,7 +45,6 @@ public class ProductService {
 
 		User user = userFinder.findByUserId(authUser.getId());
 
-
 		Product product = new Product(
 			user,
 			productRequestDto.getName(),
@@ -60,7 +60,7 @@ public class ProductService {
 
 
 	/*
-		상품 조회 메서드
+		상품 다건 페이지네이션 조회 메서드
 	*/
 	@Transactional(readOnly = true)
 	public Page<ProductResponseDto> findAllProduct(Pageable pageable) {
@@ -75,9 +75,16 @@ public class ProductService {
 	}
 
 
+	/*
+		상품 단건 조회 메서드
+	*/
+	@Transactional
+	public ProductResponseDto findProductById(Long id) {
 
+		Product product = productFinder.findProductById(id);
 
-
+		return new ProductResponseDto(product);
+	}
 
 
 }
