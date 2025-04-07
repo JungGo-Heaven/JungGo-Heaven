@@ -29,13 +29,15 @@ public class UserAdminController {
 	private final UserAdminService userAdminService;
 
 	@PatchMapping("/users/status")
-	public ResponseDto<AdminUserInfoResponseDto> updateUserStatus(@Valid @RequestBody AdminUserStatusUpdateRequestDto requestDto) {
+	public ResponseDto<AdminUserInfoResponseDto> updateUserStatus(
+		@Valid @RequestBody AdminUserStatusUpdateRequestDto requestDto) {
 		return ResponseDto.success(userAdminService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
 	}
 
 	@GetMapping("/users")
-	public ResponseDto<Page<AdminUserListResponseDto>> getAdminUserPage(@RequestParam String status,
-		@RequestParam String email, @RequestParam int pageNumber, @RequestParam int pageSize) {
+	public ResponseDto<Page<AdminUserListResponseDto>> getAdminUserPage(@RequestParam(required = false) String status,
+		@RequestParam(required = false) String email, @RequestParam(defaultValue = "0") int pageNumber,
+		@RequestParam(defaultValue = "10") int pageSize) {
 		return ResponseDto.success(userAdminService.getAdminUserPage(status, email, pageNumber, pageSize));
 	}
 

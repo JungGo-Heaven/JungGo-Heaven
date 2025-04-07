@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.domain.user.enums.UserStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -47,7 +48,7 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	}
 
 	private BooleanExpression equalStatus(String status) {
-		return StringUtils.isBlank(status) ? null : user.status.stringValue().contains(status);
+		return StringUtils.isBlank(status) ? null : user.status.eq(UserStatus.of(status));
 	}
 
 	private BooleanExpression containsEmail(String email) {
