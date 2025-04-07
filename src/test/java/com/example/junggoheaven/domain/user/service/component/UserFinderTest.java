@@ -108,25 +108,25 @@ class UserFinderTest {
 	}
 
 	@Test
-	void findValidUserById() {
+	void findNonDeletedUserById() {
 		given(userRepository.findByIdAndNonDeleted(userId)).willReturn(Optional.of(user));
 
-		User getUser = userFinder.findValidUserById(userId);
+		User getUser = userFinder.findNonDeletedUserById(userId);
 		assertThat(getUser).isNotNull();
 		assertThat(getUser.getId()).isEqualTo(userId);
 	}
 
 	@Test
-	void findValidUserById_탈퇴한_유저_비교() {
+	void findNonDeletedUserById_탈퇴한_유저_비교() {
 		given(userRepository.findByIdAndNonDeleted(deletedUserId)).willReturn(Optional.empty());
 		given(userRepository.findByIdAndNonDeleted(userId)).willReturn(Optional.of(user));
 
-		User good = userFinder.findValidUserById(userId);
+		User good = userFinder.findNonDeletedUserById(userId);
 		assertThat(good).isNotNull();
 		assertThat(good.getId()).isEqualTo(userId);
 
 		assertThrows(AlreadyDeletedUserException.class, () -> {
-			userFinder.findValidUserById(deletedUserId);
+			userFinder.findNonDeletedUserById(deletedUserId);
 		});
 	}
 
@@ -145,5 +145,20 @@ class UserFinderTest {
 		assertThat(usersForAdmin.getTotalElements()).isEqualTo(2);
 		assertThat(users.get(0).getStatus()).isEqualTo(UserStatus.ACTIVE);
 		assertThat(users.get(1).getStatus()).isEqualTo(UserStatus.DELETED);
+	}
+
+	@Test
+	void findValidUserById(){
+		given(userRepository.findById(userId)).willReturn(Optional.of(user));
+		given(userRepository.findById(deletedUserId)).willReturn(Optional.of(deletedUser));
+
+		User validUser = userFinder.findValidUserById(userId);
+
+		assertThat(validUser).isNotNull();
+		assertThat(validUser.getStatus()).isNotEqualByComparingTo(UserStatus.DELETED);
+
+		assertThrows(AlreadyDeletedUserException.class, () -> {
+			userFinder.findValidUserById(deletedUserId);
+		});
 	}
 }

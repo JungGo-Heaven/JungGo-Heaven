@@ -107,7 +107,7 @@ class AuthServiceTest {
 		given(userFinder.findByUserEmail(anyString())).willReturn(user);
 		given(bCryptPasswordEncoder.matches(password, encodedPassword)).willReturn(true);
 
-		authService.login(requestDto, servletResponse);
+		authService.login(requestDto);
 	}
 
 	@Test
@@ -117,7 +117,7 @@ class AuthServiceTest {
 		given(userFinder.findByUserEmail(anyString())).willThrow(EmailNotFoundException.class);
 
 		assertThrows(EmailNotFoundException.class, () -> {
-			authService.login(requestDto, servletResponse);
+			authService.login(requestDto);
 		});
 	}
 
@@ -129,7 +129,7 @@ class AuthServiceTest {
 		given(bCryptPasswordEncoder.matches(password, encodedPassword)).willReturn(false);
 
 		assertThrows(InvalidEmailPasswordException.class, () -> {
-			authService.login(requestDto, servletResponse);
+			authService.login(requestDto);
 		});
 	}
 }
