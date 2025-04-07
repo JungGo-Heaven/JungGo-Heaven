@@ -28,8 +28,8 @@ public class AuthController {
 	}
 
 	@PostMapping("/auth/login")
-	public ResponseDto<Void> login(@Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse response){
-		authService.login(requestDto, response);
+	public ResponseDto<Void> login(@Valid @RequestBody LoginRequestDto requestDto){
+		authService.login(requestDto);
 		return ResponseDto.success(null);
 	}
 }
