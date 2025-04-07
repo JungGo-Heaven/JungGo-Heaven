@@ -49,7 +49,7 @@ class UserAdminServiceTest {
 	@Test
 	void updateUserStatus() {
 		String updateStatus = "STOPPED";
-		given(userFinder.findNonDeletedByUserId(any())).willReturn(user);
+		given(userFinder.findValidUserById(any())).willReturn(user);
 
 		AdminUserInfoResponseDto response = userAdminService.updateUserStatus(1L, updateStatus);
 
@@ -59,7 +59,7 @@ class UserAdminServiceTest {
 	@Test
 	void updateUserStatus_동일한_status_예외() {
 		String sameStatus = "ACTIVE";
-		given(userFinder.findNonDeletedByUserId(any())).willReturn(user);
+		given(userFinder.findValidUserById(any())).willReturn(user);
 
 		assertThrows(UserStatusSameException.class, () -> userAdminService.updateUserStatus(1L, sameStatus));
 	}
@@ -83,7 +83,7 @@ class UserAdminServiceTest {
 		given(userFinder.findByUserId(any())).willReturn(user);
 
 		AdminUserInfoResponseDto response = userAdminService.getAdminUserInfo(1L);
-		
+
 		assertThat(response).isNotNull();
 		assertThat(response.getUserId()).isEqualTo(user.getId());
 	}
