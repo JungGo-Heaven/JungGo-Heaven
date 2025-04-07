@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +35,14 @@ public class GlobalExceptionHandler {
 		}
 
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(OAuth2AuthenticationException.class)
+	public ResponseEntity<ErrorResponseDto> authenticationExceptionException(
+		OAuth2AuthenticationException ex
+	) {
+		ErrorResponseDto error = ErrorResponseDto.of(ex.getClass().getSimpleName(), ex.getMessage());
+		return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(BaseException.class)
