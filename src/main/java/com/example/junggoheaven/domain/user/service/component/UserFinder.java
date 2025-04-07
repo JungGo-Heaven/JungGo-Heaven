@@ -38,7 +38,7 @@ public class UserFinder {
 
 	public User findValidUserById(Long userId) {
 		User user = findByUserId(userId);
-		if(user.getStatus().equals(UserStatus.DELETED)){
+		if (user.getStatus().equals(UserStatus.DELETED)) {
 			throw new AlreadyDeletedUserException();
 		}
 		return user;

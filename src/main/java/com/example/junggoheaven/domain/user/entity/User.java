@@ -73,6 +73,7 @@ public class User extends TimeStamp {
 			this.phoneNumber = phoneNumber;
 		}
 		this.address = address;
+		this.role = UserRole.ROLE_USER;
 	}
 
 	public void updateName(String name) {

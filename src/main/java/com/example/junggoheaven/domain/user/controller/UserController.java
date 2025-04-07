@@ -16,6 +16,7 @@ import com.example.junggoheaven.domain.user.dto.user.UserSelfInfoResponseDto;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.domain.user.service.UserService;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
+import com.example.junggoheaven.global.auth.util.RefreshUtil;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 
 import jakarta.validation.Valid;

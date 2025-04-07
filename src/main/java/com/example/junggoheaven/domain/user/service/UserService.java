@@ -12,15 +12,22 @@ import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.exception.InvalidPasswordException;
 import com.example.junggoheaven.domain.user.exception.PasswordSameException;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.global.auth.util.JwtUtil;
+import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+	private final HttpServletResponse response;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final UserFinder userFinder;
+	private final JwtUtil jwtUtil;
+	private final RefreshUtil refreshUtil;
 
 	@Transactional
 	public UserSelfInfoResponseDto addInfo(Long id, GuestAddInfoRequestDto requestDto) {
@@ -30,6 +37,9 @@ public class UserService {
 		String address = requestDto.getAddress();
 
 		user.guestAddInfo(password, phoneNumber, address);
+
+		String refreshToken = refreshUtil.getRefreshToken(String.valueOf(user.getId()));
+		jwtUtil.reissueAccessToken(refreshToken, response);
 		return UserSelfInfoResponseDto.from(user);
 	}
 
@@ -78,6 +88,7 @@ public class UserService {
 	@Transactional
 	public void deleteUserAccount(Long id) {
 		User user = userFinder.findValidUserById(id);
+		refreshUtil.deleteRefreshToken(String.valueOf(id));
 		user.deleteUser();
 	}
 }

@@ -2,9 +2,11 @@ package com.example.junggoheaven.domain.user.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class UpdatePasswordRequestDto {
 	@NotBlank(message = "현재 비밀번호를 입력해주세요.")
 	private String oldPassword;
