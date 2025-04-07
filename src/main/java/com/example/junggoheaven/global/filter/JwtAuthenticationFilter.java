@@ -60,7 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			try {
 				Claims claims = jwtUtil.extractClaims(access);
 				UserRole userRole = UserRole.of(claims.get("userRole", String.class));
-				if(userRole == UserRole.ROLE_GUEST){
+				String url = request.getRequestURI().substring("/api/v1".length());
+				if (userRole == UserRole.ROLE_GUEST && !url.equals("/users/additional-info")) {
 					log.error("GUSET 유저는 이용할 수 없습니다.");
 					throw new GuestNotAllowedException();
 				}
