@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.junggoheaven.domain.user.entity.User;
@@ -123,5 +128,22 @@ class UserFinderTest {
 		assertThrows(AlreadyDeletedUserException.class, () -> {
 			userFinder.findNonDeletedByUserId(deletedUserId);
 		});
+	}
+
+	@Test
+	void findUsersForAdmin(){
+		Pageable pageable = PageRequest.of(0, 10);
+		PageImpl userPage = new PageImpl(List.of(user, deletedUser));
+		String email = "test";
+
+		given(userRepository.findAllByStatusAndEmail(any(), any(), any())).willReturn(userPage);
+
+		Page<User> usersForAdmin = userFinder.findUsersForAdmin(null, email, pageable);
+		List<User> users = usersForAdmin.getContent();
+
+		assertThat(usersForAdmin).isNotNull();
+		assertThat(usersForAdmin.getTotalElements()).isEqualTo(2);
+		assertThat(users.get(0).getStatus()).isEqualTo(UserStatus.ACTIVE);
+		assertThat(users.get(1).getStatus()).isEqualTo(UserStatus.DELETED);
 	}
 }
