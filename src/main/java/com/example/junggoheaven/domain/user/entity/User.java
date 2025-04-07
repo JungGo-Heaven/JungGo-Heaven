@@ -58,4 +58,17 @@ public class User extends TimeStamp {
 		this.role = UserRole.ROLE_GUEST;
 		this.status = UserStatus.ACTIVE;
 	}
+
+	public void updateStatus(UserStatus status) {
+		this.status = status;
+	}
+
+	public void updatePassword(String password) {
+		this.password = password;
+	}
+
+	public void deleteUser() {
+		this.deletedAt = LocalDateTime.now();
+		this.status = UserStatus.DELETED;
+	}
 }
