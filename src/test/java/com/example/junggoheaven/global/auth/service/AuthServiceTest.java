@@ -27,6 +27,7 @@ import com.example.junggoheaven.global.auth.dto.response.SignupResponseDto;
 import com.example.junggoheaven.global.auth.exception.EmailAlreadyExistsException;
 import com.example.junggoheaven.global.auth.exception.InvalidEmailPasswordException;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
+import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +38,8 @@ class AuthServiceTest {
 	@InjectMocks
 	private AuthService authService;
 
+	@Mock
+	private RefreshUtil refreshUtil;
 	@Mock
 	private JwtUtil jwtUtil;
 	@Mock
