@@ -67,6 +67,26 @@ public class User extends TimeStamp {
 		this.password = password;
 	}
 
+	public void guestAddInfo(String password, String phoneNumber, String address) {
+		this.password = password;
+		if (phoneNumber != null && !phoneNumber.isBlank()) {
+			this.phoneNumber = phoneNumber;
+		}
+		this.address = address;
+	}
+
+	public void updateName(String name) {
+		this.name = name;
+	}
+
+	public void updatePhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public void updateAddress(String address) {
+		this.address = address;
+	}
+
 	public void deleteUser() {
 		this.deletedAt = LocalDateTime.now();
 		this.status = UserStatus.DELETED;

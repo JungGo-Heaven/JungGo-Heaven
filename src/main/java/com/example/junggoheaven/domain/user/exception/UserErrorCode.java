@@ -9,7 +9,9 @@ public enum UserErrorCode implements ErrorCode {
 	EMAIL_NOT_FOUND("EMAIL_NOT_FOUND", HttpStatus.BAD_REQUEST, "존재하지 않는 이메일 입니다."),
 	ALREADY_DELETED_USER("ALREADY_DELETED_USER", HttpStatus.BAD_REQUEST, "이미 탈퇴한 사용자 입니다."),
 	USER_STATUS_SAME("USER_STATUS_SAME", HttpStatus.BAD_REQUEST, "현재와 동일한 상태 코드 입니다."),
-	INVALID_USER_STATUS("INVALID_USER_STATUS", HttpStatus.BAD_REQUEST, "유효하지 않은 상태 코드 입니다.");
+	USER_PASSWORD_SAME("USER_PASSWORD_SAME", HttpStatus.BAD_REQUEST, "현재와 동일한 비밀번호 입니다."),
+	INVALID_USER_STATUS("INVALID_USER_STATUS", HttpStatus.BAD_REQUEST, "유효하지 않은 상태 코드 입니다."),
+	INVALID_PASSWORD("INVALID_PASSWORD", HttpStatus.BAD_REQUEST, "유효하지 않은 비밀번호 입니다.");
 
 	private String code;
 	private HttpStatus httpStatus;
