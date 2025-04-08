@@ -4,9 +4,11 @@ import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
 import com.example.junggoheaven.global.common.annotation.ValidEnum;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class InquiryStatusRequestDto {
 	@NotBlank(message = "변경하려는 문의 id를 입력해주세요.")
 	private Long inquiryId;

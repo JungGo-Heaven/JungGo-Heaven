@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
 import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.user.entity.QUser;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -26,11 +27,12 @@ public class InquiryRepositoryImpl implements InquiryCustomRepository {
 
 	@Override
 	public Page<Inquiry> findAllByForAdmin(String title, String status, String writer, Pageable pageable) {
+		QUser respondentUser = new QUser("respondent");
 
 		List<Inquiry> inquiries = jpaQueryFactory
 			.selectFrom(inquiry)
 			.leftJoin(inquiry.writer, user).fetchJoin()
-			.leftJoin(inquiry.respondent, user).fetchJoin()
+			.leftJoin(inquiry.respondent, respondentUser).fetchJoin()
 			.where(
 				containsTitle(title),
 				equalStatus(status),

@@ -24,9 +24,9 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long>, Inquiry
 
 	@EntityGraph(attributePaths = {"writer", "respondent"})
 	@Query("SELECT i FROM Inquiry i WHERE i.id = :inquiryId AND i.status <> 'DELETED'")
-	Inquiry findByIdAndStatusIsNotDeleted(Long inquiryId);
+	Optional<Inquiry> findByIdAndStatusIsNotDeleted(Long inquiryId);
 
 	@EntityGraph(attributePaths = {"writer", "respondent"})
-	@Query("SELECT i FROM Inquiry i WHERE i.id = :inquiryId AND i.status <> 'DELETED'")
+	@Query("SELECT i FROM Inquiry i WHERE i.writer.id = :writerId AND i.status <> 'DELETED'")
 	Page<Inquiry> findAllByWriterIdAndStatusIsNotDeleted(Long writerId, Pageable pageable);
 }
