@@ -27,6 +27,7 @@ import com.example.junggoheaven.global.auth.dto.response.SignupResponseDto;
 import com.example.junggoheaven.global.auth.exception.EmailAlreadyExistsException;
 import com.example.junggoheaven.global.auth.exception.InvalidEmailPasswordException;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
+import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +38,8 @@ class AuthServiceTest {
 	@InjectMocks
 	private AuthService authService;
 
+	@Mock
+	private RefreshUtil refreshUtil;
 	@Mock
 	private JwtUtil jwtUtil;
 	@Mock
@@ -104,7 +107,7 @@ class AuthServiceTest {
 		given(userFinder.findByUserEmail(anyString())).willReturn(user);
 		given(bCryptPasswordEncoder.matches(password, encodedPassword)).willReturn(true);
 
-		authService.login(requestDto, servletResponse);
+		authService.login(requestDto);
 	}
 
 	@Test
@@ -114,7 +117,7 @@ class AuthServiceTest {
 		given(userFinder.findByUserEmail(anyString())).willThrow(EmailNotFoundException.class);
 
 		assertThrows(EmailNotFoundException.class, () -> {
-			authService.login(requestDto, servletResponse);
+			authService.login(requestDto);
 		});
 	}
 
@@ -126,7 +129,7 @@ class AuthServiceTest {
 		given(bCryptPasswordEncoder.matches(password, encodedPassword)).willReturn(false);
 
 		assertThrows(InvalidEmailPasswordException.class, () -> {
-			authService.login(requestDto, servletResponse);
+			authService.login(requestDto);
 		});
 	}
 }

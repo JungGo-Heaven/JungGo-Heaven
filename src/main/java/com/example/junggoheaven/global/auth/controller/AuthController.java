@@ -22,14 +22,14 @@ public class AuthController {
 
 	private final AuthService authService;
 
-	@PostMapping("/auth/signin")
+	@PostMapping("/auth/signup")
 	public ResponseDto<SignupResponseDto> signup(@Valid @RequestBody SignupRequestDto requestDto){
 		return ResponseDto.success(authService.signup(requestDto));
 	}
 
 	@PostMapping("/auth/login")
-	public ResponseDto<Void> login(@Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse response){
-		authService.login(requestDto, response);
+	public ResponseDto<Void> login(@Valid @RequestBody LoginRequestDto requestDto){
+		authService.login(requestDto);
 		return ResponseDto.success(null);
 	}
 }

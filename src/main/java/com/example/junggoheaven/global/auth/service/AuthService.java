@@ -13,6 +13,7 @@ import com.example.junggoheaven.global.auth.dto.response.SignupResponseDto;
 import com.example.junggoheaven.global.auth.exception.EmailAlreadyExistsException;
 import com.example.junggoheaven.global.auth.exception.InvalidEmailPasswordException;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
+import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final HttpServletResponse response;
 	private final JwtUtil jwtUtil;
+	private final RefreshUtil refreshUtil;
 	private final UserWriter userWriter;
 	private final UserChecker userReader;
 	private final UserFinder userFinder;
@@ -44,7 +47,7 @@ public class AuthService {
 		return SignupResponseDto.from(saveUser);
 	}
 
-	public void login(LoginRequestDto requestDto, HttpServletResponse response) {
+	public void login(LoginRequestDto requestDto) {
 		String email = requestDto.getEmail();
 		String password = requestDto.getPassword();
 
@@ -57,7 +60,8 @@ public class AuthService {
 		jwtUtil.accessSetHeader(accessToken, response);
 
 		String refreshToken = jwtUtil.createRefreshToken(user.getId());
-		jwtUtil.accessSetHeader(refreshToken, response);
+		jwtUtil.refreshSetCookie(refreshToken, response);
+		refreshUtil.saveRefreshToken(refreshToken, String.valueOf(user.getId()));
 	}
 
 }

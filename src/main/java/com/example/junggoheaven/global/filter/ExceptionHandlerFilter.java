@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -48,8 +49,6 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 		writer.write(jsonError);
 		writer.flush();
 
-		// front에게 error를 알리기 위해 sendError 작성
-		response.sendError(errorCode.getHttpStatus().value(), errorCode.getDefaultMessage());
 		log.error("Error Response: {}", jsonError);
 	}
 }

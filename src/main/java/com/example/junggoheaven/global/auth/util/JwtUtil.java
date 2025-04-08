@@ -116,6 +116,7 @@ public class JwtUtil {
 		accessSetHeader(newAccessToken, response);
 
 		String newRefreshToken = createRefreshToken(authUser.getId());
+		refreshUtil.reissueRefreshToken(newRefreshToken, String.valueOf(authUser.getId()));
 		refreshSetCookie(newRefreshToken, response);
 	}
 
@@ -133,7 +134,7 @@ public class JwtUtil {
 	}
 
 	public void refreshSetCookie(String refreshToken, HttpServletResponse response) {
-		Cookie cookie = new Cookie("token", refreshToken);
+		Cookie cookie = new Cookie("refresh", refreshToken);
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		response.addCookie(cookie);
