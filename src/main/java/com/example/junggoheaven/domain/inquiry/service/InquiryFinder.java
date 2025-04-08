@@ -39,10 +39,6 @@ public class InquiryFinder {
 		return inquiryRepository.findAllByWriterIdAndStatusIsNotDeleted(writerId, pageable);
 	}
 
-	public Page<Inquiry> findAllByWriter(Long writerId, Pageable pageable) {
-		return inquiryRepository.findAllByWriterId(writerId, pageable);
-	}
-
 	public Page<Inquiry> findAllByForAdmin(String title, String status, String writerEmail, Pageable pageable) {
 		return inquiryRepository.findAllByForAdmin(title, status, writerEmail, pageable);
 	}
