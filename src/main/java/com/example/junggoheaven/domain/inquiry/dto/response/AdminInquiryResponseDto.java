@@ -1,8 +1,10 @@
 package com.example.junggoheaven.domain.inquiry.dto.response;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
+import com.example.junggoheaven.domain.user.entity.User;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -44,9 +46,11 @@ public class AdminInquiryResponseDto {
 			.body(inquiry.getBody())
 			.createdAt(inquiry.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 			.modifiedAt(inquiry.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-			.responderEmail(inquiry.getRespondent().getEmail())
+			.responderEmail(Optional.ofNullable(inquiry.getRespondent()).map(User::getEmail).orElse(null))
 			.response(inquiry.getResponse())
-			.responseAt(inquiry.getResponseAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+			.responseAt(Optional.ofNullable(inquiry.getResponseAt())
+				.map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+				.orElse(null))
 			.build();
 	}
 }

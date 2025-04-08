@@ -24,7 +24,7 @@ public class InquiryFinder {
 	}
 
 	public Inquiry findByIdForUser(Long inquiryId) {
-		return inquiryRepository.findByIdAndStatusIsNotDeleted(inquiryId);
+		return inquiryRepository.findByIdAndStatusIsNotDeleted(inquiryId).orElseThrow(InquiryNotFoundException::new);
 	}
 
 	public Inquiry findByValidWriter(Long inquiryId, Long writerId) {

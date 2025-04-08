@@ -7,7 +7,6 @@ import static org.mockito.BDDMockito.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.junggoheaven.domain.inquiry.dto.request.CreateInquiryRequestDto;
@@ -144,7 +142,7 @@ class InquiryServiceTest {
 	}
 
 	@Test
-	void updateInquiry_내용_변경(){
+	void updateInquiry_내용_변경() {
 		String body = "내용 변경";
 		UpdateInquiryRequestDto requestDto = new UpdateInquiryRequestDto(null, body);
 
@@ -158,7 +156,7 @@ class InquiryServiceTest {
 	}
 
 	@Test
-	void updateInquiry_삭제된_문의_에러(){
+	void updateInquiry_삭제된_문의_에러() {
 		UpdateInquiryRequestDto requestDto = new UpdateInquiryRequestDto("t", "b");
 
 		ReflectionTestUtils.setField(inquiry2, "status", InquiryStatus.DELETED);
