@@ -9,9 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
 
-public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
+public interface InquiryRepository extends JpaRepository<Inquiry, Long>, InquiryCustomRepository {
 
 	@EntityGraph(attributePaths = {"writer", "respondent"})
 	@Query("SELECT i FROM Inquiry i WHERE i.id = :inquiryId")
