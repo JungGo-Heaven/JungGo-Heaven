@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.image.exception;
+package com.example.junggoheaven.domain.image.exception.imageException;
 
 public class TypeMismatchException extends ImageException {
     public TypeMismatchException() {

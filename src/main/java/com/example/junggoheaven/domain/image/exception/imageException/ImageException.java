@@ -1,7 +1,6 @@
-package com.example.junggoheaven.domain.image.exception;
+package com.example.junggoheaven.domain.image.exception.imageException;
 
 import com.example.junggoheaven.global.common.exception.BaseException;
-import com.example.junggoheaven.global.common.exception.ErrorCode;
 
 public class ImageException extends BaseException {
     public ImageException(ImageErrorCode errorCode) {

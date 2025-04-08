@@ -1,10 +1,9 @@
 package com.example.junggoheaven.domain.image.enums;
 
-import static com.example.junggoheaven.domain.user.enums.UserRole.*;
+import static com.example.junggoheaven.domain.user.enums.UserRole.ROLE_USER;
 
+import com.example.junggoheaven.domain.image.exception.imageException.TypeMismatchException;
 import com.example.junggoheaven.domain.user.enums.UserRole;
-import com.example.junggoheaven.global.common.exception.BaseException;
-import com.example.junggoheaven.domain.image.exception.ImageErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,9 +13,9 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public enum UploadType {
 
-    PROFILES("profiles", role -> role == ROLE_USER || role == ROLE_GUEST),
-    PRODUCTS("products", role -> role == ROLE_USER || role == ROLE_GUEST),
-    CHAT_ROOMS("chat_rooms", role -> role == ROLE_USER || role == ROLE_GUEST);
+    PROFILES("profiles", role -> role == ROLE_USER),
+    PRODUCTS("products", role -> role == ROLE_USER),
+    CHAT_ROOMS("chat_rooms", role -> role == ROLE_USER);
 
     private final String type;
 
@@ -30,7 +29,7 @@ public enum UploadType {
                 return uploadType;
             }
         }
-        throw new BaseException(ImageErrorCode.TYPE_MISMATCH);
+        throw new TypeMismatchException();
     }
 
     // url의 일부로 생성

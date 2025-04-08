@@ -1,20 +1,21 @@
-package com.example.junggoheaven.domain.image.exception;
-
+package com.example.junggoheaven.domain.image.exception.S3Exception;
 
 import com.example.junggoheaven.global.common.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-public enum ImageErrorCode implements ErrorCode {
+public enum S3ErrorCode implements ErrorCode {
 
-    TYPE_MISMATCH("TYPE_MISMATCH", BAD_REQUEST, "파일 형식이 올바르지 않습니다.");
+    AMAZON_SERVICE_ERROR("AMAZON_SERVICE_ERROR", BAD_REQUEST, "아마존 서비스 에러로 인해 PresignedUrl 생성 실패"),
+    SDK_CLIENT_ERROR("SDK_CLIENT_ERROR", BAD_REQUEST, "SDK Client 에러로 인해 PresignedUrl 생성 실패"),
+    UNEXPECTED_ERROR("UNEXPECTED_ERROR", BAD_REQUEST, "알 수 없는 에러로 인해 PresignedUrl 생성 실패");
 
     private String code;
     private HttpStatus httpStatus;
     private String message;
 
-    ImageErrorCode(String code, HttpStatus httpStatus, String message) {
+    S3ErrorCode(String code, HttpStatus httpStatus, String message) {
         this.code = code;
         this.httpStatus = httpStatus;
         this.message = message;
