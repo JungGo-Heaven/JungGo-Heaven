@@ -25,6 +25,7 @@ import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryListRespo
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryResponseDto;
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
 import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidInquiryException;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
@@ -92,7 +93,7 @@ class InquiryServiceTest {
 	void getMyInquiries() {
 		Page<Inquiry> page = new PageImpl<>(List.of(inquiry1, inquiry2));
 
-		given(inquiryFinder.findAllByWriter(any(), any())).willReturn(page);
+		given(inquiryFinder.findAllByWriterForUser(any(), any())).willReturn(page);
 		Page<UserInquiryListResponseDto> pages = inquiryService.getMyInquiries(userId, 0, 10);
 		List<UserInquiryListResponseDto> lists = pages.getContent();
 
@@ -107,7 +108,7 @@ class InquiryServiceTest {
 		AuthUser validUser = new AuthUser(userId, writer.getEmail(), UserRole.ROLE_USER, writer.getName());
 		AuthUser admin = new AuthUser(2L, "email", UserRole.ROLE_ADMIN, "admin");
 
-		given(inquiryFinder.findInquiryById(any())).willReturn(inquiry1);
+		given(inquiryFinder.findByIdForUser(any())).willReturn(inquiry1);
 
 		UserInquiryResponseDto writerUser = inquiryService.getInquiry(validUser, inquiryId1);
 		assertThat(writerUser).isNotNull();
@@ -121,7 +122,7 @@ class InquiryServiceTest {
 	void getInquiry_확인_불가능_일반_다른_유저() {
 		AuthUser invalidUser = new AuthUser(2L, "email", UserRole.ROLE_USER, writer.getName());
 
-		given(inquiryFinder.findInquiryById(any())).willReturn(inquiry1);
+		given(inquiryFinder.findByIdForUser(any())).willReturn(inquiry1);
 
 		assertThrows(InvalidInquiryException.class, () -> {
 			inquiryService.getInquiry(invalidUser, inquiryId1);
@@ -157,10 +158,32 @@ class InquiryServiceTest {
 	}
 
 	@Test
+	void updateInquiry_삭제된_문의_에러(){
+		UpdateInquiryRequestDto requestDto = new UpdateInquiryRequestDto("t", "b");
+
+		ReflectionTestUtils.setField(inquiry2, "status", InquiryStatus.DELETED);
+		given(inquiryFinder.findByValidWriter(any(), any())).willReturn(inquiry2);
+
+		assertThrows(InvalidInquiryException.class, () -> {
+			inquiryService.updateInquiry(inquiryId2, userId, requestDto);
+		});
+	}
+
+	@Test
 	void deleteInquiry() {
 		given(inquiryFinder.findByValidWriter(any(), any())).willReturn(inquiry1);
 		inquiryService.deleteInquiry(inquiryId1, userId);
 
 		assertThat(inquiry1.getStatus()).isEqualTo(InquiryStatus.DELETED);
+	}
+
+	@Test
+	void deleteInquiry_이미_삭제된_문의_에러() {
+		ReflectionTestUtils.setField(inquiry2, "status", InquiryStatus.DELETED);
+		given(inquiryFinder.findByValidWriter(any(), any())).willReturn(inquiry2);
+
+		assertThrows(AlreadyDeletedInquiryException.class, () -> {
+			inquiryService.deleteInquiry(inquiryId2, userId);
+		});
 	}
 }

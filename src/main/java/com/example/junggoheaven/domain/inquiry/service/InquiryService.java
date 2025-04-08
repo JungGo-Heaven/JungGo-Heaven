@@ -11,6 +11,8 @@ import com.example.junggoheaven.domain.inquiry.dto.request.UpdateInquiryRequestD
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryListResponseDto;
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryResponseDto;
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
+import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidInquiryException;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
@@ -39,13 +41,13 @@ public class InquiryService {
 
 	public Page<UserInquiryListResponseDto> getMyInquiries(Long userId, int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return inquiryFinder.findAllByWriter(userId, pageable).map(UserInquiryListResponseDto::from);
+		return inquiryFinder.findAllByWriterForUser(userId, pageable).map(UserInquiryListResponseDto::from);
 	}
 
 	public UserInquiryResponseDto getInquiry(AuthUser authUser, Long inquiryId) {
 		UserRole userRole = authUser.getRole();
 		Long writerId = authUser.getId();
-		Inquiry inquiry = inquiryFinder.findInquiryById(inquiryId);
+		Inquiry inquiry = inquiryFinder.findByIdForUser(inquiryId);
 
 		if (!writerId.equals(inquiry.getWriter().getId()) && !userRole.equals(UserRole.ROLE_ADMIN)) {
 			throw new InvalidInquiryException();
@@ -60,6 +62,10 @@ public class InquiryService {
 		String title = requestDto.getTitle();
 		String body = requestDto.getBody();
 
+		if (inquiry.getStatus().equals(InquiryStatus.DELETED)) {
+			throw new InvalidInquiryException();
+		}
+
 		if (title != null) {
 			inquiry.updateTitle(title);
 		}
@@ -73,6 +79,9 @@ public class InquiryService {
 	@Transactional
 	public Void deleteInquiry(Long inquiryId, Long userId) {
 		Inquiry inquiry = inquiryFinder.findByValidWriter(inquiryId, userId);
+		if (inquiry.getStatus().equals(InquiryStatus.DELETED)) {
+			throw new AlreadyDeletedInquiryException();
+		}
 		inquiry.delete();
 
 		return null;

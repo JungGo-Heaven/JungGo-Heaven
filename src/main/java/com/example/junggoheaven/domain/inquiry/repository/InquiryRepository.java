@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
+import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
 
 public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
@@ -21,4 +22,12 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 	@EntityGraph(attributePaths = {"writer", "respondent"})
 	@Query("SELECT i FROM Inquiry i WHERE i.writer.id = :writerId")
 	Page<Inquiry> findAllByWriterId(Long writerId, Pageable pageable);
+
+	@EntityGraph(attributePaths = {"writer", "respondent"})
+	@Query("SELECT i FROM Inquiry i WHERE i.id = :inquiryId AND i.status <> 'DELETED'")
+	Inquiry findByIdAndStatusIsNotDeleted(Long inquiryId);
+
+	@EntityGraph(attributePaths = {"writer", "respondent"})
+	@Query("SELECT i FROM Inquiry i WHERE i.id = :inquiryId AND i.status <> 'DELETED'")
+	Page<Inquiry> findAllByWriterIdAndStatusIsNotDeleted(Long writerId, Pageable pageable);
 }

@@ -6,7 +6,8 @@ import com.example.junggoheaven.global.common.exception.ErrorCode;
 
 public enum InquiryErrorCode implements ErrorCode {
 	INQUIRY_NOT_FOUND("INQUIRY_NOT_FOUND", HttpStatus.NOT_FOUND, "해당 문의를 찾을 수 없습니다."),
-	INVALID_INQUIRY("INVALID_INQUIRY", HttpStatus.BAD_REQUEST, "유효하지 않은 요청 입니다.");
+	INVALID_INQUIRY("INVALID_INQUIRY", HttpStatus.BAD_REQUEST, "유효하지 않은 요청 입니다."),
+	ALREADY_DELETED_INQUIRY("ALREADY_DELETED_INQUIRY", HttpStatus.BAD_REQUEST, "이미 삭제된 문의 내역 입니다.");
 
 	private String code;
 	private HttpStatus httpStatus;
