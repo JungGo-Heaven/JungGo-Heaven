@@ -48,4 +48,4 @@ src/main/resources/*.yml
 .DS_Store
 
 ### 의존성 ###
-build.gradle
+#build.gradle
