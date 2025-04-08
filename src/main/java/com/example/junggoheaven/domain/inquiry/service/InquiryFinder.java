@@ -23,12 +23,20 @@ public class InquiryFinder {
 		return inquiryRepository.findById(inquiryId).orElseThrow(InquiryNotFoundException::new);
 	}
 
+	public Inquiry findByIdForUser(Long inquiryId) {
+		return inquiryRepository.findByIdAndStatusIsNotDeleted(inquiryId);
+	}
+
 	public Inquiry findByValidWriter(Long inquiryId, Long writerId) {
 		Inquiry inquiry = findInquiryById(inquiryId);
 		if (!inquiry.getWriter().getId().equals(writerId)) {
 			throw new InvalidInquiryException();
 		}
 		return inquiry;
+	}
+
+	public  Page<Inquiry> findAllByWriterForUser(Long writerId, Pageable pageable) {
+		return inquiryRepository.findAllByWriterIdAndStatusIsNotDeleted(writerId, pageable);
 	}
 
 	public Page<Inquiry> findAllByWriter(Long writerId, Pageable pageable) {
