@@ -2,11 +2,14 @@ package com.example.junggoheaven.global.auth.dto.user;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.example.junggoheaven.domain.user.enums.UserRole;
+import com.example.junggoheaven.domain.user.exception.InvalidUserRoleException;
 
 import lombok.Getter;
 
@@ -25,4 +28,8 @@ public class AuthUser {
 		this.name = name;
 	}
 
+	public UserRole getRole(){
+		return authorities.stream().map(GrantedAuthority::getAuthority)
+			.map(UserRole::of).findFirst().orElseThrow(InvalidUserRoleException::new);
+	}
 }
