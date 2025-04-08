@@ -5,6 +5,7 @@ import com.example.junggoheaven.domain.chatMessage.dto.request.ChatMessageReques
 import com.example.junggoheaven.domain.chatMessage.dto.request.ChatReadRequestDto;
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageResponseDto;
 import com.example.junggoheaven.domain.chatMessage.entity.ChatMessage;
+import com.example.junggoheaven.domain.chatMessage.exception.ChatRoomMissMatchException;
 import com.example.junggoheaven.domain.chatMessage.exception.NoPermissionToDelete;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageChecker;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageFinder;
@@ -18,6 +19,7 @@ import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,15 +76,17 @@ public class ChatMessageService {
         }
     }
 
+    @Transactional
     public void deleteMessage(ChatDeleteRequestDto requestDto, Long userId) {
-        ChatRoom chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
-        User user = userFinder.findByUserId(userId);
 
         List<ChatMessage> messages = chatMessageFinder.findAllById(requestDto.getDeleteMessageIds());
 
         for(ChatMessage message : messages) {
             if(!message.getSender().getId().equals(userId)) {
                 throw new NoPermissionToDelete();
+            }
+            if (!message.getChatRoom().getId().equals(requestDto.getChatRoomId())) {
+                throw new ChatRoomMissMatchException();
             }
             message.isDeleted();
         }
