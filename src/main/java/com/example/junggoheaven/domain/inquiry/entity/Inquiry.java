@@ -59,4 +59,20 @@ public class Inquiry extends TimeStamp {
 	public void delete(){
 		this.status = InquiryStatus.DELETED;
 	}
+
+	public void respond(User respondent, String response) {
+		this.respondent = respondent;
+		this.response = response;
+		this.responseAt = LocalDateTime.now();
+		this.status = InquiryStatus.COMPLETED;
+	}
+
+	public void updateResponse(String response) {
+		this.response = response;
+		this.responseAt = LocalDateTime.now();
+	}
+
+	public void updateStatus(InquiryStatus status) {
+		this.status = status;
+	}
 }
