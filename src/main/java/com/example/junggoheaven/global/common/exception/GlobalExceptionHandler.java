@@ -37,18 +37,17 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
 
-	@ExceptionHandler(OAuth2AuthenticationException.class)
-	public ResponseEntity<ErrorResponseDto> authenticationExceptionException(
-		OAuth2AuthenticationException ex
-	) {
-		ErrorResponseDto error = ErrorResponseDto.of(ex.getClass().getSimpleName(), ex.getMessage());
-		return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
-	}
-
 	@ExceptionHandler(BaseException.class)
 	public ResponseEntity<ErrorResponseDto> handleBaseException(BaseException ex) {
 		ErrorResponseDto error = ErrorResponseDto.of(ex);
 		return new ResponseEntity<>(error, ex.getStatus());
+	}
+
+	@ExceptionHandler(OAuth2AuthenticationException.class)
+	public ResponseEntity<ErrorResponseDto> authenticationExceptionException(
+		OAuth2AuthenticationException ex) {
+		ErrorResponseDto error = ErrorResponseDto.of(ex.getClass().getSimpleName(), ex.getMessage());
+		return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
@@ -57,4 +56,18 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
 	}
 
+	// FIXME: 화면에 작성 시 AuthenticationCredentialsNotFoundException으로만 잡게 됨. 문제 해결 필요함.
+	// private ErrorResponseDto sendErrorResponse(Exception ex, int code) throws IOException {
+	// 	httpServletResponse.setStatus(code);
+	// 	httpServletResponse.setContentType("application/json;charset=UTF-8");
+	//
+	// 	ErrorResponseDto errorResponse = ErrorResponseDto.of(ex.getClass().getSimpleName(), ex.getMessage());
+	//
+	// 	ObjectMapper mapper = new ObjectMapper();
+	// 	String jsonResponse = mapper.writeValueAsString(errorResponse);
+	//
+	// 	httpServletResponse.getWriter().write(jsonResponse);
+	//
+	// 	return errorResponse;
+	// }
 }
