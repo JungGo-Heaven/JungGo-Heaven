@@ -39,8 +39,6 @@ public class ChatRoomServiceTest {
     @Mock
     private ChatMessageFinder chatMessageFinder;
 
-
-
     @Test
     public void 존재하는_채팅방_입장() {
         // given
@@ -50,7 +48,9 @@ public class ChatRoomServiceTest {
         User sellerUser = new User("seller@n.com", "Seller", "987654321");
         ReflectionTestUtils.setField(sellerUser, "id", 2L);
 
-        Product product = new Product(1L, sellerUser, "test name", "Product test", 1000L, SellStatus.ONSALE, null);
+        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
+        ReflectionTestUtils.setField(product, "id", 1L);
+
         ChatRoom chatRoom = new ChatRoom(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 
@@ -62,7 +62,7 @@ public class ChatRoomServiceTest {
         AuthUser authUser = new AuthUser(1L, "buyer@n.com", UserRole.ROLE_USER, "Buyer");
 
         // when
-        ResponseDto<ChatRoomEnterResponseDto> response = chatRoomService.enterChatRoom(1L, 1L, authUser);
+        ResponseDto<ChatRoomEnterResponseDto> response = chatRoomService.enterChatRoom(1L, authUser);
 
         // then
         assertNotNull(response);
@@ -78,7 +78,7 @@ public class ChatRoomServiceTest {
         AuthUser authUser = new AuthUser(1L, "buyer@n.com", UserRole.ROLE_USER, "Buyer");
 
         // when
-        ResponseDto<ChatRoomEnterResponseDto> response = chatRoomService.enterChatRoom(1L, 1L, authUser);
+        ResponseDto<ChatRoomEnterResponseDto> response = chatRoomService.enterChatRoom(1L, authUser);
 
         // then
         assertNotNull(response);
@@ -94,7 +94,9 @@ public class ChatRoomServiceTest {
         User sellerUser = new User("seller@n.com", "Seller", "987654321");
         ReflectionTestUtils.setField(sellerUser, "id", 2L);
 
-        Product product = new Product(1L, sellerUser, "test name", "Product test", 1000L, SellStatus.ONSALE, null);
+        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
+        ReflectionTestUtils.setField(product, "id", 1L);
+
         ChatRoom chatRoom = new ChatRoom(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 
@@ -118,7 +120,9 @@ public class ChatRoomServiceTest {
         User sellerUser = new User("seller@n.com", "Seller", "987654321");
         ReflectionTestUtils.setField(sellerUser, "id", 2L);
 
-        Product product = new Product(1L, sellerUser, "test name", "Product test", 1000L, SellStatus.ONSALE, null);
+        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
+        ReflectionTestUtils.setField(product, "id", 1L);
+
         ChatRoom chatRoom = new ChatRoom(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 
@@ -130,7 +134,7 @@ public class ChatRoomServiceTest {
         chatRoomService.exitChatRoom(1L, authUser);
 
         // then
-        assertEquals(authUser.getId(), chatRoom.getSellerExited());  // Verify that sellerExited has been set
+        assertEquals(authUser.getId(), chatRoom.getSellerExited());
     }
 
     @Test
@@ -142,7 +146,9 @@ public class ChatRoomServiceTest {
         User sellerUser = new User("seller@n.com", "Seller", "987654321");
         ReflectionTestUtils.setField(sellerUser, "id", 2L);
 
-        Product product = new Product(1L, sellerUser, "test name", "Product test", 1000L, SellStatus.ONSALE, null);
+        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
+        ReflectionTestUtils.setField(product, "id", 1L);
+
         ChatRoom chatRoom = new ChatRoom(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 

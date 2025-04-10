@@ -4,9 +4,11 @@ import com.example.junggoheaven.domain.chatMessage.enums.MessageType;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class ChatMessageRequestDto {
     @Nullable
     private Long chatRoomId;
