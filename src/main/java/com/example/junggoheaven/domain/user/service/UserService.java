@@ -87,7 +87,7 @@ public class UserService {
 
 	@Transactional
 	public void deleteUserAccount(Long id) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		refreshUtil.deleteRefreshToken(String.valueOf(id));
 		user.deleteUser();
 	}

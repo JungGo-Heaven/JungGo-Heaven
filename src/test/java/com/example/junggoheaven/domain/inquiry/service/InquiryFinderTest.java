@@ -24,6 +24,7 @@ import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
 import com.example.junggoheaven.domain.inquiry.exception.InquiryNotFoundException;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidInquiryException;
 import com.example.junggoheaven.domain.inquiry.repository.InquiryRepository;
+import com.example.junggoheaven.domain.inquiry.service.component.InquiryFinder;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 
