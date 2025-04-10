@@ -4,12 +4,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.junggoheaven.global.auth.exception.AuthException;
-import com.example.junggoheaven.global.auth.exception.GuestNotAllowedException;
+import com.example.junggoheaven.global.common.exception.BaseException;
 import com.example.junggoheaven.global.common.exception.ErrorCode;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,8 +27,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 		FilterChain filterChain) throws ServletException, IOException {
 		try {
 			filterChain.doFilter(request, response);
-		} catch (AuthException e) {
-			log.error("인증 관련 오류 발생: {}", e.getClass().getSimpleName());
+		} catch (BaseException e) {
 			setErrorResponse(response, e.getErrorCode());
 		}
 	}
