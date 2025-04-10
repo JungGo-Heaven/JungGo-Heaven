@@ -90,7 +90,7 @@ public class SecurityConfig {
 			)
 
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**")).permitAll()
+				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**"), new AntPathRequestMatcher("/chat/**")).permitAll()
 				.anyRequest().authenticated())
 
 			.build();

@@ -75,7 +75,9 @@ public class ChatMessageServiceTest {
         sellerUser = new User("seller@n.com", "Seller", "987654321");
         ReflectionTestUtils.setField(sellerUser, "id", 2L);
 
-        product = new Product(1L, sellerUser, "test name", "Product test", 1000L, SellStatus.ONSALE, null);
+        product = new Product(sellerUser, "test name", "Product test", 1000L);
+        ReflectionTestUtils.setField(product, "id", 1L);
+
         chatRoom = new ChatRoom(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 
@@ -134,7 +136,7 @@ public class ChatMessageServiceTest {
         chatMessageService.isRead(requestDto, sellerUser.getId());
 
         // then
-        assertTrue(unreadMessages.get(0).getIsRead());  // Verify that the message is marked as read
+        assertTrue(unreadMessages.get(0).getIsRead());
     }
 
     @Test
@@ -147,7 +149,7 @@ public class ChatMessageServiceTest {
         when(chatMessageFinder.findAllById(deleteMessageIds)).thenReturn(Arrays.asList(message));
 
         // when & then
-        assertThrows(NoPermissionToDelete.class, () -> chatMessageService.deleteMessage(requestDto, 2L));  // The user does not have permission to delete
+        assertThrows(NoPermissionToDelete.class, () -> chatMessageService.deleteMessage(requestDto, 2L));
     }
 
     @Test
@@ -160,7 +162,7 @@ public class ChatMessageServiceTest {
         when(chatMessageFinder.findAllById(deleteMessageIds)).thenReturn(Arrays.asList(message));
 
         // when & then
-        assertThrows(ChatRoomMissMatchException.class, () -> chatMessageService.deleteMessage(requestDto, 1L));  // The chat room does not match
+        assertThrows(ChatRoomMissMatchException.class, () -> chatMessageService.deleteMessage(requestDto, 1L));
     }
 
     @Test

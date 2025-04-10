@@ -38,7 +38,7 @@ public class ChatMessage {
     private LocalDateTime sendAt;
 
     @Column(name = "is_read", nullable = false)
-    private boolean isRead;
+    private Boolean isRead;
 
 
     public ChatMessage(ChatRoom chatRoom, User sender, String message, MessageType messageType) {

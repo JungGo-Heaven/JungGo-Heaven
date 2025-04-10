@@ -21,6 +21,7 @@ public class ChatMessageHandler {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @MessageMapping("/api/v1/chat-rooms/message")
+
     public void sendMessage(ChatMessageRequestDto chatMessageRequestDto,
                             Principal principal) {
         Long userId = Long.parseLong(principal.getName());
