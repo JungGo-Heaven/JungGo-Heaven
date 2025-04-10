@@ -14,6 +14,8 @@ import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
 import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
 import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidInquiryException;
+import com.example.junggoheaven.domain.inquiry.service.component.InquiryFinder;
+import com.example.junggoheaven.domain.inquiry.service.component.InquiryWriter;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
@@ -77,13 +79,8 @@ public class InquiryService {
 	}
 
 	@Transactional
-	public Void deleteInquiry(Long inquiryId, Long userId) {
+	public void deleteInquiry(Long inquiryId, Long userId) {
 		Inquiry inquiry = inquiryFinder.findByValidWriter(inquiryId, userId);
-		if (inquiry.getStatus().equals(InquiryStatus.DELETED)) {
-			throw new AlreadyDeletedInquiryException();
-		}
 		inquiry.delete();
-
-		return null;
 	}
 }
