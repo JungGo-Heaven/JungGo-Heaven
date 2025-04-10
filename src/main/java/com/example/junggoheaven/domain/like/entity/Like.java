@@ -13,10 +13,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(uniqueConstraints = @UniqueConstraint(name = "unique_product_user", columnNames = {"product_id", "users_id"}))
+@NoArgsConstructor
+@Table(name = "likes"
+	, uniqueConstraints = @UniqueConstraint(name = "unique_product_user", columnNames = {"product_id", "users_id"}))
 public class Like {
 
 	@Id

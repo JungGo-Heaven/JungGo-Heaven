@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.junggoheaven.domain.like.dto.LikeProductResponseDto;
 import com.example.junggoheaven.domain.like.dto.LikeRequestDto;
@@ -57,8 +58,8 @@ public class LikeService {
 
 	public LikeResponseDto getProductLikes(Long productId) {
 		int count = likeFinder.getProductLikesCount(productId);
-		Like like = likeFinder.getLikeByProductId(productId);
-		return LikeResponseDto.from(like, count);
+		Product product = productFinder.findProductById(productId);
+		return LikeResponseDto.from(product, count);
 	}
 
 	public List<LikeProductResponseDto> getPopularProducts() {
