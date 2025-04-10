@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.product.controller;
 
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
+import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
 import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
 import com.example.junggoheaven.domain.product.service.ProductService;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
@@ -88,7 +89,7 @@ public class ProductController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("productId") Long productId,
 		@RequestBody ProductRequestDto productRequestDto
-	){
+	) {
 		ProductResponseDto productResponseDto = productService.editProduct(authUser, productId, productRequestDto);
 
 		return ResponseDto.success(productResponseDto);
@@ -96,6 +97,20 @@ public class ProductController {
 	}
 
 
+	/*
+		상품 판매상태 변경
+	*/
+	@PatchMapping("/v1/products/sellstatus/{productId}")
+	public ResponseDto<ProductResponseDto> setSellStatus(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("productId") Long productId,
+		@RequestBody ProductSellStatusRequestDto productSellStatusRequestDto
+	) {
+		ProductResponseDto productResponseDto = productService.setSellStatus(authUser, productId,
+			productSellStatusRequestDto);
+
+		return ResponseDto.success(productResponseDto);
+	}
 
 
 }
