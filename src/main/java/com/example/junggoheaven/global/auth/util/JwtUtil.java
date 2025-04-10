@@ -116,6 +116,7 @@ public class JwtUtil {
 		accessSetHeader(newAccessToken, response);
 
 		String newRefreshToken = createRefreshToken(authUser.getId());
+		refreshUtil.reissueRefreshToken(newRefreshToken, String.valueOf(authUser.getId()));
 		refreshSetCookie(newRefreshToken, response);
 	}
 

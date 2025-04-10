@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final HttpServletResponse response;
 	private final JwtUtil jwtUtil;
 	private final RefreshUtil refreshUtil;
 	private final UserWriter userWriter;
@@ -46,7 +47,7 @@ public class AuthService {
 		return SignupResponseDto.from(saveUser);
 	}
 
-	public void login(LoginRequestDto requestDto, HttpServletResponse response) {
+	public void login(LoginRequestDto requestDto) {
 		String email = requestDto.getEmail();
 		String password = requestDto.getPassword();
 
