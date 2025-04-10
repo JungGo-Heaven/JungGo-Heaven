@@ -5,5 +5,5 @@ import java.util.List;
 import com.example.junggoheaven.domain.like.entity.Like;
 
 public interface LikeCustomRepository {
-	List<Like> findTop5Likes();
+	List<Long> findTop5Likes();
 }

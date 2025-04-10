@@ -3,6 +3,8 @@ package com.example.junggoheaven.domain.product.service.component;
 import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.exception.ProductNotFoundException;
 import com.example.junggoheaven.domain.product.repository.ProductRepository;
+
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,5 +30,7 @@ public class ProductFinder {
 			.orElseThrow(ProductNotFoundException::new);
 	}
 
-
+	public List<Product> findLikeTop5Products(List<Long> ids){
+		return productRepository.findByIdIn(ids);
+	}
 }

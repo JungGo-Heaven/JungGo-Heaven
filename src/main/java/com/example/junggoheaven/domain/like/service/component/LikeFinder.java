@@ -28,11 +28,11 @@ public class LikeFinder {
 		return likeRepository.findByUserAndValidProductOrderByIdAsc(userId, pageable);
 	}
 
-	public Like getProductById(Long productId) {
+	public Like getLikeByProductId(Long productId) {
 		return likeRepository.findByValidProductId(productId);
 	}
 
-	public List<Like> getProductLikesTop5() {
+	public List<Long> getProductLikesTop5() {
 		return likeRepository.findTop5Likes();
 	}
 

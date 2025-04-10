@@ -57,13 +57,14 @@ public class LikeService {
 
 	public LikeResponseDto getProductLikes(Long productId) {
 		int count = likeFinder.getProductLikesCount(productId);
-		Like like = likeFinder.getProductById(productId);
+		Like like = likeFinder.getLikeByProductId(productId);
 		return LikeResponseDto.from(like, count);
 	}
 
 	public List<LikeProductResponseDto> getPopularProducts() {
-		List<Like> top5 = likeFinder.getProductLikesTop5();
-		return top5.stream().map(LikeProductResponseDto::from).toList();
+		List<Long> top5ProductIds = likeFinder.getProductLikesTop5();
+		List<Product> products = productFinder.findLikeTop5Products(top5ProductIds);
+		return products.stream().map(LikeProductResponseDto::from).toList();
 	}
 
 	public void deleteProductLikes(Long userId, Long likeId) {
