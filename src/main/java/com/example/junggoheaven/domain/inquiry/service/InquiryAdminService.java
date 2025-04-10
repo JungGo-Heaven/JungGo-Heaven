@@ -17,6 +17,7 @@ import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryEx
 import com.example.junggoheaven.domain.inquiry.exception.InquiryStatusSameException;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidRespondentException;
 import com.example.junggoheaven.domain.inquiry.exception.RespondNotFoundException;
+import com.example.junggoheaven.domain.inquiry.service.component.InquiryFinder;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 
