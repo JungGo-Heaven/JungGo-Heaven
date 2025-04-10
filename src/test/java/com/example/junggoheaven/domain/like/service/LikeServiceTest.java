@@ -110,7 +110,7 @@ class LikeServiceTest {
 	@Test
 	void getProductLikes() {
 		given(likeFinder.getProductLikesCount(any())).willReturn(3);
-		given(likeFinder.getProductById(any())).willReturn(like);
+		given(likeFinder.getLikeByProductId(any())).willReturn(like);
 
 		LikeResponseDto responseDto = likeService.getProductLikes(11L);
 
@@ -121,9 +121,12 @@ class LikeServiceTest {
 
 	@Test
 	void getPopularProducts() {
-		List<Like> top5 = List.of(like);
-		given(likeFinder.getProductLikesTop5()).willReturn(top5);
+		List<Long> ids = List.of(10L);
+		given(likeFinder.getProductLikesTop5()).willReturn(ids);
+		given(productFinder.findLikeTop5Products(any())).willReturn(List.of(product));
+		
 		List<LikeProductResponseDto> responseDto = likeService.getPopularProducts();
+
 		assertThat(responseDto).isNotNull();
 		assertThat(responseDto.get(0).getProductId()).isEqualTo(product.getId());
 	}
