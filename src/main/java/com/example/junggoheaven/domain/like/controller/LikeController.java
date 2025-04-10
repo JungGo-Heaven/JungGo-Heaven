@@ -53,7 +53,7 @@ public class LikeController {
 		return ResponseDto.success(likeService.getPopularProducts());
 	}
 
-	@DeleteMapping("/likes/{likeId}}")
+	@DeleteMapping("/likes/{likeId}")
 	public ResponseDto<Void> deleteProductLikes(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable Long likeId) {
 		likeService.deleteProductLikes(authUser.getId(), likeId);

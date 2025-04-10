@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.junggoheaven.domain.like.entity.Like;
@@ -56,7 +55,7 @@ class LikeFinderTest {
 	@Test
 	void getProductLikesCount() {
 		int count = 5;
-		given(likeRepository.countByProduct_Id(1L)).willReturn(count);
+		given(likeRepository.countByProductId(1L)).willReturn(count);
 		int result = likeFinder.getProductLikesCount(1L);
 		assertThat(result).isEqualTo(count);
 	}

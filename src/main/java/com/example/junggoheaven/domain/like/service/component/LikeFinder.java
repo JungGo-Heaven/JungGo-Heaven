@@ -21,7 +21,7 @@ public class LikeFinder {
 	private final LikeRepository likeRepository;
 
 	public int getProductLikesCount(Long productId) {
-		return likeRepository.countByProduct_Id(productId);
+		return likeRepository.countByProductId(productId);
 	}
 
 	public Page<Like> getUserLikes(Long userId, Pageable pageable) {
