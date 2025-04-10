@@ -59,7 +59,7 @@ class UserRepositoryTest {
 		Page<User> onlyStatus = userRepository.findAllByStatusAndEmail(findStatus, null, pageable);
 		Page<User> onlyEmail = userRepository.findAllByStatusAndEmail(null, findEmail, pageable);
 
-		assertThat(emailAndStatus.getTotalElements()).isEqualTo(1);
+		assertThat(emailAndStatus.getTotalElements()).isEqualTo(1); 
 		assertThat(onlyStatus.getTotalElements()).isEqualTo(1);
 		assertThat(onlyEmail.getTotalElements()).isEqualTo(2);
 	}
