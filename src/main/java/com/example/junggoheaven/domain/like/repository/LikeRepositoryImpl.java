@@ -20,9 +20,10 @@ public class LikeRepositoryImpl implements LikeCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<Like> findTop5Likes() {
+	public List<Long> findTop5Likes() {
 		LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
+		// 좋아요 Top5인 product.id List를 구함
 		List<Long> top5 = jpaQueryFactory
 			.select(like.product.id)
 			.from(like)
@@ -34,10 +35,6 @@ public class LikeRepositoryImpl implements LikeCustomRepository {
 			.limit(5)
 			.fetch();
 
-		return jpaQueryFactory
-			.selectFrom(like)
-			.join(like.product, product).fetchJoin()
-			.where(like.product.id.in(top5))
-			.fetch();
+		return top5;
 	}
 }
