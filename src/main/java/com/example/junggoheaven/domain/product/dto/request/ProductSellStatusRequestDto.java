@@ -1,20 +1,14 @@
 package com.example.junggoheaven.domain.product.dto.request;
 
 
+import com.example.junggoheaven.domain.product.enums.SellStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ProductRequestDto {
+public class ProductSellStatusRequestDto {
 
-	private final String name;
-
-	private final String information;
-
-	private final Long price;
-
-
-
+	private final SellStatus sellStatus;
 
 }

@@ -45,12 +45,25 @@ public class Product extends TimeStamp {
 	private Long price;
 
 	@Enumerated(EnumType.STRING)
-	//@ColumnDefault("ONSALE")
 	private SellStatus sellStatus;
 
 	@Column
 	@ColumnDefault("null")
 	private LocalDateTime deletedAt;
+
+	public Product(
+		User user,
+		String name,
+		String information,
+		Long price
+	) {
+		this.user = user;
+		this.name = name;
+		this.information = information;
+		this.price = price;
+		this.sellStatus = SellStatus.ONSALE;
+		//this.deletedAt = null;
+	}
 
 
 }
