@@ -2,6 +2,8 @@ package com.example.junggoheaven.domain.user.enums;
 
 import java.util.Arrays;
 
+import com.example.junggoheaven.domain.user.exception.InvalidUserRoleException;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,12 +16,11 @@ public enum UserRole {
 
 	private final String userRole;
 
-	// TODO: 예외 발생 추후 수정 예정
 	public static UserRole of(String role) {
 		return Arrays.stream(UserRole.values())
 			.filter(r -> r.name().equalsIgnoreCase(role))
 			.findFirst()
-			.orElseThrow(RuntimeException::new);
+			.orElseThrow(InvalidUserRoleException::new);
 	}
 
 	public static class Authority {
