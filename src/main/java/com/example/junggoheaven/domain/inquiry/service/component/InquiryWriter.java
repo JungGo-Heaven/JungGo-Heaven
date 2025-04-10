@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.inquiry.service;
+package com.example.junggoheaven.domain.inquiry.service.component;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

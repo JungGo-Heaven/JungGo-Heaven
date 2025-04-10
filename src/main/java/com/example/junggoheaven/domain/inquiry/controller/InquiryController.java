@@ -56,6 +56,7 @@ public class InquiryController {
 
 	@DeleteMapping("/inquiries/{inquiryId}")
 	public ResponseDto<Void> deleteInquiry(@PathVariable Long inquiryId, @AuthenticationPrincipal AuthUser authUser) {
-		return ResponseDto.success(inquiryService.deleteInquiry(inquiryId, authUser.getId()));
+		inquiryService.deleteInquiry(inquiryId, authUser.getId());
+		return ResponseDto.success(null);
 	}
 }
