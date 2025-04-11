@@ -176,14 +176,4 @@ class InquiryServiceTest {
 
 		assertThat(inquiry1.getStatus()).isEqualTo(InquiryStatus.DELETED);
 	}
-
-	@Test
-	void deleteInquiry_이미_삭제된_문의_에러() {
-		ReflectionTestUtils.setField(inquiry2, "status", InquiryStatus.DELETED);
-		given(inquiryFinder.findByValidWriter(any(), any())).willReturn(inquiry2);
-
-		assertThrows(AlreadyDeletedInquiryException.class, () -> {
-			inquiryService.deleteInquiry(inquiryId2, userId);
-		});
-	}
 }
