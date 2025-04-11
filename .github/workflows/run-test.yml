@@ -44,7 +44,6 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          arguments: build test -P spring.profiles.active=test
           files: '**/build/test-results/test/TEST-*.xml'
 
       - name: Notify failure
