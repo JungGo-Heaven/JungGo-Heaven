@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup MySQL
-        uses: mirromutth/mysql-action
+        uses: mirromutth/mysql-action@v1.1
         with:
           host port: 3306
           container port: 3306
@@ -41,7 +41,7 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-results-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           arguments: build test -P spring.profiles.active=test
