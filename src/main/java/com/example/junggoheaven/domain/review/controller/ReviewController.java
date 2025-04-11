@@ -27,9 +27,9 @@ public class ReviewController {
     }
 
     @GetMapping("/reviews")
-    public ResponseEntity<ResponseDto<Page<ReviewResponseDto>>> getReviews(@PathVariable Long userId,
+    public ResponseDto<Page<ReviewResponseDto>> getReviews(@PathVariable Long userId,
                                                                           Pageable pageable) {
-        return ResponseEntity.ok(reviewService.getReviews(userId, pageable));
+        return reviewService.getReviews(userId, pageable);
     }
 
     @PatchMapping("/reviews/{reviewId}/update")
@@ -46,7 +46,7 @@ public class ReviewController {
     }
 
     @GetMapping("/rating")
-    public ResponseEntity<ResponseDto<ReviewRatingResponseDto>> getAverageRating(@PathVariable Long userId){
-        return ResponseEntity.ok(reviewService.getReviewRating(userId));
+    public ResponseDto<ReviewRatingResponseDto> getAverageRating(@PathVariable Long userId){
+        return reviewService.getReviewRating(userId);
     }
 }
