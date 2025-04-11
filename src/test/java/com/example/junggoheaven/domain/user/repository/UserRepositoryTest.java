@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.TestPropertySource;
 
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.config.QueryDslConfig;
@@ -20,6 +21,14 @@ import com.example.junggoheaven.global.config.QueryDslConfig;
 @DataJpaTest
 @Import(QueryDslConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1",
+	"spring.datasource.driver-class-name=org.h2.Driver",
+	"spring.datasource.username=sa",
+	"spring.datasource.password=",
+	"spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+	"spring.jpa.hibernate.ddl-auto=create-drop"
+})
 class UserRepositoryTest {
 
 	@Autowired
