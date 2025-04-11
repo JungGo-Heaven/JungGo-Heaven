@@ -1,0 +1,58 @@
+name: java ci with gradle
+
+on:
+  push:
+    branches:
+      - develop
+      - feat/*
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action
+        with:
+          host port: 3306
+          container port: 3306
+          mysql version: '8.0'
+          mysql database: testdb
+          mysql user: 'test'
+          mysql password: 'test_password'
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build test
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-results-action@v2
+        if: always()
+        with:
+          arguments: build test -P spring.profiles.active=test
+          files: '**/build/test-results/test/TEST-*.xml'
+
+      - name: Notify failure
+        uses: 8398a7/action-slack@v3
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          status: ${{ job.status }}
+          username: github-actions
+          channel: '#github'
+        if: failure()
