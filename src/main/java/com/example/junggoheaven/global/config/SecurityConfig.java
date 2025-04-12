@@ -15,14 +15,17 @@ import org.springframework.security.oauth2.client.web.HttpSessionOAuth2Authoriza
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.example.junggoheaven.global.auth.handler.CustomAuthenticationEntryPoint;
 import com.example.junggoheaven.global.auth.handler.OAuth2AuthenticationFailureHandler;
 import com.example.junggoheaven.global.auth.handler.OAuth2AuthenticationSuccessHandler;
 import com.example.junggoheaven.global.filter.ExceptionHandlerFilter;
 import com.example.junggoheaven.global.filter.JwtAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -48,15 +51,16 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http,
-		OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2Service) throws Exception {
+		OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2Service,
+		CustomAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
 		return http
 			.csrf(AbstractHttpConfigurer::disable)
 
 			.sessionManagement((session) -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+			.addFilterBefore(exceptionHandlerFilter, SecurityContextHolderFilter.class)
 			.addFilterBefore(jwtAuthenticationFilter, SecurityContextHolderAwareRequestFilter.class)
-			.addFilterBefore(exceptionHandlerFilter, JwtAuthenticationFilter.class)
 
 			.formLogin(AbstractHttpConfigurer::disable)
 			.anonymous(AbstractHttpConfigurer::disable)
@@ -74,8 +78,19 @@ public class SecurityConfig {
 				.failureHandler(oAuth2AuthenticationFailureHandler)
 			)
 
+			.exceptionHandling(exceptions -> exceptions
+				.authenticationEntryPoint(authenticationEntryPoint)
+				.accessDeniedHandler((request, response, accessDeniedException) -> {
+					if (!response.isCommitted()) {
+						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+						response.setContentType("application/json;charset=UTF-8");
+						response.getWriter().write("{\"error\":\"접근 거부\",\"message\":\"" + accessDeniedException.getMessage() + "\"}");
+					}
+				})
+			)
+
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**")).permitAll()
+				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**"), new AntPathRequestMatcher("/chat/**")).permitAll()
 				.anyRequest().authenticated())
 
 			.build();

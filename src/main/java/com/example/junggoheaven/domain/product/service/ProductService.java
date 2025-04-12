@@ -1,15 +1,161 @@
 package com.example.junggoheaven.domain.product.service;
 
 
+import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
+import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
+import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
+import com.example.junggoheaven.domain.product.entity.Product;
+import com.example.junggoheaven.domain.product.enums.SellStatus;
+import com.example.junggoheaven.domain.product.exception.ProductNotYourException;
+import com.example.junggoheaven.domain.product.exception.ProductSellStatusSameFlag;
 import com.example.junggoheaven.domain.product.repository.ProductRepository;
+import com.example.junggoheaven.domain.product.service.component.ProductChecker;
+import com.example.junggoheaven.domain.product.service.component.ProductFinder;
+import com.example.junggoheaven.domain.product.service.component.ProductWriter;
+import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.global.auth.dto.user.AuthUser;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
-	private final ProductRepository productRepository;
+	private final ProductFinder productFinder;
+	private final ProductWriter productWriter;
+	private final ProductChecker productChecker;
+
+	private final UserFinder userFinder;
+
+
+	/*
+		상품 등록 메서드
+	*/
+	@Transactional
+	public ProductResponseDto saveProduct(AuthUser authUser, ProductRequestDto productRequestDto) {
+
+		User user = userFinder.findByUserId(authUser.getId());
+
+		Product product = new Product(
+			user,
+			productRequestDto.getName(),
+			productRequestDto.getInformation(),
+			productRequestDto.getPrice()
+		);
+
+		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+	}
+
+
+	/*
+		상품 다건 페이지네이션 조회 메서드
+	*/
+	@Transactional(readOnly = true)
+	public Page<ProductResponseDto> findAllProduct(Pageable pageable) {
+
+		Page<Product> productPage = productFinder.findAllProduct(pageable);
+
+		List<ProductResponseDto> dtoList = productPage.getContent().stream()
+			.map(ProductResponseDto::toDto)
+			.toList();
+
+		return new PageImpl<>(dtoList, pageable, productPage.getTotalElements());
+	}
+
+
+	/*
+		상품 단건 조회 메서드
+	*/
+	@Transactional
+	public ProductResponseDto findProductById(Long id) {
+
+		Product product = productFinder.findProductById(id);
+
+		return new ProductResponseDto(product);
+	}
+
+
+	/*
+		상품 소프트딜리트 메서드
+	*/
+	@Transactional
+	public ProductResponseDto softDeleteProduct(Long id) {
+
+		Product product = productFinder.findProductById(id);
+
+		product.setDeletedAt(LocalDateTime.now()); // 소프트 딜리트 변수에 현재시간 대입 -> null 이 아니므로 더이상 DB에 레코드가 논리적으로 존재하지 않음
+
+		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+	}
+
+
+	/*
+		상품 정보 수정 메서드
+	*/
+	@Transactional
+	public ProductResponseDto editProduct(AuthUser authUser, Long productId, ProductRequestDto productRequest) {
+
+		User user = userFinder.findByUserId(authUser.getId());
+
+		// 수정하려는 상품 찾기 -> productFinder 에서 없는 상품일경우 예외처리
+		Product product = productFinder.findProductById(productId);
+
+		// 다른 유저의 상품 수정을 방지하는 기능
+		if (!(productChecker.isMyProduct(user, product))) {
+			throw new ProductNotYourException();
+		}
+
+		// 상품 수정
+		product.setName(productRequest.getName());
+		product.setInformation(productRequest.getInformation());
+		product.setPrice(productRequest.getPrice());
+
+		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+
+	}
+
+
+	/*
+		상품 판매상태 변경 메서드
+	*/
+	@Transactional
+	public ProductResponseDto setSellStatus(AuthUser authUser, Long productId,
+		ProductSellStatusRequestDto productSellStatusRequestDto) {
+
+		SellStatus requestSellStatus = productSellStatusRequestDto.getSellStatus();
+
+		User user = userFinder.findByUserId(authUser.getId());
+
+		// 수정하려는 상품 찾기 -> productFinder 에서 없는 상품일경우 예외처리
+		Product product = productFinder.findProductById(productId);
+
+		// 다른 유저의 상품 수정을 방지하는 기능
+		if (!(productChecker.isMyProduct(user, product))) {
+			throw new ProductNotYourException();
+		}
+
+		if ((productChecker.isSameSellStatus(product, requestSellStatus))) {
+			throw new ProductSellStatusSameFlag();
+		}
+
+		product.setSellStatus(requestSellStatus);
+		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+	}
 
 
 }

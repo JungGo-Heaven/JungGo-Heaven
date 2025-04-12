@@ -39,7 +39,7 @@ out/
 ### application.properties ###
 application.properties
 src/main/resources/*.yml
-
+!src/main/resources/application-secret.yml
 
 ### .env ###
 .env
@@ -48,4 +48,4 @@ src/main/resources/*.yml
 .DS_Store
 
 ### 의존성 ###
-build.gradle
+#build.gradle
