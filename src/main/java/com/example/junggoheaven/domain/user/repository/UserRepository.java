@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.junggoheaven.domain.user.entity.User;
-import com.example.junggoheaven.domain.user.enums.UserStatus;
 
 public interface UserRepository extends JpaRepository<User,Long>, UserCustomRepository {
 	Optional<User> findByEmail(String email);
