@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ProfileUploadResponse {
+public class UploadResponse {
 
     private final String uploadUrl;
 
-    public static ProfileUploadResponse of(String uploadUrl) {
-        return new ProfileUploadResponse(uploadUrl);
+    public static UploadResponse of(String uploadUrl) {
+        return new UploadResponse(uploadUrl);
     }
 }

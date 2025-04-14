@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.image.exception.imageException;
+package com.example.junggoheaven.domain.image.exception;
 
 import com.example.junggoheaven.global.common.exception.BaseException;
 

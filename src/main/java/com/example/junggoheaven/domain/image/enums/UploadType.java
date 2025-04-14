@@ -2,7 +2,7 @@ package com.example.junggoheaven.domain.image.enums;
 
 import static com.example.junggoheaven.domain.user.enums.UserRole.ROLE_USER;
 
-import com.example.junggoheaven.domain.image.exception.imageException.TypeMismatchException;
+import com.example.junggoheaven.domain.image.exception.TypeMismatchException;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

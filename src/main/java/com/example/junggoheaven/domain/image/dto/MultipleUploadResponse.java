@@ -7,11 +7,11 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class ChatRoomUploadResponse {
+public class MultipleUploadResponse {
 
     private final List<String> uploadUrls;
 
-    public static ChatRoomUploadResponse of(List<String> uploadUrls) {
-        return new ChatRoomUploadResponse(uploadUrls);
+    public static MultipleUploadResponse of(List<String> uploadUrls) {
+        return new MultipleUploadResponse(uploadUrls);
     }
 }
