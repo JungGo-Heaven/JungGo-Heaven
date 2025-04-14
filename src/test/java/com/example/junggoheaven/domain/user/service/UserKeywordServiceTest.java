@@ -1,6 +1,5 @@
 package com.example.junggoheaven.domain.user.service;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,18 +8,28 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.entity.UserKeyword;
-import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.domain.user.repository.UserBulkRepository;
 import com.example.junggoheaven.domain.user.repository.UserKeywordBulkRepository;
 import com.example.junggoheaven.domain.user.repository.UserRepository;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1",
+	"spring.datasource.driver-class-name=org.h2.Driver",
+	"spring.datasource.username=sa",
+	"spring.datasource.password=",
+	"spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+	"spring.jpa.hibernate.ddl-auto=create-drop"
+})
 class UserKeywordServiceTest {
 
 	@Autowired
