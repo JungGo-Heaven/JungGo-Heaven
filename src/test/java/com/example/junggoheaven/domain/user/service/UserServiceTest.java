@@ -162,7 +162,7 @@ class UserServiceTest {
 
 	@Test
 	void deleteUserAccount() {
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 
 		assertThat(user.getDeletedAt()).isNull();
 

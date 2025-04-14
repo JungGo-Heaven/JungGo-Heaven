@@ -36,7 +36,7 @@ public class ChatRoom {
         this.buyerExited = id;
     }
     public void sellerExited(Long id){
-        this.buyerExited = id;
+        this.sellerExited = id;
     }
 
     public ChatRoom(Product product, User buyer) {

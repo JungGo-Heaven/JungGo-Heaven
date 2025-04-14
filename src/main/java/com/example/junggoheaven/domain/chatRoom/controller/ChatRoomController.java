@@ -18,19 +18,19 @@ import org.springframework.web.bind.annotation.*;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<ResponseDto<ChatRoomEnterResponseDto>> enterChatRoom(
+    @GetMapping("/product/{productId}")
+    public ResponseDto<ChatRoomEnterResponseDto> enterChatRoom(
             @PathVariable Long productId,
             @AuthenticationPrincipal AuthUser authUser) {
-        return ResponseEntity.ok(chatRoomService.enterChatRoom(productId, authUser));
+        return chatRoomService.enterChatRoom(productId, authUser);
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<Page<ChatRoomsResponseDto>>> getChatRooms(
+    public ResponseDto<Page<ChatRoomsResponseDto>> getChatRooms(
             @AuthenticationPrincipal AuthUser authUser,
             Pageable pageable
     ){
-        return ResponseEntity.ok(chatRoomService.getChatRooms(authUser.getId(), pageable));
+        return chatRoomService.getChatRooms(authUser.getId(), pageable);
     }
 
     @PutMapping("/{chatRoomId}")
@@ -40,8 +40,4 @@ public class ChatRoomController {
             ) {
         chatRoomService.exitChatRoom(chatRoomId, authUser);
     }
-
-
-
-
 }

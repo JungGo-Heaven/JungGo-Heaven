@@ -13,6 +13,7 @@ import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,21 +40,28 @@ public class ChatRoomServiceTest {
     @Mock
     private ChatMessageFinder chatMessageFinder;
 
+    User buyerUser;
+    User sellerUser;
+    Product product;
+    ChatRoom chatRoom;
+    @BeforeEach
+    void setUp() {
+        buyerUser = new User("buyer@n.com", "Buyer", "123456789");
+        ReflectionTestUtils.setField(buyerUser, "id", 1L);
+
+        sellerUser = new User("seller@n.com", "Seller", "987654321");
+        ReflectionTestUtils.setField(sellerUser, "id", 2L);
+
+        product = new Product(sellerUser, "test name", "Product test", 1000L);
+        ReflectionTestUtils.setField(product, "id", 1L);
+
+        chatRoom = new ChatRoom(product, buyerUser);
+        ReflectionTestUtils.setField(chatRoom, "id", 1L);
+    }
+
     @Test
     public void 존재하는_채팅방_입장() {
         // given
-        User buyerUser = new User("buyer@n.com", "Buyer", "123456789");
-        ReflectionTestUtils.setField(buyerUser, "id", 1L);
-
-        User sellerUser = new User("seller@n.com", "Seller", "987654321");
-        ReflectionTestUtils.setField(sellerUser, "id", 2L);
-
-        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
-        ReflectionTestUtils.setField(product, "id", 1L);
-
-        ChatRoom chatRoom = new ChatRoom(product, buyerUser);
-        ReflectionTestUtils.setField(chatRoom, "id", 1L);
-
         List<ChatMessage> messages = Arrays.asList(new ChatMessage(chatRoom, buyerUser, "testtest", MessageType.TEXT));
 
         when(chatRoomFinder.findByProductIdAndBuyerIdOpt(anyLong(), anyLong())).thenReturn(Optional.of(chatRoom));
@@ -88,18 +96,6 @@ public class ChatRoomServiceTest {
     @Test
     public void 구매자_채팅방_나감() {
         // given
-        User buyerUser = new User("buyer@n.com", "Buyer", "123456789");
-        ReflectionTestUtils.setField(buyerUser, "id", 1L);
-
-        User sellerUser = new User("seller@n.com", "Seller", "987654321");
-        ReflectionTestUtils.setField(sellerUser, "id", 2L);
-
-        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
-        ReflectionTestUtils.setField(product, "id", 1L);
-
-        ChatRoom chatRoom = new ChatRoom(product, buyerUser);
-        ReflectionTestUtils.setField(chatRoom, "id", 1L);
-
         when(chatRoomFinder.findByChatRoomId(anyLong())).thenReturn(chatRoom);
 
         AuthUser authUser = new AuthUser(1L, "buyer@n.com", UserRole.ROLE_USER, "Buyer");
@@ -114,18 +110,6 @@ public class ChatRoomServiceTest {
     @Test
     public void 판매자_채팅방_나감() {
         // given
-        User buyerUser = new User("buyer@n.com", "Buyer", "123456789");
-        ReflectionTestUtils.setField(buyerUser, "id", 1L);
-
-        User sellerUser = new User("seller@n.com", "Seller", "987654321");
-        ReflectionTestUtils.setField(sellerUser, "id", 2L);
-
-        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
-        ReflectionTestUtils.setField(product, "id", 1L);
-
-        ChatRoom chatRoom = new ChatRoom(product, buyerUser);
-        ReflectionTestUtils.setField(chatRoom, "id", 1L);
-
         when(chatRoomFinder.findByChatRoomId(anyLong())).thenReturn(chatRoom);
 
         AuthUser authUser = new AuthUser(2L, "seller@n.com", UserRole.ROLE_USER, "Seller");
@@ -140,18 +124,6 @@ public class ChatRoomServiceTest {
     @Test
     public void 채팅방_참여자가_아닌_사용자가_채팅방_접근() {
         // given
-        User buyerUser = new User("buyer@n.com", "Buyer", "123456789");
-        ReflectionTestUtils.setField(buyerUser, "id", 1L);
-
-        User sellerUser = new User("seller@n.com", "Seller", "987654321");
-        ReflectionTestUtils.setField(sellerUser, "id", 2L);
-
-        Product product = new Product(sellerUser, "test name", "Product test", 1000L);
-        ReflectionTestUtils.setField(product, "id", 1L);
-
-        ChatRoom chatRoom = new ChatRoom(product, buyerUser);
-        ReflectionTestUtils.setField(chatRoom, "id", 1L);
-
         when(chatRoomFinder.findByChatRoomId(anyLong())).thenReturn(chatRoom);
 
         AuthUser authUser = new AuthUser(3L, "random@n.com", UserRole.ROLE_USER, "Random User");
