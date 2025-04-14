@@ -4,9 +4,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.junggoheaven.domain.image.entity.ProfileImage;
+import com.example.junggoheaven.domain.image.exception.ImageUploadIOException;
+import com.example.junggoheaven.domain.image.repository.ProfileImageRepository;
+import com.example.junggoheaven.domain.image.service.ProfileImageService;
 import com.example.junggoheaven.domain.user.dto.user.GuestAddInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdateInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdatePasswordRequestDto;
+import com.example.junggoheaven.domain.user.dto.user.UploadProfileImageRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UserSelfInfoResponseDto;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.exception.InvalidPasswordException;
@@ -15,7 +20,6 @@ import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
 import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
 
+	private final ProfileImageRepository profileImageRepository;
 	private final HttpServletResponse response;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final UserFinder userFinder;
@@ -78,6 +83,17 @@ public class UserService {
 		}
 
 		user.updatePassword(newPassword);
+	}
+	
+	@Transactional
+	public UserSelfInfoResponseDto updateUserImage(Long userId, UploadProfileImageRequestDto requestDto) {
+		User user = userFinder.findValidUserById(userId);
+		Long imageId = requestDto.getId();
+
+		ProfileImage profileImage = profileImageRepository.findById(imageId).orElseThrow(ImageUploadIOException::new);
+
+		user.updateProfileImage(profileImage);
+		return UserSelfInfoResponseDto.from(user);
 	}
 
 	public UserSelfInfoResponseDto getMyInformation(Long id) {
