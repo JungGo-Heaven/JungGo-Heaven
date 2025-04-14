@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
 
 
 @Entity
@@ -48,6 +49,10 @@ public class Product extends TimeStamp {
 	@Column
 	@ColumnDefault("null")
 	private LocalDateTime deletedAt;
+
+	@CreatedDate // 최초 생성 시각 스탬프
+	private LocalDateTime pullAt;
+
 
 	public Product(
 		User user,

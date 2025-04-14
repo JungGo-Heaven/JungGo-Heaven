@@ -8,7 +8,9 @@ import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -47,9 +50,12 @@ public class ProductController {
 	*/
 	@GetMapping("/v1/products")
 	public ResponseDto<Page<ProductResponseDto>> findAllProduct(
-		@PageableDefault(page = 0, size = 5) Pageable pageable // 기본 page, size 크기 설정 파라미터
+		//@PageableDefault(sort = , page = 0, size = 5) Pageable pageable // 기본 page, size 크기 설정 파라미터
+		// Refactor 고민 요망
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size
 	) {
-		Page<ProductResponseDto> productResponseDtoPage = productService.findAllProduct(pageable);
+		Page<ProductResponseDto> productResponseDtoPage = productService.findAllProduct(page, size);
 
 		return ResponseDto.success(productResponseDtoPage);
 	}
@@ -110,6 +116,21 @@ public class ProductController {
 			productSellStatusRequestDto);
 
 		return ResponseDto.success(productResponseDto);
+	}
+
+
+	/*
+		상품 끌어올리기 기능
+	*/
+	@PatchMapping("/v1/products/pull/{productId}")
+	public ResponseDto<ProductResponseDto> pullProduct(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("productId") Long productId
+	) {
+		ProductResponseDto productResponseDto = productService.pullProduct(authUser, productId);
+
+		return ResponseDto.success(productResponseDto);
+
 	}
 
 

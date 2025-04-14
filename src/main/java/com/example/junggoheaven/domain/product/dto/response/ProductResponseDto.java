@@ -26,6 +26,8 @@ public class ProductResponseDto {
 
 	private final LocalDateTime deletedAt;
 
+	private final LocalDateTime pullAt;
+
 
 	// Product 를 받는 생성자
 	public ProductResponseDto(Product product){
@@ -36,6 +38,7 @@ public class ProductResponseDto {
 		this.price = product.getPrice();
 		this.sellStatus = product.getSellStatus();
 		this.deletedAt = product.getDeletedAt(); // 반드시 null
+		this.pullAt = product.getPullAt();
 	}
 
 
@@ -48,7 +51,8 @@ public class ProductResponseDto {
 			product.getInformation(),
 			product.getPrice(),
 			product.getSellStatus(),
-			product.getDeletedAt()
+			product.getDeletedAt(),
+			product.getPullAt()
 		);
 	}
 

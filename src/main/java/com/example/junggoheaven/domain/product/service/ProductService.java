@@ -20,7 +20,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +62,9 @@ public class ProductService {
 		상품 다건 페이지네이션 조회 메서드
 	*/
 	@Transactional(readOnly = true)
-	public Page<ProductResponseDto> findAllProduct(Pageable pageable) {
+	public Page<ProductResponseDto> findAllProduct(int page, int size) {
+		// Refactor 고민 요망
+		Pageable pageable = PageRequest.of( (page > 0) ? page - 1 : 0, size, Sort.by("pullAt").descending());
 
 		Page<Product> productPage = productFinder.findAllProduct(pageable);
 
@@ -153,6 +157,28 @@ public class ProductService {
 
 		product.setSellStatus(requestSellStatus);
 		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+	}
+
+
+	/*
+		끌어올리기 기능
+	*/
+	@Transactional
+	public ProductResponseDto pullProduct(AuthUser authUser, Long productId){
+
+		User user = userFinder.findByUserId(authUser.getId());
+
+		// 끌어올리기 상품 찾기 -> productFinder 에서 없는 상품일경우 예외처리
+		Product product = productFinder.findProductById(productId);
+
+		// 다른 유저의 상품을 끌어올리는것을 방지
+		if (!(productChecker.isMyProduct(user, product))) {
+			throw new ProductNotYourException();
+		}
+
+		product.setPullAt(LocalDateTime.now());
 
 		return new ProductResponseDto(product);
 	}
