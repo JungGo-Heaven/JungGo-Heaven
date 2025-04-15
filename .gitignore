@@ -41,6 +41,7 @@ application.properties
 src/main/resources/*.yml
 src/main/resources/local/*.yml
 !src/main/resources/application-secret.yml
+application-s3.yml
 
 ### .env ###
 .env
