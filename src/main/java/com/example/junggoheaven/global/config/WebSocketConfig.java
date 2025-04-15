@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         //        .withSockJS(); // 웹소켓을 지원하지 않는 브라우저일 경우 http 방식으로 전환하기 위함
     }
 
-    @Override
+    @Override 
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/sub");
         registry.setApplicationDestinationPrefixes("/pub");
