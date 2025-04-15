@@ -1,5 +1,6 @@
 package com.example.junggoheaven.domain.image.controller;
 
+import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageResponseDto;
 import com.example.junggoheaven.domain.image.dto.MultipleUploadResponse;
 import com.example.junggoheaven.domain.image.dto.UploadResponse;
 import com.example.junggoheaven.domain.image.entity.ProfileImage;
@@ -11,7 +12,10 @@ import com.example.junggoheaven.domain.image.service.S3.S3StorageService;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +30,9 @@ public class UploadController {
     private final ProfileImageService profileImageService;
     private final ProductImageService productImageService;
     private final ChatRoomImageService chatRoomImageService;
+
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
 
     @PostMapping("/files/profiles")
     public ResponseDto<UploadResponse> uploadFile(
@@ -53,18 +60,29 @@ public class UploadController {
         return ResponseDto.success(response);
     }
 
-    @PostMapping("/files/multiples/chat-rooms")
-    public ResponseDto<MultipleUploadResponse> uploadChatRoomImages(
+    @PostMapping("/files/multiples/chat-rooms/{chatRoomId}")
+    public void uploadChatRoomImages(
             @RequestPart("multipartFiles") List<MultipartFile> multipartFiles,
             @RequestPart("type") String type,
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long chatRoomId
+            ) {
         if (multipartFiles.size() > 5) {
             throw new FileUploadLimitExceededException();
         }
         MultipleUploadResponse response = s3StorageService.chatRoomImageUpload(multipartFiles, type, authUser);
 
-        chatRoomImageService.saveChatRoomImages(response.getUploadUrls(), multipartFiles, authUser);
-        return ResponseDto.success(response);
+        List<ChatMessageResponseDto> responseDtos = chatRoomImageService.saveChatRoomImages(
+                response.getUploadUrls(), multipartFiles, authUser, chatRoomId
+        );
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("현재 인증 정보: " + authentication);
+
+        for (ChatMessageResponseDto dto : responseDtos) {
+            simpMessagingTemplate.convertAndSend(
+                    "/sub/chat/room/" + chatRoomId,
+                    dto
+            );
+        }
     }
 }

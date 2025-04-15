@@ -44,7 +44,9 @@ public class ChatRoomService {
                             m.getId(),
                             m.getSender().getId(),
                             m.getMessage(),
-                            m.getSendAt()
+                            m.getChatRoomImage() != null ? m.getChatRoomImage().getChatRoomImageUrl() : null,
+                            m.getSendAt(),
+                            m.getMessageType()
                     ))
                     .toList();
 

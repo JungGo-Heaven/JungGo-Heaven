@@ -2,7 +2,10 @@ package com.example.junggoheaven.domain.chatMessage.entity;
 
 import com.example.junggoheaven.domain.chatMessage.enums.MessageType;
 import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
+import com.example.junggoheaven.domain.image.entity.ChatRoomImage;
 import com.example.junggoheaven.domain.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,12 +31,14 @@ public class ChatMessage {
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
+    @Nullable
     private String message;
 
     private MessageType messageType;
 
-//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatMessage")
-//    List<ChatImage> chatImages = new ArrayList<>();
+    @OneToOne(mappedBy = "chatMessage")
+    @JsonIgnore
+    private ChatRoomImage chatRoomImage;
 
     private LocalDateTime sendAt;
 
@@ -46,6 +51,14 @@ public class ChatMessage {
         this.sender = sender;
         this.message = message;
         this.messageType = messageType;
+        this.sendAt = LocalDateTime.now();
+        this.isRead = false;
+    }
+
+    public ChatMessage(ChatRoom chatRoom, User sender){
+        this.chatRoom = chatRoom;
+        this.sender = sender;
+        this.messageType = MessageType.IMAGE;
         this.sendAt = LocalDateTime.now();
         this.isRead = false;
     }

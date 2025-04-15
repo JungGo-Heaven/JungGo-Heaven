@@ -60,7 +60,9 @@ public class ChatMessageService {
                 savedMessage.getId(),
                 savedMessage.getSender().getId(),
                 savedMessage.getMessage(),
-                savedMessage.getSendAt()
+                savedMessage.getChatRoomImage() != null ? savedMessage.getChatRoomImage().getChatRoomImageUrl() : null,
+                savedMessage.getSendAt(),
+                savedMessage.getMessageType()
         );
     }
 
