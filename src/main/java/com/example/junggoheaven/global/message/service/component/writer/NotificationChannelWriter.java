@@ -1,4 +1,4 @@
-package com.example.junggoheaven.global.message.writer;
+package com.example.junggoheaven.global.message.service.component.writer;
 
 import org.springframework.stereotype.Component;
 
@@ -14,5 +14,9 @@ public class NotificationChannelWriter {
 
 	public void write(NotificationChannel notificationChannel) {
 		notificationChannelRepository.save(notificationChannel);
+	}
+
+	public void delete(NotificationChannel notificationChannel) {
+		notificationChannelRepository.delete(notificationChannel);
 	}
 }
