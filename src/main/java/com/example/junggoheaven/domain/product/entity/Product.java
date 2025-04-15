@@ -1,5 +1,6 @@
 package com.example.junggoheaven.domain.product.entity;
 
+import com.example.junggoheaven.domain.image.entity.ProductImage;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
@@ -35,6 +36,10 @@ public class Product extends TimeStamp {
 	@JoinColumn(name = "users_id")
 	private User user;
 
+	@ManyToOne
+	@JoinColumn(name = "product_images_id")
+	private ProductImage productImage;
+
 	@Column(nullable = false)
 	private String name;
 
@@ -54,6 +59,23 @@ public class Product extends TimeStamp {
 	private LocalDateTime pullAt;
 
 
+	public Product(
+		User user,
+		String name,
+		String information,
+		Long price,
+		ProductImage productImage
+	) {
+		this.user = user;
+		this.name = name;
+		this.information = information;
+		this.price = price;
+		this.sellStatus = SellStatus.ONSALE;
+		this.productImage = productImage;
+		//this.deletedAt = null;
+	}
+
+	// 테스트 꼬임 방지용 생성자
 	public Product(
 		User user,
 		String name,
