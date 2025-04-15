@@ -11,13 +11,15 @@ import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.product.exception.ProductNotYourException;
 import com.example.junggoheaven.domain.product.exception.ProductSellStatusSameFlag;
-import com.example.junggoheaven.domain.product.repository.ProductRepository;
 import com.example.junggoheaven.domain.product.service.component.ProductChecker;
 import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.product.service.component.ProductWriter;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
+import com.example.junggoheaven.global.message.event.finder.ProductRegisteredEvent;
+import com.example.junggoheaven.global.message.publisher.EventPublisher;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class ProductService {
 
 	private final ProductImageRepository productImageRepository;
 
+	private final EventPublisher eventPublisher;
 
 	/*
 		상품 등록 메서드
@@ -64,6 +67,7 @@ public class ProductService {
 
 		productWriter.saveProduct(product);
 
+		eventPublisher.publishEventAfterTransaction(new ProductRegisteredEvent(this, user.getId(), product.getName()));
 		return new ProductResponseDto(product);
 	}
 
