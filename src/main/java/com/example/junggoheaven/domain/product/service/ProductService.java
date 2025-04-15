@@ -1,6 +1,9 @@
 package com.example.junggoheaven.domain.product.service;
 
 
+import com.example.junggoheaven.domain.image.entity.ProductImage;
+import com.example.junggoheaven.domain.image.exception.UnexpectedErrorException;
+import com.example.junggoheaven.domain.image.repository.ProductImageRepository;
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
 import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
 import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
@@ -36,6 +39,8 @@ public class ProductService {
 
 	private final UserFinder userFinder;
 
+	private final ProductImageRepository productImageRepository;
+
 
 	/*
 		상품 등록 메서드
@@ -45,11 +50,16 @@ public class ProductService {
 
 		User user = userFinder.findByUserId(authUser.getId());
 
+		ProductImage productImage = productImageRepository.findById(productRequestDto.getProductImageId())
+			.orElseThrow(UnexpectedErrorException::new);
+
+
 		Product product = new Product(
 			user,
 			productRequestDto.getName(),
 			productRequestDto.getInformation(),
-			productRequestDto.getPrice()
+			productRequestDto.getPrice(),
+			productImage
 		);
 
 		productWriter.saveProduct(product);
