@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.junggoheaven.domain.user.dto.user.GuestAddInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdateInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdatePasswordRequestDto;
+import com.example.junggoheaven.domain.user.dto.user.UploadProfileImageRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UserSelfInfoResponseDto;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.domain.user.service.UserService;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
-import com.example.junggoheaven.global.auth.util.RefreshUtil;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 
 import jakarta.validation.Valid;
@@ -47,6 +47,11 @@ public class UserController {
 		@Valid @RequestBody UpdatePasswordRequestDto requestDto) {
 		userService.updateUserPassword(authUser.getId(), requestDto);
 		return ResponseDto.success(null);
+	}
+
+	@PatchMapping("/users/my/image")
+	public ResponseDto<UserSelfInfoResponseDto> updateUserImage(@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody UploadProfileImageRequestDto requestDto) {
+		return ResponseDto.success(userService.updateUserImage(authUser.getId(), requestDto));
 	}
 
 	@GetMapping("/users/my")

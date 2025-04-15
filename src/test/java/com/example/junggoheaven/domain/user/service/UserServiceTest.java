@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +18,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.example.junggoheaven.domain.image.entity.ProfileImage;
+import com.example.junggoheaven.domain.image.repository.ProfileImageRepository;
 import com.example.junggoheaven.domain.user.dto.user.GuestAddInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdateInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdatePasswordRequestDto;
+import com.example.junggoheaven.domain.user.dto.user.UploadProfileImageRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UserSelfInfoResponseDto;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
@@ -38,12 +42,15 @@ class UserServiceTest {
 	@Mock
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Mock
+	private ProfileImageRepository profileImageRepository;
+	@Mock
 	private UserFinder userFinder;
 	@Mock
 	private RefreshUtil refreshUtil;
 	@Mock
 	private JwtUtil jwtUtil;
 
+	ProfileImage profileImage;
 	User guestUser;
 	User user;
 
@@ -60,6 +67,10 @@ class UserServiceTest {
 		ReflectionTestUtils.setField(user, "id", 2L);
 		ReflectionTestUtils.setField(user, "createdAt", LocalDateTime.of(2025, 03, 31, 12, 00));
 		ReflectionTestUtils.setField(user, "modifiedAt", guestUser.getCreatedAt());
+
+		profileImage = new  ProfileImage();
+		ReflectionTestUtils.setField(profileImage, "id", 1L);
+		ReflectionTestUtils.setField(profileImage, "profileImageUrl", "image url");
 	}
 
 	@Test
@@ -170,5 +181,19 @@ class UserServiceTest {
 
 		assertThat(user.getStatus()).isEqualTo(UserStatus.DELETED);
 		assertThat(user.getDeletedAt()).isNotNull();
+	}
+
+	@Test
+	void updateUserImage(){
+		UploadProfileImageRequestDto requestDto = new UploadProfileImageRequestDto(1L);
+		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(profileImageRepository.findById(any())).willReturn(Optional.of(profileImage));
+
+		assertThat(user.getProfileImage()).isNull();
+
+		UserSelfInfoResponseDto responseDto = userService.updateUserImage(user.getId(), requestDto);
+
+		assertThat(responseDto).isNotNull();
+		assertThat(user.getProfileImage()).isNotNull();
 	}
 }

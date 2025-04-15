@@ -2,6 +2,7 @@ package com.example.junggoheaven.domain.user.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.junggoheaven.domain.image.entity.ProfileImage;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.domain.user.enums.UserStatus;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
@@ -10,9 +11,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -39,6 +43,9 @@ public class User extends TimeStamp {
 	@Enumerated(EnumType.STRING)
 	private UserStatus status;
 	private LocalDateTime deletedAt;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "profile_image_id")
+	private ProfileImage profileImage;
 
 	@Builder
 	public User(String email, String password, String name, String phoneNumber, String address) {
@@ -86,6 +93,10 @@ public class User extends TimeStamp {
 
 	public void updateAddress(String address) {
 		this.address = address;
+	}
+
+	public void updateProfileImage(ProfileImage profileImage) {
+		this.profileImage = profileImage;
 	}
 
 	public void deleteUser() {
