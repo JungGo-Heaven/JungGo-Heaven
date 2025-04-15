@@ -75,5 +75,20 @@ public class Product extends TimeStamp {
 		//this.deletedAt = null;
 	}
 
+	// 테스트 꼬임 방지용 생성자
+	public Product(
+		User user,
+		String name,
+		String information,
+		Long price
+	) {
+		this.user = user;
+		this.name = name;
+		this.information = information;
+		this.price = price;
+		this.sellStatus = SellStatus.ONSALE;
+		//this.deletedAt = null;
+	}
+
 
 }
