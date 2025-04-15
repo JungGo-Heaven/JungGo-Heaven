@@ -14,6 +14,8 @@ public class ProductRequestDto {
 
 	private final Long price;
 
+	private final Long productImageId;
+
 
 
 

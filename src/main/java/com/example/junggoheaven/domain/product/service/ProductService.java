@@ -1,6 +1,9 @@
 package com.example.junggoheaven.domain.product.service;
 
 
+import com.example.junggoheaven.domain.image.entity.ProductImage;
+import com.example.junggoheaven.domain.image.exception.UnexpectedErrorException;
+import com.example.junggoheaven.domain.image.repository.ProductImageRepository;
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
 import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
 import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
@@ -8,6 +11,7 @@ import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.product.exception.ProductNotYourException;
 import com.example.junggoheaven.domain.product.exception.ProductSellStatusSameFlag;
+import com.example.junggoheaven.domain.product.repository.ProductRepository;
 import com.example.junggoheaven.domain.product.service.component.ProductChecker;
 import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.product.service.component.ProductWriter;
@@ -22,7 +26,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +41,9 @@ public class ProductService {
 	private final ProductChecker productChecker;
 
 	private final UserFinder userFinder;
+
+	private final ProductImageRepository productImageRepository;
+
 	private final EventPublisher eventPublisher;
 
 	/*
@@ -45,11 +54,16 @@ public class ProductService {
 
 		User user = userFinder.findByUserId(authUser.getId());
 
+		ProductImage productImage = productImageRepository.findById(productRequestDto.getProductImageId())
+			.orElseThrow(UnexpectedErrorException::new);
+
+
 		Product product = new Product(
 			user,
 			productRequestDto.getName(),
 			productRequestDto.getInformation(),
-			productRequestDto.getPrice()
+			productRequestDto.getPrice(),
+			productImage
 		);
 
 		productWriter.saveProduct(product);
@@ -63,7 +77,9 @@ public class ProductService {
 		상품 다건 페이지네이션 조회 메서드
 	*/
 	@Transactional(readOnly = true)
-	public Page<ProductResponseDto> findAllProduct(Pageable pageable) {
+	public Page<ProductResponseDto> findAllProduct(int page, int size) {
+		// Refactor 고민 요망
+		Pageable pageable = PageRequest.of( (page > 0) ? page - 1 : 0, size, Sort.by("pullAt").descending());
 
 		Page<Product> productPage = productFinder.findAllProduct(pageable);
 
@@ -156,6 +172,28 @@ public class ProductService {
 
 		product.setSellStatus(requestSellStatus);
 		productWriter.saveProduct(product);
+
+		return new ProductResponseDto(product);
+	}
+
+
+	/*
+		끌어올리기 기능
+	*/
+	@Transactional
+	public ProductResponseDto pullProduct(AuthUser authUser, Long productId){
+
+		User user = userFinder.findByUserId(authUser.getId());
+
+		// 끌어올리기 상품 찾기 -> productFinder 에서 없는 상품일경우 예외처리
+		Product product = productFinder.findProductById(productId);
+
+		// 다른 유저의 상품을 끌어올리는것을 방지
+		if (!(productChecker.isMyProduct(user, product))) {
+			throw new ProductNotYourException();
+		}
+
+		product.setPullAt(LocalDateTime.now());
 
 		return new ProductResponseDto(product);
 	}

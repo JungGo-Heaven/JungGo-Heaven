@@ -43,10 +43,20 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
+    // spring cloud aws starter
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.3.0'
+
+    // aws java sdk for amazon s3
+    implementation platform('software.amazon.awssdk:bom:2.27.21')
+    implementation 'software.amazon.awssdk:s3'
+
+    //jjwt
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
+    // queryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'

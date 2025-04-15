@@ -1,5 +1,6 @@
 package com.example.junggoheaven.domain.product.dto.response;
 
+import com.example.junggoheaven.domain.image.entity.ProductImage;
 import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.user.entity.User;
@@ -22,9 +23,13 @@ public class ProductResponseDto {
 
 	private final Long price;
 
+	private final ProductImage productImage;
+
 	private final SellStatus sellStatus;
 
 	private final LocalDateTime deletedAt;
+
+	private final LocalDateTime pullAt;
 
 
 	// Product 를 받는 생성자
@@ -36,6 +41,8 @@ public class ProductResponseDto {
 		this.price = product.getPrice();
 		this.sellStatus = product.getSellStatus();
 		this.deletedAt = product.getDeletedAt(); // 반드시 null
+		this.pullAt = product.getPullAt();
+		this.productImage = product.getProductImage();
 	}
 
 
@@ -47,8 +54,10 @@ public class ProductResponseDto {
 			product.getName(),
 			product.getInformation(),
 			product.getPrice(),
+			product.getProductImage(),
 			product.getSellStatus(),
-			product.getDeletedAt()
+			product.getDeletedAt(),
+			product.getPullAt()
 		);
 	}
 
