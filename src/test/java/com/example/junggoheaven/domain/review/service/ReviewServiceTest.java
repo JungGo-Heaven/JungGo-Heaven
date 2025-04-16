@@ -49,10 +49,10 @@ public class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("user@test.com", "User", "123456789");
+        user = User.of("user@test.com", "User", "123456789");
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        reviewer = new User("reviewer@test.com", "Reviewer", "987654321");
+        reviewer = User.of("reviewer@test.com", "Reviewer", "987654321");
         ReflectionTestUtils.setField(reviewer, "id", 2L);
 
         reviewRequestDto = new ReviewRequestDto((byte) 5, "친절하고 답변이 빠르십니다.");

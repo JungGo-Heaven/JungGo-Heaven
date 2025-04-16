@@ -36,18 +36,6 @@ public class UserFinder {
 		return userRepository.findByEmail(email).orElseThrow(EmailNotFoundException::new);
 	}
 
-	public User findValidUserById(Long userId) {
-		User user = findByUserId(userId);
-		if (user.getStatus().equals(UserStatus.DELETED)) {
-			throw new AlreadyDeletedUserException();
-		}
-		return user;
-	}
-
-	public User findNonDeletedUserById(Long userId) {
-		return userRepository.findByIdAndNonDeleted(userId).orElseThrow(AlreadyDeletedUserException::new);
-	}
-
 	public Page<User> findUsersForAdmin(String status, String email, Pageable pageable) {
 		return userRepository.findAllByStatusAndEmail(status, email, pageable);
 	}

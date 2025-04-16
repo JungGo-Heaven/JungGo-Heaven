@@ -69,10 +69,10 @@ public class ChatMessageServiceTest {
 
     @BeforeEach
     void setUp() {
-        buyerUser = new User("buyer@n.com", "Buyer", "123456789");
+        buyerUser = User.of("buyer@n.com", "Buyer", "123456789");
         ReflectionTestUtils.setField(buyerUser, "id", 1L);
 
-        sellerUser = new User("seller@n.com", "Seller", "987654321");
+        sellerUser = User.of("seller@n.com", "Seller", "987654321");
         ReflectionTestUtils.setField(sellerUser, "id", 2L);
 
         product = new Product(sellerUser, "test name", "Product test", 1000L);

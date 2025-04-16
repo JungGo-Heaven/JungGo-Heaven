@@ -44,12 +44,12 @@ class UserFinderTest {
 
 	@BeforeEach
 	void setUp() {
-		user = new User(email, "password", "name", "phoneNumber", "address");
+		user = User.of(email, "password", "name", "phoneNumber", "address");
 		ReflectionTestUtils.setField(user, "id", userId);
 		ReflectionTestUtils.setField(user, "createdAt", LocalDateTime.now());
 		ReflectionTestUtils.setField(user, "modifiedAt", LocalDateTime.now());
 
-		deletedUser = new User(email, "password", "name", "phoneNumber", "address");
+		deletedUser = User.of(email, "password", "name", "phoneNumber", "address");
 		ReflectionTestUtils.setField(deletedUser, "id", deletedUserId);
 		ReflectionTestUtils.setField(deletedUser, "createdAt", LocalDateTime.now());
 		ReflectionTestUtils.setField(deletedUser, "modifiedAt", LocalDateTime.now());
@@ -108,29 +108,6 @@ class UserFinderTest {
 	}
 
 	@Test
-	void findNonDeletedUserById() {
-		given(userRepository.findByIdAndNonDeleted(userId)).willReturn(Optional.of(user));
-
-		User getUser = userFinder.findNonDeletedUserById(userId);
-		assertThat(getUser).isNotNull();
-		assertThat(getUser.getId()).isEqualTo(userId);
-	}
-
-	@Test
-	void findNonDeletedUserById_탈퇴한_유저_비교() {
-		given(userRepository.findByIdAndNonDeleted(deletedUserId)).willReturn(Optional.empty());
-		given(userRepository.findByIdAndNonDeleted(userId)).willReturn(Optional.of(user));
-
-		User good = userFinder.findNonDeletedUserById(userId);
-		assertThat(good).isNotNull();
-		assertThat(good.getId()).isEqualTo(userId);
-
-		assertThrows(AlreadyDeletedUserException.class, () -> {
-			userFinder.findNonDeletedUserById(deletedUserId);
-		});
-	}
-
-	@Test
 	void findUsersForAdmin(){
 		Pageable pageable = PageRequest.of(0, 10);
 		PageImpl userPage = new PageImpl(List.of(user, deletedUser));
@@ -145,20 +122,5 @@ class UserFinderTest {
 		assertThat(usersForAdmin.getTotalElements()).isEqualTo(2);
 		assertThat(users.get(0).getStatus()).isEqualTo(UserStatus.ACTIVE);
 		assertThat(users.get(1).getStatus()).isEqualTo(UserStatus.DELETED);
-	}
-
-	@Test
-	void findValidUserById(){
-		given(userRepository.findById(userId)).willReturn(Optional.of(user));
-		given(userRepository.findById(deletedUserId)).willReturn(Optional.of(deletedUser));
-
-		User validUser = userFinder.findValidUserById(userId);
-
-		assertThat(validUser).isNotNull();
-		assertThat(validUser.getStatus()).isNotEqualByComparingTo(UserStatus.DELETED);
-
-		assertThrows(AlreadyDeletedUserException.class, () -> {
-			userFinder.findValidUserById(deletedUserId);
-		});
 	}
 }

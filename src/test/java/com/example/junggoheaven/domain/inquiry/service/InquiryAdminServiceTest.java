@@ -52,8 +52,8 @@ class InquiryAdminServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		writer = new User("email", "password", "writer", "010-0000-0001", "address");
-		admin = new User("email", "password", "admin", "010-0000-1000", "address");
+		writer = User.of("email", "password", "writer", "010-0000-0001", "address");
+		admin = User.of("email", "password", "admin", "010-0000-1000", "address");
 
 		ReflectionTestUtils.setField(writer, "id", 1L);
 		ReflectionTestUtils.setField(writer, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));

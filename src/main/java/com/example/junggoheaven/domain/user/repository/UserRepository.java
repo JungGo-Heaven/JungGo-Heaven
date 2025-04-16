@@ -13,8 +13,5 @@ public interface UserRepository extends JpaRepository<User,Long>, UserCustomRepo
 
 	Boolean existsByEmail(String email);
 
-	@Query("SELECT u FROM User u WHERE u.id = :userId AND u.status <> 'DELETED'")
-	Optional<User> findByIdAndNonDeleted(Long userId);
-
 	List<User> findUsersByIdBetween(Long startId, Long endId);
 }
