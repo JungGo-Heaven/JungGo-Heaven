@@ -2,7 +2,7 @@ package com.example.junggoheaven.domain.inquiry.entity;
 
 import java.time.LocalDateTime;
 
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
 

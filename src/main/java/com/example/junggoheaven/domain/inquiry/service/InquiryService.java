@@ -11,8 +11,7 @@ import com.example.junggoheaven.domain.inquiry.dto.request.UpdateInquiryRequestD
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryListResponseDto;
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryResponseDto;
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
-import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidInquiryException;
 import com.example.junggoheaven.domain.inquiry.service.component.InquiryFinder;
 import com.example.junggoheaven.domain.inquiry.service.component.InquiryWriter;
