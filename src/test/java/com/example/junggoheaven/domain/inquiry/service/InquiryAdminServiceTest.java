@@ -64,9 +64,9 @@ class InquiryAdminServiceTest {
 		ReflectionTestUtils.setField(admin, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
 		ReflectionTestUtils.setField(admin, "modifiedAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
 
-		inquiry1 = new Inquiry(writer, "title1", "b");
-		inquiry2 = new Inquiry(writer, "title2", "b");
-		inquiry3 = new Inquiry(writer, "title3", "b");
+		inquiry1 = Inquiry.of(writer, "title1", "b");
+		inquiry2 = Inquiry.of(writer, "title2", "b");
+		inquiry3 = Inquiry.of(writer, "title3", "b");
 
 		ReflectionTestUtils.setField(inquiry1, "id", 1L);
 		ReflectionTestUtils.setField(inquiry1, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));

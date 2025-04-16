@@ -54,7 +54,7 @@ class InquiryFinderTest {
 		ReflectionTestUtils.setField(respondent, "modifiedAt", LocalDateTime.of(2023,5,1,12,0,0));
 		ReflectionTestUtils.setField(respondent, "role", UserRole.ROLE_ADMIN);
 
-		inquiry = new Inquiry(writer, "문의 제목", "문의 내용");
+		inquiry = Inquiry.of(writer, "문의 제목", "문의 내용");
 		ReflectionTestUtils.setField(inquiry, "id", 1L);
 		ReflectionTestUtils.setField(inquiry, "createdAt", LocalDateTime.of(2025,3,1,12,0,0));
 		ReflectionTestUtils.setField(inquiry, "modifiedAt", LocalDateTime.of(2025,3,1,12,0,0));

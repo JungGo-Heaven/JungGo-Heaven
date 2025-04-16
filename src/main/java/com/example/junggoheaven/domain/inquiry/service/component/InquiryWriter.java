@@ -18,4 +18,8 @@ public class InquiryWriter {
 	public Inquiry saveInquiry(Inquiry inquiry) {
 		return inquiryRepository.save(inquiry);
 	}
+
+	public void deleteInquiry(Inquiry inquiry) {
+		inquiryRepository.delete(inquiry);
+	}
 }
