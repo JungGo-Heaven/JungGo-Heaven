@@ -38,7 +38,7 @@ public enum UploadType {
     }
 
     // Predicate 사용 메서드
-    public boolean isNotAllowedFor(UserRole role) {
+    public boolean isAllowedFor(UserRole role) {
         return roleChecker.test(role);
     }
 

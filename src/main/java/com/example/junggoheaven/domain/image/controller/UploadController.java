@@ -75,8 +75,6 @@ public class UploadController {
         List<ChatMessageResponseDto> responseDtos = chatRoomImageService.saveChatRoomImages(
                 response.getUploadUrls(), multipartFiles, authUser, chatRoomId
         );
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("현재 인증 정보: " + authentication);
 
         for (ChatMessageResponseDto dto : responseDtos) {
             simpMessagingTemplate.convertAndSend(
