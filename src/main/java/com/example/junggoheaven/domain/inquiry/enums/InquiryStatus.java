@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.inquiry.eunms;
+package com.example.junggoheaven.domain.inquiry.enums;
 
 import java.util.Arrays;
 
