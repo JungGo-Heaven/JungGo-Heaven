@@ -39,7 +39,7 @@ public class LikeService {
 		Long productId = requestDto.getProductId();
 		Product product = productFinder.findProductById(productId);
 
-		Like newLike = new Like(product, user);
+		Like newLike = Like.of(product, user);
 		try {
 			likeWriter.saveLike(newLike);
 		} catch (DataIntegrityViolationException e) {

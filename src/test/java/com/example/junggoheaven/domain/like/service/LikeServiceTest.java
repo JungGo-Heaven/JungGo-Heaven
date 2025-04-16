@@ -65,7 +65,7 @@ class LikeServiceTest {
 		ReflectionTestUtils.setField(product, "createdAt", LocalDateTime.of(2025,1,31,12,0,0));
 		ReflectionTestUtils.setField(product, "modifiedAt", LocalDateTime.of(2025,1,31,12,0,0));
 
-		like = new Like(product, user);
+		like = Like.of(product, user);
 		ReflectionTestUtils.setField(like, "id", 111L);
 	}
 
