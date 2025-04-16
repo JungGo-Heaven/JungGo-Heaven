@@ -41,7 +41,7 @@ public class AuthService {
 			throw new EmailAlreadyExistsException();
 		}
 
-		User user = new User(email, password, name, phoneNumber, address);
+		User user = User.of(email, password, name, phoneNumber, address);
 		User saveUser = userWriter.saveUser(user);
 
 		return SignupResponseDto.from(saveUser);

@@ -51,4 +51,8 @@ public class UserFinder {
 	public Page<User> findUsersForAdmin(String status, String email, Pageable pageable) {
 		return userRepository.findAllByStatusAndEmail(status, email, pageable);
 	}
+
+	public void delete(User user) {
+		userRepository.delete(user);
+	}
 }

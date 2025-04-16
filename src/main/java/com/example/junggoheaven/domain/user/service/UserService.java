@@ -105,6 +105,6 @@ public class UserService {
 	public void deleteUserAccount(Long id) {
 		User user = userFinder.findByUserId(id);
 		refreshUtil.deleteRefreshToken(String.valueOf(id));
-		user.deleteUser();
+		userFinder.delete(user);
 	}
 }
