@@ -46,8 +46,8 @@ class LikeFinderTest {
 		product = new Product(user, "product", "information", 13000L);
 		ReflectionTestUtils.setField(product, "id", 10L);
 
-		one = new Like(product, user);
-		two = new Like(product, user);
+		one = Like.of(product, user);
+		two = Like.of(product, user);
 		ReflectionTestUtils.setField(one, "id", 11L);
 		ReflectionTestUtils.setField(two, "id", 12L);
 	}
