@@ -53,7 +53,7 @@ class InquiryServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		writer = new User("email@email.com", "password", "name", "010-0000-0001", "address");
+		writer = User.of("email@email.com", "password", "name", "010-0000-0001", "address");
 		ReflectionTestUtils.setField(writer, "id", userId);
 		ReflectionTestUtils.setField(writer, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
 		ReflectionTestUtils.setField(writer, "modifiedAt", LocalDateTime.of(2010, 1, 1, 0, 0, 0));

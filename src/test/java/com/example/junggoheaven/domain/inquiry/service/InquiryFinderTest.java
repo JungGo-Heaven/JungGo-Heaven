@@ -43,12 +43,12 @@ class InquiryFinderTest {
 
 	@BeforeEach
 	void setUp() {
-		writer = new User("이메일", "비밀번호", "이름", "번호", "주소");
+		writer = User.of("이메일", "비밀번호", "이름", "번호", "주소");
 		ReflectionTestUtils.setField(writer, "id", 11L);
 		ReflectionTestUtils.setField(writer, "createdAt", LocalDateTime.of(2020,4,1,12,0,0));
 		ReflectionTestUtils.setField(writer, "modifiedAt", LocalDateTime.of(2023,5,1,12,0,0));
 
-		respondent = new User("이메일", "비밀번호", "이름", "번호", "주소");
+		respondent = User.of("이메일", "비밀번호", "이름", "번호", "주소");
 		ReflectionTestUtils.setField(respondent, "id", 12L);
 		ReflectionTestUtils.setField(respondent, "createdAt", LocalDateTime.of(2020,4,1,12,0,0));
 		ReflectionTestUtils.setField(respondent, "modifiedAt", LocalDateTime.of(2023,5,1,12,0,0));

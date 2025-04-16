@@ -36,7 +36,7 @@ public class UserService {
 
 	@Transactional
 	public UserSelfInfoResponseDto addInfo(Long id, GuestAddInfoRequestDto requestDto) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		String password = bCryptPasswordEncoder.encode(requestDto.getPassword());
 		String phoneNumber = requestDto.getPhoneNumber();
 		String address = requestDto.getAddress();
@@ -50,7 +50,7 @@ public class UserService {
 
 	@Transactional
 	public UserSelfInfoResponseDto updateUserInfo(Long id, UpdateInfoRequestDto requestDto) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		String name = requestDto.getName();
 		String phoneNumber = requestDto.getPhoneNumber();
 		String address = requestDto.getAddress();
@@ -70,7 +70,7 @@ public class UserService {
 
 	@Transactional
 	public void updateUserPassword(Long id, UpdatePasswordRequestDto requestDto) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		String oldPassword = requestDto.getOldPassword();
 
 		if (!bCryptPasswordEncoder.matches(oldPassword, user.getPassword())) {
@@ -87,7 +87,7 @@ public class UserService {
 	
 	@Transactional
 	public UserSelfInfoResponseDto updateUserImage(Long userId, UploadProfileImageRequestDto requestDto) {
-		User user = userFinder.findValidUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		Long imageId = requestDto.getId();
 
 		ProfileImage profileImage = profileImageRepository.findById(imageId).orElseThrow(ImageUploadIOException::new);
@@ -97,7 +97,7 @@ public class UserService {
 	}
 
 	public UserSelfInfoResponseDto getMyInformation(Long id) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		return UserSelfInfoResponseDto.from(user);
 	}
 

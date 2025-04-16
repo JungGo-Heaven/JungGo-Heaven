@@ -40,7 +40,7 @@ class LikeFinderTest {
 
 	@BeforeEach
 	void setUp() {
-		user = new User("emali", "name","010-1234-1234");
+		user = User.of("emali", "name","010-1234-1234");
 		ReflectionTestUtils.setField(user, "id", 1L);
 
 		product = new Product(user, "product", "information", 13000L);
