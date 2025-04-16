@@ -68,15 +68,15 @@ public class SecurityConfig {
 			.logout(AbstractHttpConfigurer::disable)
 			.rememberMe(AbstractHttpConfigurer::disable)
 
-			// .oauth2Login(oauth2 -> oauth2
-			// 	.authorizationEndpoint(endpoint -> endpoint
-			// 		.authorizationRequestRepository(authorizationRequestRepository())
-			// 	)
-			// 	.userInfoEndpoint(userInfo -> userInfo
-			// 		.userService(oauth2Service))
-			// 	.successHandler(oAuth2AuthenticationSuccessHandler)
-			// 	.failureHandler(oAuth2AuthenticationFailureHandler)
-			// )
+			.oauth2Login(oauth2 -> oauth2
+				.authorizationEndpoint(endpoint -> endpoint
+					.authorizationRequestRepository(authorizationRequestRepository())
+				)
+				.userInfoEndpoint(userInfo -> userInfo
+					.userService(oauth2Service))
+				.successHandler(oAuth2AuthenticationSuccessHandler)
+				.failureHandler(oAuth2AuthenticationFailureHandler)
+			)
 
 			.exceptionHandling(exceptions -> exceptions
 				.authenticationEntryPoint(authenticationEntryPoint)
