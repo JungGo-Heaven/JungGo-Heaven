@@ -17,6 +17,7 @@ import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.exception.InvalidPasswordException;
 import com.example.junggoheaven.domain.user.exception.PasswordSameException;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
 import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
@@ -31,6 +32,7 @@ public class UserService {
 	private final HttpServletResponse response;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final UserFinder userFinder;
+	private final UserWriter userWriter;
 	private final JwtUtil jwtUtil;
 	private final RefreshUtil refreshUtil;
 
@@ -101,10 +103,9 @@ public class UserService {
 		return UserSelfInfoResponseDto.from(user);
 	}
 
-	@Transactional
 	public void deleteUserAccount(Long id) {
 		User user = userFinder.findByUserId(id);
 		refreshUtil.deleteRefreshToken(String.valueOf(id));
-		userFinder.delete(user);
+		userWriter.delete(user);
 	}
 }

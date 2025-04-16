@@ -23,7 +23,7 @@ public class UserKeywordService {
 
 	public void addKeywords(Long userId, List<String> keywords) {
 		// User 가 있는지 확인 (삭제 안된 유저)
-		User savedUser = userFinder.findNonDeletedUserById(userId);
+		User savedUser = userFinder.findByUserId(userId);
 
 		// User 가 등록한 Keyword 개수 확인 (최대 10 개)
 		if (userKeywordRepository.countByUserId(userId) + keywords.size() > MAX_KEYWORDS_COUNT) {
