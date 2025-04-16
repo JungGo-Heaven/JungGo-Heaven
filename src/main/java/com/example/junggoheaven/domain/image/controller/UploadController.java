@@ -13,9 +13,7 @@ import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,8 +73,6 @@ public class UploadController {
         List<ChatMessageResponseDto> responseDtos = chatRoomImageService.saveChatRoomImages(
                 response.getUploadUrls(), multipartFiles, authUser, chatRoomId
         );
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("현재 인증 정보: " + authentication);
 
         for (ChatMessageResponseDto dto : responseDtos) {
             simpMessagingTemplate.convertAndSend(

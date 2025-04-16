@@ -55,7 +55,7 @@ public class S3StorageService implements StorageService {
         Long userId = authUser.getId();
         UserRole userRole = userFinder.findByUserId(userId).getRole();
         UploadType uploadType = UploadType.from(type);
-        if (!uploadType.isNotAllowedFor(userRole)) {
+        if (!uploadType.isAllowedFor(userRole)) {
             throw new UploadAccessDeniedException();
         }
 
@@ -110,7 +110,7 @@ public class S3StorageService implements StorageService {
         Long userId = authUser.getId();
         UserRole userRole = userFinder.findByUserId(userId).getRole();
         UploadType uploadType = UploadType.from(type);
-        if (!uploadType.isNotAllowedFor(userRole)) {
+        if (!uploadType.isAllowedFor(userRole)) {
             throw new UploadAccessDeniedException();
         }
 
