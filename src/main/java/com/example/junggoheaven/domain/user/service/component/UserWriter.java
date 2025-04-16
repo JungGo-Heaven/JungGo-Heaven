@@ -13,7 +13,11 @@ public class UserWriter {
 
 	private final UserRepository userRepository;
 
-	public User saveUser(User user){
+	public User saveUser(User user) {
 		return userRepository.save(user);
+	}
+
+	public void delete(User user) {
+		userRepository.delete(user);
 	}
 }

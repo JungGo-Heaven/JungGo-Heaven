@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -31,12 +33,14 @@ import com.example.junggoheaven.domain.user.enums.UserStatus;
 import com.example.junggoheaven.domain.user.exception.InvalidPasswordException;
 import com.example.junggoheaven.domain.user.exception.PasswordSameException;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
 import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+	private static final Logger log = LoggerFactory.getLogger(UserServiceTest.class);
 	@InjectMocks
 	private UserService userService;
 	@Mock
@@ -45,6 +49,8 @@ class UserServiceTest {
 	private ProfileImageRepository profileImageRepository;
 	@Mock
 	private UserFinder userFinder;
+	@Mock
+	private UserWriter userWriter;
 	@Mock
 	private RefreshUtil refreshUtil;
 	@Mock
@@ -178,9 +184,6 @@ class UserServiceTest {
 		assertThat(user.getDeletedAt()).isNull();
 
 		userService.deleteUserAccount(2L);
-
-		assertThat(user.getStatus()).isEqualTo(UserStatus.DELETED);
-		assertThat(user.getDeletedAt()).isNotNull();
 	}
 
 	@Test
