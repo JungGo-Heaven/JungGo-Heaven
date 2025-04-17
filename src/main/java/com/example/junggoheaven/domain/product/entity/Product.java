@@ -1,6 +1,8 @@
 package com.example.junggoheaven.domain.product.entity;
 
 import com.example.junggoheaven.domain.image.entity.ProductImage;
+import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
+import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
@@ -24,7 +26,6 @@ import org.springframework.data.annotation.CreatedDate;
 @Entity
 @Table(name = "product")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends TimeStamp {
 
@@ -88,6 +89,25 @@ public class Product extends TimeStamp {
 		this.price = price;
 		this.sellStatus = SellStatus.ONSALE;
 		//this.deletedAt = null;
+	}
+
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	public void updateProduct(ProductRequestDto productRequestDto) {
+		this.name = productRequestDto.getName();
+		this.information = productRequestDto.getInformation();
+		this.price = productRequestDto.getPrice();
+	}
+
+	public void updateSellStatus(SellStatus sellStatus) {
+		this.sellStatus = sellStatus;
+	}
+
+	public void pullProduct() {
+		this.pullAt = LocalDateTime.now();
 	}
 
 
