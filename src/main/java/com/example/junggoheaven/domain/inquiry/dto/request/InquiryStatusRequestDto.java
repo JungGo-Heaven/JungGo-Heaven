@@ -1,6 +1,6 @@
 package com.example.junggoheaven.domain.inquiry.dto.request;
 
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.global.common.annotation.ValidEnum;
 
 import jakarta.validation.constraints.NotBlank;

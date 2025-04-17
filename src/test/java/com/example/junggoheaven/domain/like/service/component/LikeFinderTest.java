@@ -40,14 +40,14 @@ class LikeFinderTest {
 
 	@BeforeEach
 	void setUp() {
-		user = new User("emali", "name","010-1234-1234");
+		user = User.of("emali", "name","010-1234-1234");
 		ReflectionTestUtils.setField(user, "id", 1L);
 
 		product = new Product(user, "product", "information", 13000L);
 		ReflectionTestUtils.setField(product, "id", 10L);
 
-		one = new Like(product, user);
-		two = new Like(product, user);
+		one = Like.of(product, user);
+		two = Like.of(product, user);
 		ReflectionTestUtils.setField(one, "id", 11L);
 		ReflectionTestUtils.setField(two, "id", 12L);
 	}

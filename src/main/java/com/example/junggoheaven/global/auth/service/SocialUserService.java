@@ -59,7 +59,7 @@ public class SocialUserService implements OAuth2UserService<OAuth2UserRequest, O
 		Optional<User> existingUser = userFinder.findByUserEmailOpt(oAuthInfo.getEmail());
 
 		User user = existingUser.orElseGet(() -> {
-			User newUser = new User(oAuthInfo.getEmail(), oAuthInfo.getName(), oAuthInfo.getPhoneNumber());
+			User newUser = User.of(oAuthInfo.getEmail(), oAuthInfo.getName(), oAuthInfo.getPhoneNumber());
 			return userWriter.saveUser(newUser);
 		});
 

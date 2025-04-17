@@ -20,7 +20,7 @@ public class InquiryMatchedUserFinder {
 	public void findInquiryResponseMatchedUser(InquiryResponseRegisteredEvent event) {
 		Long userId = event.getUserId();
 
-		User user = userFinder.findNonDeletedUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		log.info("{}님, 문의에 대한 답변이 등록되었습니다.", user.getName());
 	}
 }

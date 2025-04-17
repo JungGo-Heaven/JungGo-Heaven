@@ -2,6 +2,7 @@ package com.example.junggoheaven.domain.image.entity;
 
 import com.example.junggoheaven.global.common.entity.TimeStamp;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "product_images")
 public class ProductImage extends TimeStamp {
 
@@ -23,8 +24,12 @@ public class ProductImage extends TimeStamp {
     @Column(nullable = false)
     private String keyName;
 
-    public ProductImage(String profileImageUrl, String keyName) {
+    private ProductImage(String profileImageUrl, String keyName) {
         this.productImageUrl = profileImageUrl;
         this.keyName = keyName;
+    }
+
+    public static ProductImage of(String productImageUrl, String keyName) {
+        return new ProductImage(productImageUrl, keyName);
     }
 }

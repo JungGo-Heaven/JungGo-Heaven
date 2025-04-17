@@ -13,8 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -27,16 +28,17 @@ import com.example.junggoheaven.domain.user.dto.user.UploadProfileImageRequestDt
 import com.example.junggoheaven.domain.user.dto.user.UserSelfInfoResponseDto;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
-import com.example.junggoheaven.domain.user.enums.UserStatus;
 import com.example.junggoheaven.domain.user.exception.InvalidPasswordException;
 import com.example.junggoheaven.domain.user.exception.PasswordSameException;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
 import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+	private static final Logger log = LoggerFactory.getLogger(UserServiceTest.class);
 	@InjectMocks
 	private UserService userService;
 	@Mock
@@ -45,6 +47,8 @@ class UserServiceTest {
 	private ProfileImageRepository profileImageRepository;
 	@Mock
 	private UserFinder userFinder;
+	@Mock
+	private UserWriter userWriter;
 	@Mock
 	private RefreshUtil refreshUtil;
 	@Mock
@@ -56,8 +60,8 @@ class UserServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		guestUser = new User("email", null, "name", null, null);
-		user = new User("email", "password", "name", "010-1234-1234", "address");
+		guestUser = User.of("email", null, "name", null, null);
+		user = User.of("email", "password", "name", "010-1234-1234", "address");
 
 		ReflectionTestUtils.setField(guestUser, "id", 1L);
 		ReflectionTestUtils.setField(guestUser, "createdAt", LocalDateTime.of(2025, 04, 01, 12, 00));
@@ -68,7 +72,7 @@ class UserServiceTest {
 		ReflectionTestUtils.setField(user, "createdAt", LocalDateTime.of(2025, 03, 31, 12, 00));
 		ReflectionTestUtils.setField(user, "modifiedAt", guestUser.getCreatedAt());
 
-		profileImage = new  ProfileImage();
+		profileImage = ProfileImage.of("profileImageUrl", "name");
 		ReflectionTestUtils.setField(profileImage, "id", 1L);
 		ReflectionTestUtils.setField(profileImage, "profileImageUrl", "image url");
 	}
@@ -79,7 +83,7 @@ class UserServiceTest {
 		String password = "123456";
 		GuestAddInfoRequestDto requestDto = new GuestAddInfoRequestDto();
 
-		given(userFinder.findValidUserById(any())).willReturn(guestUser);
+		given(userFinder.findByUserId(any())).willReturn(guestUser);
 		given(bCryptPasswordEncoder.encode(any())).willReturn(password);
 
 		assertThat(guestUser.getRole()).isEqualTo(UserRole.ROLE_GUEST);
@@ -97,7 +101,7 @@ class UserServiceTest {
 
 		UpdateInfoRequestDto requestDto = new UpdateInfoRequestDto(updateName, updatePhoneNumber, updateAddress);
 
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 
 		UserSelfInfoResponseDto responseDto = userService.updateUserInfo(2L, requestDto);
 		assertThat(responseDto).isNotNull();
@@ -114,7 +118,7 @@ class UserServiceTest {
 		String address = user.getAddress();
 		UpdateInfoRequestDto requestDto = new UpdateInfoRequestDto(null, null, null);
 
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 
 		UserSelfInfoResponseDto responseDto = userService.updateUserInfo(2L, requestDto);
 		assertThat(responseDto).isNotNull();
@@ -130,7 +134,7 @@ class UserServiceTest {
 		String newPassword = "newPassword";
 		UpdatePasswordRequestDto requestDto = new UpdatePasswordRequestDto(oldPassword, newPassword);
 
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 		given(bCryptPasswordEncoder.matches(any(), any())).willReturn(true).willReturn(false);
 		given(bCryptPasswordEncoder.encode(any())).willReturn(newPassword);
 
@@ -142,7 +146,7 @@ class UserServiceTest {
 	@Test
 	void updateUserPassword_oldPassword_에러() {
 		UpdatePasswordRequestDto requestDto = new UpdatePasswordRequestDto("oldPassword", "newPassword");
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 		given(bCryptPasswordEncoder.matches(any(), any())).willReturn(false);
 
 		assertThrows(InvalidPasswordException.class, () -> {
@@ -153,7 +157,7 @@ class UserServiceTest {
 	@Test
 	void updateUserPassword_newPassword_에러() {
 		UpdatePasswordRequestDto requestDto = new UpdatePasswordRequestDto("oldPassword", "newPassword");
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 		given(bCryptPasswordEncoder.matches(any(), any())).willReturn(true).willReturn(true);
 
 		assertThrows(PasswordSameException.class, () -> {
@@ -163,7 +167,7 @@ class UserServiceTest {
 
 	@Test
 	void getMyInformation() {
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 
 		UserSelfInfoResponseDto responseDto = userService.getMyInformation(2L);
 
@@ -178,15 +182,12 @@ class UserServiceTest {
 		assertThat(user.getDeletedAt()).isNull();
 
 		userService.deleteUserAccount(2L);
-
-		assertThat(user.getStatus()).isEqualTo(UserStatus.DELETED);
-		assertThat(user.getDeletedAt()).isNotNull();
 	}
 
 	@Test
 	void updateUserImage(){
 		UploadProfileImageRequestDto requestDto = new UploadProfileImageRequestDto(1L);
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 		given(profileImageRepository.findById(any())).willReturn(Optional.of(profileImage));
 
 		assertThat(user.getProfileImage()).isNull();

@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.image.service.S3;
 
 import com.example.junggoheaven.domain.image.dto.MultipleUploadResponse;
+import com.example.junggoheaven.domain.image.dto.UploadContext;
 import com.example.junggoheaven.domain.image.dto.UploadResponse;
 import com.example.junggoheaven.domain.image.enums.UploadType;
 import com.example.junggoheaven.domain.image.exception.*;
@@ -44,7 +45,7 @@ public class S3StorageService implements StorageService {
     private String region;
 
     @Override
-    public UploadResponse upload(MultipartFile image, String type, AuthUser authUser) {
+    public UploadResponse upload(MultipartFile image, String type, AuthUser authUser, Long resourceId) {
         checkFileType(image.getContentType());
 
         // random_UUID + / + System.currentTimeMillis() + "_" + originalFilename + fileExtension
@@ -55,11 +56,12 @@ public class S3StorageService implements StorageService {
         Long userId = authUser.getId();
         UserRole userRole = userFinder.findByUserId(userId).getRole();
         UploadType uploadType = UploadType.from(type);
-        if (!uploadType.isNotAllowedFor(userRole)) {
+        if (!uploadType.isAllowedFor(userRole)) {
             throw new UploadAccessDeniedException();
         }
 
-        String key = uploadType.getPrefix() + filename;
+        // 업로드 타입 별 id도 함께 key 값에 추가
+        String key = uploadType.buildKey(resourceId, filename);
 
         // S3에 upload
         PutObjectRequest request = PutObjectRequest.builder()
@@ -79,18 +81,18 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public MultipleUploadResponse productImageUpload(List<MultipartFile> originalImages, String type, AuthUser authUser) {
+    public MultipleUploadResponse productImageUpload(List<MultipartFile> originalImages, String type, AuthUser authUser, UploadContext uploadContext) {
 
         Set<UploadType> invalidUploadTypes = Set.of(PROFILES, CHAT_ROOMS);
-        List<String> responses = multipleUpload(originalImages, type, authUser, invalidUploadTypes);
+        List<String> responses = multipleUpload(originalImages, type, authUser, invalidUploadTypes, uploadContext);
         return MultipleUploadResponse.of(responses);
     }
 
     @Override
-    public MultipleUploadResponse chatRoomImageUpload(List<MultipartFile> originalImages, String type, AuthUser authUser) {
+    public MultipleUploadResponse chatRoomImageUpload(List<MultipartFile> originalImages, String type, AuthUser authUser, UploadContext uploadContext) {
 
         Set<UploadType> invalidUploadTypes = Set.of(PROFILES, PRODUCTS);
-        List<String> responses = multipleUpload(originalImages, type, authUser, invalidUploadTypes);
+        List<String> responses = multipleUpload(originalImages, type, authUser, invalidUploadTypes, uploadContext);
         return MultipleUploadResponse.of(responses);
     }
 
@@ -103,14 +105,14 @@ public class S3StorageService implements StorageService {
     }
 
     // 다중 이미지 업로드 공통 로직
-    private List<String> multipleUpload(List<MultipartFile> images, String type, AuthUser authUser, Set<UploadType> invalidUploadTypes) {
+    private List<String> multipleUpload(List<MultipartFile> images, String type, AuthUser authUser, Set<UploadType> invalidUploadTypes, UploadContext uploadContext) {
 
         int counter = 0;
         // UserRole 및 uploadType check
         Long userId = authUser.getId();
         UserRole userRole = userFinder.findByUserId(userId).getRole();
         UploadType uploadType = UploadType.from(type);
-        if (!uploadType.isNotAllowedFor(userRole)) {
+        if (!uploadType.isAllowedFor(userRole)) {
             throw new UploadAccessDeniedException();
         }
 
@@ -119,11 +121,13 @@ public class S3StorageService implements StorageService {
             throw new InvalidUploadTypeException();
         }
 
+        Long resourceId = uploadContext.getResourceId(uploadType);
+
         List<String> responses = new ArrayList<>();
         for (MultipartFile image : images) {
             try {
                 counter++;
-                UploadResponse upload = upload(image, type, authUser);
+                UploadResponse upload = upload(image, type, authUser, resourceId);
                 responses.add(upload.getUploadUrl());
             } catch (Exception e) {
                 log.error("{} 번째 업로드 중 예외 발생: {}", counter, e.getLocalizedMessage());

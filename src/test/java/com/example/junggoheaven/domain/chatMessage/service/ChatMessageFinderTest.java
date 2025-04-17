@@ -39,7 +39,7 @@ public class ChatMessageFinderTest {
 
     @BeforeEach
     void setUp() {
-        sender = new User("sender@n.com", "Sender", "123456789");
+        sender = User.of("sender@n.com", "Sender", "123456789");
         ReflectionTestUtils.setField(sender, "id", 1L);
 
         chatRoom = new ChatRoom(null, sender);

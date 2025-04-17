@@ -1,7 +1,6 @@
 package com.example.junggoheaven.global.message.pusher;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -10,9 +9,8 @@ import org.springframework.stereotype.Component;
 import com.example.junggoheaven.global.message.dto.MatchedUserDto;
 import com.example.junggoheaven.global.message.entity.NotificationDeliveryLog;
 import com.example.junggoheaven.global.message.enums.ChannelType;
-import com.example.junggoheaven.global.message.event.pusher.PushByFCMEvent;
 import com.example.junggoheaven.global.message.event.pusher.PushByWebPushEvent;
-import com.example.junggoheaven.global.message.writer.NotificationDeliveryEventWriter;
+import com.example.junggoheaven.global.message.service.component.writer.NotificationDeliveryEventWriter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,15 +25,15 @@ public class WebPushPusher {
 	@EventListener
 	public void productRegisteredMessagePusher(PushByWebPushEvent event) {
 		List<MatchedUserDto> userList = event.getUserList();
-		AtomicInteger count = new AtomicInteger(0);
+		int count = 0;
 
 		for (MatchedUserDto user : userList) {
 			// push 알림
-			count.incrementAndGet();
+			count++;
 		}
 
 		// 알림 방식 로그로 저장
-		log.info("총 {} 명의 사용자 에게 알림 {} 을/를 보냈습니다.", count.get(), ChannelType.WEB_PUSH);
+		log.info("총 {} 명의 사용자 에게 알림 {} 을/를 보냈습니다.", count, ChannelType.WEB_PUSH);
 
 		NotificationDeliveryLog notificationDeliveryLog = NotificationDeliveryLog.builder()
 			.channelType(ChannelType.WEB_PUSH)

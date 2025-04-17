@@ -4,6 +4,8 @@ import com.example.junggoheaven.domain.image.dto.UploadResponse;
 import com.example.junggoheaven.domain.image.entity.ProfileImage;
 import com.example.junggoheaven.domain.image.repository.ProfileImageRepository;
 import com.example.junggoheaven.domain.image.service.S3.S3StorageService;
+import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ public class ProfileImageService {
 
     private final ProfileImageRepository profileImageRepository;
     private final S3StorageService s3StorageService;
+    private final UserFinder userFinder;
 
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
@@ -25,11 +28,11 @@ public class ProfileImageService {
     private String region;
 
     @Transactional
-    public ProfileImage uploadProfileImage(MultipartFile image, AuthUser authUser) {
-        UploadResponse uploadResponse = s3StorageService.upload(image, "profiles", authUser);
+    public ProfileImage uploadProfileImage(MultipartFile image, AuthUser authUser, Long userId) {
+        UploadResponse uploadResponse = s3StorageService.upload(image, "profiles", authUser, userId);
         String profileImageUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + uploadResponse.getUploadUrl();
 
-        ProfileImage profileImage = new ProfileImage(image.getOriginalFilename(),profileImageUrl);
+        ProfileImage profileImage = ProfileImage.of(image.getOriginalFilename(), profileImageUrl);
         return profileImageRepository.save(profileImage);
     }
 }

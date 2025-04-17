@@ -2,6 +2,12 @@ package com.example.junggoheaven.domain.user.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.example.junggoheaven.domain.image.entity.ProfileImage;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.domain.user.enums.UserStatus;
@@ -26,6 +32,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET status = 'DELETED', deleted_at = NOW() WHERE id = ?")
+@FilterDef(name = "deletedFilter")
+@Filter(name = "deletedFilter", condition = "status <> 'DELETED'")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends TimeStamp {
 
@@ -48,7 +57,7 @@ public class User extends TimeStamp {
 	private ProfileImage profileImage;
 
 	@Builder
-	public User(String email, String password, String name, String phoneNumber, String address) {
+	private User(String email, String password, String name, String phoneNumber, String address) {
 		this.email = email;
 		this.password = password;
 		this.name = name;
@@ -58,12 +67,23 @@ public class User extends TimeStamp {
 		this.status = UserStatus.ACTIVE;
 	}
 
-	public User(String email, String name, String phoneNumber) {
+	@Builder
+	private User(String email, String name, String phoneNumber) {
 		this.email = email;
 		this.name = name;
 		this.phoneNumber = phoneNumber;
 		this.role = UserRole.ROLE_GUEST;
 		this.status = UserStatus.ACTIVE;
+	}
+
+	public static User of(String email, String password, String name, String phoneNumber, String address) {
+		return User.builder()
+			.email(email).password(password).name(name).phoneNumber(phoneNumber).address(address).build();
+	}
+
+	public static User of(String email, String name, String phoneNumber){
+		return User.builder()
+			.email(email).name(name).phoneNumber(phoneNumber).build();
 	}
 
 	public void updateStatus(UserStatus status) {
@@ -97,10 +117,5 @@ public class User extends TimeStamp {
 
 	public void updateProfileImage(ProfileImage profileImage) {
 		this.profileImage = profileImage;
-	}
-
-	public void deleteUser() {
-		this.deletedAt = LocalDateTime.now();
-		this.status = UserStatus.DELETED;
 	}
 }

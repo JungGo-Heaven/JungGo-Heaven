@@ -38,7 +38,7 @@ class UserAdminServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		user = new User("email@email.com", "password", "name", "phoneNumber", "address");
+		user = User.of("email@email.com", "password", "name", "phoneNumber", "address");
 		ReflectionTestUtils.setField(user, "id", 1L);
 		ReflectionTestUtils.setField(user, "createdAt", LocalDateTime.now());
 		ReflectionTestUtils.setField(user, "modifiedAt", LocalDateTime.now());
@@ -49,7 +49,7 @@ class UserAdminServiceTest {
 	@Test
 	void updateUserStatus() {
 		String updateStatus = "STOPPED";
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 
 		AdminUserInfoResponseDto response = userAdminService.updateUserStatus(1L, updateStatus);
 
@@ -59,7 +59,7 @@ class UserAdminServiceTest {
 	@Test
 	void updateUserStatus_동일한_status_예외() {
 		String sameStatus = "ACTIVE";
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 
 		assertThrows(UserStatusSameException.class, () -> userAdminService.updateUserStatus(1L, sameStatus));
 	}

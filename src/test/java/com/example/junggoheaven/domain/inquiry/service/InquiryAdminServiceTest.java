@@ -22,7 +22,7 @@ import com.example.junggoheaven.domain.inquiry.dto.request.RespondInquiryRequest
 import com.example.junggoheaven.domain.inquiry.dto.response.AdminInquiryListResponseDto;
 import com.example.junggoheaven.domain.inquiry.dto.response.AdminInquiryResponseDto;
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.domain.inquiry.exception.AlreadyCompletedInquiryException;
 import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
 import com.example.junggoheaven.domain.inquiry.exception.InquiryStatusSameException;
@@ -52,8 +52,8 @@ class InquiryAdminServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		writer = new User("email", "password", "writer", "010-0000-0001", "address");
-		admin = new User("email", "password", "admin", "010-0000-1000", "address");
+		writer = User.of("email", "password", "writer", "010-0000-0001", "address");
+		admin = User.of("email", "password", "admin", "010-0000-1000", "address");
 
 		ReflectionTestUtils.setField(writer, "id", 1L);
 		ReflectionTestUtils.setField(writer, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
@@ -64,9 +64,9 @@ class InquiryAdminServiceTest {
 		ReflectionTestUtils.setField(admin, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
 		ReflectionTestUtils.setField(admin, "modifiedAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
 
-		inquiry1 = new Inquiry(writer, "title1", "b");
-		inquiry2 = new Inquiry(writer, "title2", "b");
-		inquiry3 = new Inquiry(writer, "title3", "b");
+		inquiry1 = Inquiry.of(writer, "title1", "b");
+		inquiry2 = Inquiry.of(writer, "title2", "b");
+		inquiry3 = Inquiry.of(writer, "title3", "b");
 
 		ReflectionTestUtils.setField(inquiry1, "id", 1L);
 		ReflectionTestUtils.setField(inquiry1, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
