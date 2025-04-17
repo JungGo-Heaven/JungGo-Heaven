@@ -2,6 +2,7 @@ package com.example.junggoheaven.domain.image.controller;
 
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageResponseDto;
 import com.example.junggoheaven.domain.image.dto.MultipleUploadResponse;
+import com.example.junggoheaven.domain.image.dto.UploadContext;
 import com.example.junggoheaven.domain.image.dto.UploadResponse;
 import com.example.junggoheaven.domain.image.entity.ProfileImage;
 import com.example.junggoheaven.domain.image.exception.FileUploadLimitExceededException;
@@ -32,26 +33,31 @@ public class UploadController {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
 
-    @PostMapping("/files/profiles")
+    @PostMapping("/files/profiles/{userId}")
     public ResponseDto<UploadResponse> uploadFile(
             @RequestPart("multipartFile") MultipartFile multipartFile,
             @RequestPart("type") String type,
-            @AuthenticationPrincipal AuthUser authUser
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long userId
     ) {
-        ProfileImage profile = profileImageService.uploadProfileImage(multipartFile, authUser);
+        ProfileImage profile = profileImageService.uploadProfileImage(multipartFile, authUser, userId);
         return ResponseDto.success(new UploadResponse(profile.getProfileImageUrl()));
     }
 
-    @PostMapping("/files/multiples/products")
+    @PostMapping("/files/multiples/products/{productId}")
     public ResponseDto<MultipleUploadResponse> uploadProductImages(
             @RequestPart("multipartFiles") List<MultipartFile> multipartFiles,
             @RequestPart("type") String type,
-            @AuthenticationPrincipal AuthUser authUser
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long productId
     ) {
         if (multipartFiles.size() > 3) {
             throw new FileUploadLimitExceededException();
         }
-        MultipleUploadResponse response = s3StorageService.productImageUpload(multipartFiles, type, authUser);
+
+        // UploadContext 생성 (productId 포함)
+        UploadContext uploadContext = new UploadContext(productId, null);
+        MultipleUploadResponse response = s3StorageService.productImageUpload(multipartFiles, type, authUser,uploadContext);
 
         // 업로드된 URL을 기반으로 ProductImage 생성 및 저장
         productImageService.saveProductImages(response.getUploadUrls(), multipartFiles, authUser);
@@ -68,7 +74,10 @@ public class UploadController {
         if (multipartFiles.size() > 5) {
             throw new FileUploadLimitExceededException();
         }
-        MultipleUploadResponse response = s3StorageService.chatRoomImageUpload(multipartFiles, type, authUser);
+
+        // UploadContext 생성 (chatRoomId 포함)
+        UploadContext uploadContext = new UploadContext(null, chatRoomId);
+        MultipleUploadResponse response = s3StorageService.chatRoomImageUpload(multipartFiles, type, authUser,uploadContext);
 
         List<ChatMessageResponseDto> responseDtos = chatRoomImageService.saveChatRoomImages(
                 response.getUploadUrls(), multipartFiles, authUser, chatRoomId

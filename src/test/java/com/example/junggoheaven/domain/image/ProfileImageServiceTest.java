@@ -48,9 +48,10 @@ public class ProfileImageServiceTest {
                 "file", "profile.jpeg", "image/jpeg", "fake-image-content".getBytes()
         );
         AuthUser authUser = new AuthUser(1L, "a@a.com", ROLE_USER, "test");
+        Long userId = authUser.getId();
         UploadResponse uploadResponse = new UploadResponse("http://testImage.com");
 
-        when(s3StorageService.upload(mockMultipartFile, "profiles", authUser))
+        when(s3StorageService.upload(mockMultipartFile, "profiles", authUser, userId))
                 .thenReturn(uploadResponse);
 
         // 저장된 profileImage를 검증하기 위해 캡처
@@ -59,10 +60,10 @@ public class ProfileImageServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0)); // 저장된 0번째 객체 리턴
 
         //when : 파일 업로드
-        ProfileImage result = profileImageService.uploadProfileImage(mockMultipartFile, authUser);
+        ProfileImage result = profileImageService.uploadProfileImage(mockMultipartFile, authUser, userId);
 
         //then : S3 업로드 로직 호출 여부 확인
-        verify(s3StorageService).upload(mockMultipartFile, "profiles", authUser);
+        verify(s3StorageService).upload(mockMultipartFile, "profiles", authUser, userId);
         verify(profileImageRepository).save(profileImageCaptor.capture());
 
         ProfileImage savedImage = profileImageCaptor.getValue();
