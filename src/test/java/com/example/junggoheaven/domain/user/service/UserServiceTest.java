@@ -74,7 +74,7 @@ class UserServiceTest {
 		ReflectionTestUtils.setField(user, "createdAt", LocalDateTime.of(2025, 03, 31, 12, 00));
 		ReflectionTestUtils.setField(user, "modifiedAt", guestUser.getCreatedAt());
 
-		profileImage = new  ProfileImage();
+		profileImage = ProfileImage.of("profileImageUrl", "name");
 		ReflectionTestUtils.setField(profileImage, "id", 1L);
 		ReflectionTestUtils.setField(profileImage, "profileImageUrl", "image url");
 	}
