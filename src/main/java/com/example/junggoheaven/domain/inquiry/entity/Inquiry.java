@@ -28,7 +28,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE users SET status = 'DELETED' WHERE id = ?")
-@FilterDef(name = "deletedFilter")
 @Filter(name = "deletedFilter", condition = "status <> 'DELETED'")
 public class Inquiry extends TimeStamp {
 	@Id

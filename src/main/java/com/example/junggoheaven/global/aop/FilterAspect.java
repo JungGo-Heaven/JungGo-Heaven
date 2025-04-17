@@ -16,7 +16,7 @@ public class FilterAspect {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@Around("execution(* com.example.junggoheaven.domain.user.repository.*Repository*.*(..))")
+	@Around("execution(* *.*Repository*.*(..))")
 	public Object enableFilter(ProceedingJoinPoint joinPoint) throws Throwable {
 		Session session = entityManager.unwrap(Session.class);
 		session.enableFilter("deletedFilter");
