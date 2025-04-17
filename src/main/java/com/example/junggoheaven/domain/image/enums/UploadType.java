@@ -37,6 +37,9 @@ public enum UploadType {
         return this.type + "/";
     }
 
+    public String buildKey(Long resourceId, String filename) {
+        return getPrefix() + resourceId + "/" + filename;
+    }
     // Predicate 사용 메서드
     public boolean isAllowedFor(UserRole role) {
         return roleChecker.test(role);

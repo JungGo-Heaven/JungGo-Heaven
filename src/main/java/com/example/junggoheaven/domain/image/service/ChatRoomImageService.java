@@ -50,7 +50,7 @@ public class ChatRoomImageService {
 
             String fullUrl = s3StorageService.buildS3Url(imageUrl);
 
-            ChatRoomImage chatRoomImage = new ChatRoomImage(savedChatMessage, fullUrl, originalFilename);
+            ChatRoomImage chatRoomImage = ChatRoomImage.of(savedChatMessage, fullUrl, originalFilename);
             chatRoomImages.add(chatRoomImage);
 
             ChatMessageResponseDto dto = new ChatMessageResponseDto(
