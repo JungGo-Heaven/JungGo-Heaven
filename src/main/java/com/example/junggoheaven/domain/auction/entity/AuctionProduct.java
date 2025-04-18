@@ -1,6 +1,5 @@
 package com.example.junggoheaven.domain.auction.entity;
 
-import com.example.junggoheaven.domain.auction.Enum.AuctionStatus;
 import com.example.junggoheaven.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

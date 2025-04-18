@@ -1,8 +1,7 @@
 package com.example.junggoheaven.domain.auction.entity;
 
-import com.example.junggoheaven.domain.auction.Enum.AuctionStatus;
+import com.example.junggoheaven.domain.auction.enums.AuctionStatus;
 import com.example.junggoheaven.domain.auction.dto.request.UpdateAuctionRequestDto;
-import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
 import jakarta.annotation.Nullable;

@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.auction.Enum;
+package com.example.junggoheaven.domain.auction.enums;
 
 public enum AuctionStatus {
     WAITING,

@@ -1,6 +1,5 @@
 package com.example.junggoheaven.domain.auction.dto.request;
 
-import com.example.junggoheaven.domain.auction.Enum.AuctionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
