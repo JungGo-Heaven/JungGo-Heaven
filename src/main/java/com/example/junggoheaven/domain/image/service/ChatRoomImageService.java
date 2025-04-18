@@ -42,7 +42,7 @@ public class ChatRoomImageService {
         List<ChatMessageResponseDto> responseDtos = new ArrayList<>();
 
         for (int i = 0; i < uploadUrls.size(); i++) {
-            ChatMessage chatMessage = new ChatMessage(chatRoom, user);
+            ChatMessage chatMessage = ChatMessage.of(chatRoom, user);
             ChatMessage savedChatMessage = chatMessageWriter.save(chatMessage);
 
             String imageUrl = uploadUrls.get(i);

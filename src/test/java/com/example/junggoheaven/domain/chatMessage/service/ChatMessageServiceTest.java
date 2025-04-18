@@ -7,7 +7,7 @@ import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageRespo
 import com.example.junggoheaven.domain.chatMessage.entity.ChatMessage;
 import com.example.junggoheaven.domain.chatMessage.enums.MessageType;
 import com.example.junggoheaven.domain.chatMessage.exception.ChatRoomMissMatchException;
-import com.example.junggoheaven.domain.chatMessage.exception.NoPermissionToDelete;
+import com.example.junggoheaven.domain.chatMessage.exception.NoPermissionToChatMessage;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageChecker;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageFinder;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageWriter;
@@ -15,7 +15,6 @@ import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
 import com.example.junggoheaven.domain.chatRoom.service.component.ChatRoomFinder;
 import com.example.junggoheaven.domain.chatRoom.service.component.ChatRoomWriter;
 import com.example.junggoheaven.domain.product.entity.Product;
-import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.product.repository.ProductRepository;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
@@ -78,7 +77,7 @@ public class ChatMessageServiceTest {
         product = new Product(sellerUser, "test name", "Product test", 1000L);
         ReflectionTestUtils.setField(product, "id", 1L);
 
-        chatRoom = new ChatRoom(product, buyerUser);
+        chatRoom = ChatRoom.of(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 
     }
@@ -88,7 +87,7 @@ public class ChatMessageServiceTest {
         // given
         ChatMessageRequestDto requestDto = new ChatMessageRequestDto(1L, 1L, "test message", MessageType.TEXT);
         when(chatRoomFinder.findByChatRoomId(1L)).thenReturn(chatRoom);
-        when(chatMessageWriter.save(any(ChatMessage.class))).thenReturn(new ChatMessage(chatRoom, buyerUser, "test message", MessageType.TEXT));
+        when(chatMessageWriter.save(any(ChatMessage.class))).thenReturn(ChatMessage.of(chatRoom, buyerUser, "test message", MessageType.TEXT));
 
         // when
         ChatMessageResponseDto response = chatMessageService.createMessage(requestDto, 1L);
@@ -106,7 +105,7 @@ public class ChatMessageServiceTest {
         ChatMessageRequestDto requestDto = new ChatMessageRequestDto(null, 1L, "test message", MessageType.TEXT);
 
         when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
-        when(chatMessageWriter.save(any(ChatMessage.class))).thenReturn(new ChatMessage(new ChatRoom(product, buyerUser), buyerUser, "test message", MessageType.TEXT));
+        when(chatMessageWriter.save(any(ChatMessage.class))).thenReturn(ChatMessage.of(ChatRoom.of(product, buyerUser), buyerUser, "test message", MessageType.TEXT));
 
         // when
         ChatMessageResponseDto response = chatMessageService.createMessage(requestDto, 1L);
@@ -121,7 +120,7 @@ public class ChatMessageServiceTest {
     @Test
     public void 읽지_않은_메시지_읽음처리() {
         // given
-        ChatMessage chatMessage = new ChatMessage(chatRoom, buyerUser, "test message", MessageType.TEXT);
+        ChatMessage chatMessage = ChatMessage.of(chatRoom, buyerUser, "test message", MessageType.TEXT);
         ReflectionTestUtils.setField(chatMessage, "id", 1L);
 
         ChatReadRequestDto requestDto = new ChatReadRequestDto(1L, Arrays.asList(1L));
@@ -145,11 +144,11 @@ public class ChatMessageServiceTest {
         List<Long> deleteMessageIds = Arrays.asList(1L);
         ChatDeleteRequestDto requestDto = new ChatDeleteRequestDto(1L, deleteMessageIds);
 
-        ChatMessage message = new ChatMessage(chatRoom, buyerUser, "test message", MessageType.TEXT);
+        ChatMessage message = ChatMessage.of(chatRoom, buyerUser, "test message", MessageType.TEXT);
         when(chatMessageFinder.findAllById(deleteMessageIds)).thenReturn(Arrays.asList(message));
 
         // when & then
-        assertThrows(NoPermissionToDelete.class, () -> chatMessageService.deleteMessage(requestDto, 2L));
+        assertThrows(NoPermissionToChatMessage.class, () -> chatMessageService.deleteMessage(requestDto, 2L));
     }
 
     @Test
@@ -158,7 +157,7 @@ public class ChatMessageServiceTest {
         List<Long> deleteMessageIds = Arrays.asList(1L);
         ChatDeleteRequestDto requestDto = new ChatDeleteRequestDto(2L, deleteMessageIds);
 
-        ChatMessage message = new ChatMessage(chatRoom, buyerUser, "test message", MessageType.TEXT);
+        ChatMessage message = ChatMessage.of(chatRoom, buyerUser, "test message", MessageType.TEXT);
         when(chatMessageFinder.findAllById(deleteMessageIds)).thenReturn(Arrays.asList(message));
 
         // when & then
@@ -171,7 +170,7 @@ public class ChatMessageServiceTest {
         List<Long> deleteMessageIds = Arrays.asList(1L);
         ChatDeleteRequestDto requestDto = new ChatDeleteRequestDto(1L, deleteMessageIds);
 
-        ChatMessage message = new ChatMessage(chatRoom, buyerUser, "test message", MessageType.TEXT);
+        ChatMessage message = ChatMessage.of(chatRoom, buyerUser, "test message", MessageType.TEXT);
         when(chatMessageFinder.findAllById(deleteMessageIds)).thenReturn(Arrays.asList(message));
 
         // when

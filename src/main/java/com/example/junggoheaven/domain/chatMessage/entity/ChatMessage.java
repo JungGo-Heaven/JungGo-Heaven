@@ -7,8 +7,11 @@ import com.example.junggoheaven.domain.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +20,9 @@ import java.util.List;
 @Entity
 @Table(name = "chat_message")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE users SET messageType = 'DELETED' WHERE id = ?")
+@Filter(name = "deletedFilter", condition = "messageType <> 'DELETED'")
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +51,7 @@ public class ChatMessage {
     private Boolean isRead;
 
 
-    public ChatMessage(ChatRoom chatRoom, User sender, String message, MessageType messageType) {
+    private ChatMessage(ChatRoom chatRoom, User sender, String message, MessageType messageType) {
         this.chatRoom = chatRoom;
         this.sender = sender;
         this.message = message;
@@ -55,13 +60,21 @@ public class ChatMessage {
         this.isRead = false;
     }
 
-    public ChatMessage(ChatRoom chatRoom, User sender){
+    private ChatMessage(ChatRoom chatRoom, User sender){
         this.chatRoom = chatRoom;
         this.sender = sender;
         this.messageType = MessageType.IMAGE;
         this.sendAt = LocalDateTime.now();
         this.isRead = false;
     }
+
+    public static ChatMessage of(ChatRoom chatRoom, User sender, String message, MessageType messageType) {
+        return new ChatMessage(chatRoom, sender, message, messageType);
+    }
+    public static ChatMessage of(ChatRoom chatRoom, User sender) {
+        return new ChatMessage(chatRoom, sender);
+    }
+
 
     public void isRead() {
         this.isRead = true;

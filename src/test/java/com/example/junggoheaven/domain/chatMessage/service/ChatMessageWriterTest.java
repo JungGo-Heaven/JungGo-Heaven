@@ -36,10 +36,10 @@ public class ChatMessageWriterTest {
         sender = User.of("sender@n.com", "Sender", "123456789");
         ReflectionTestUtils.setField(sender, "id", 1L);
 
-        chatRoom = new ChatRoom(null, sender);
+        chatRoom = ChatRoom.of(null, sender);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 
-        chatMessage = new ChatMessage(chatRoom, sender, "test message", MessageType.TEXT);
+        chatMessage = ChatMessage.of(chatRoom, sender, "test message", MessageType.TEXT);
     }
 
     @Test

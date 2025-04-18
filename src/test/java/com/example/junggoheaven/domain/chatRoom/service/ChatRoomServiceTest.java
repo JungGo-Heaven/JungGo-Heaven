@@ -8,7 +8,6 @@ import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
 import com.example.junggoheaven.domain.chatRoom.exception.ChatRoomForbidden;
 import com.example.junggoheaven.domain.chatRoom.service.component.ChatRoomFinder;
 import com.example.junggoheaven.domain.product.entity.Product;
-import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
@@ -55,14 +54,14 @@ public class ChatRoomServiceTest {
         product = new Product(sellerUser, "test name", "Product test", 1000L);
         ReflectionTestUtils.setField(product, "id", 1L);
 
-        chatRoom = new ChatRoom(product, buyerUser);
+        chatRoom = ChatRoom.of(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
     }
 
     @Test
     public void 존재하는_채팅방_입장() {
         // given
-        List<ChatMessage> messages = Arrays.asList(new ChatMessage(chatRoom, buyerUser, "testtest", MessageType.TEXT));
+        List<ChatMessage> messages = Arrays.asList(ChatMessage.of(chatRoom, buyerUser, "testtest", MessageType.TEXT));
 
         when(chatRoomFinder.findByProductIdAndBuyerIdOpt(anyLong(), anyLong())).thenReturn(Optional.of(chatRoom));
         when(chatMessageFinder.findByChatRoomIdOrderBySendAtAsc(1L)).thenReturn(messages);

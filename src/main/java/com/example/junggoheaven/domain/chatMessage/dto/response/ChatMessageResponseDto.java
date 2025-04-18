@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor 
 @NoArgsConstructor
 public class ChatMessageResponseDto {
     private Long chatRoomId;
