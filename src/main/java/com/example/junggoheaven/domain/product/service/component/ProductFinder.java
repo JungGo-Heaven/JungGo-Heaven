@@ -21,12 +21,13 @@ public class ProductFinder {
 
 	// Opt 제거
 	public Page<Product> findAllProduct(Pageable pageable) {
-		return productRepository.findByDeletedAtNull(pageable);
+		return productRepository.findAllAndStatusIsNotDeleted(pageable);
+		//return productRepository.findByDeletedAtNull(pageable);
 	}
 
 
-	public Product findProductById(Long id) {
-		return productRepository.findById(id)
+	public Product findProductById(Long productId) {
+		return productRepository.findByIdAndStatusIsNotDeleted(productId)
 			.orElseThrow(ProductNotFoundException::new);
 	}
 

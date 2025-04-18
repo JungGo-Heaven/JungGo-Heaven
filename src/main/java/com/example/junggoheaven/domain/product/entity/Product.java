@@ -3,6 +3,7 @@ package com.example.junggoheaven.domain.product.entity;
 import com.example.junggoheaven.domain.image.entity.ProductImage;
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
 import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
+import com.example.junggoheaven.domain.product.enums.ProductStatus;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
@@ -20,6 +21,8 @@ import java.time.LocalDateTime;
 
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.CreatedDate;
 
 
@@ -27,6 +30,8 @@ import org.springframework.data.annotation.CreatedDate;
 @Table(name = "product")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE product SET status = 'DELETED' WHERE id = ?")
+@Filter(name = "deletedFilter", condition = "status <> 'DELETED'")
 public class Product extends TimeStamp {
 
 	@Id
@@ -56,6 +61,9 @@ public class Product extends TimeStamp {
 	@ColumnDefault("null")
 	private LocalDateTime deletedAt;
 
+	@Enumerated(EnumType.STRING)
+	private ProductStatus status;
+
 	@CreatedDate // 최초 생성 시각 스탬프
 	private LocalDateTime pullAt;
 
@@ -74,6 +82,7 @@ public class Product extends TimeStamp {
 		this.sellStatus = SellStatus.ONSALE;
 		this.productImage = productImage;
 		//this.deletedAt = null;
+		this.status = ProductStatus.NORMAL;
 	}
 
 	// 테스트 꼬임 방지용 생성자
@@ -92,7 +101,7 @@ public class Product extends TimeStamp {
 	}
 
 
-	public void softDelete() {
+	public void softDeleteSetDateTime() {
 		this.deletedAt = LocalDateTime.now();
 	}
 

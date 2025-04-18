@@ -94,9 +94,9 @@ public class ProductService {
 		상품 단건 조회 메서드
 	*/
 	@Transactional
-	public ProductResponseDto findProductById(Long id) {
+	public ProductResponseDto findProductById(Long productId) {
 
-		Product product = productFinder.findProductById(id);
+		Product product = productFinder.findProductById(productId);
 
 		return new ProductResponseDto(product);
 	}
@@ -110,9 +110,9 @@ public class ProductService {
 
 		Product product = productFinder.findProductById(id);
 
-		product.softDelete(); // 소프트 딜리트 변수에 현재시간 대입 -> null 이 아니므로 더이상 DB에 레코드가 논리적으로 존재하지 않음
+		product.softDeleteSetDateTime(); // 소프트 딜리트 변수에 현재시간 대입 -> null 이 아니므로 더이상 DB에 레코드가 논리적으로 존재하지 않음
 
-		productWriter.saveProduct(product);
+		productWriter.deleteProduct(product);
 
 		return new ProductResponseDto(product);
 	}
