@@ -21,8 +21,7 @@ public class ProductFinder {
 
 	// Opt 제거
 	public Page<Product> findAllProduct(Pageable pageable) {
-		return productRepository.findAllAndStatusIsNotDeleted(pageable);
-		//return productRepository.findByDeletedAtNull(pageable);
+		return productRepository.findAll(pageable);
 	}
 
 
