@@ -53,6 +53,24 @@ public class ProductService {
 
 		User user = userFinder.findByUserId(authUser.getId());
 
+		if(productRequestDto.getProductImageId() == null){
+
+			Product product = new Product(
+				user,
+				productRequestDto.getName(),
+				productRequestDto.getInformation(),
+				productRequestDto.getPrice(),
+				null
+			);
+
+			productWriter.saveProduct(product);
+			eventPublisher.publishEventAfterTransaction(new ProductRegisteredEvent(this, user.getId(), product.getName()));
+
+			return new ProductResponseDto(product);
+
+		}
+
+
 		ProductImage productImage = productImageRepository.findById(productRequestDto.getProductImageId())
 			.orElseThrow(UnexpectedErrorException::new);
 
