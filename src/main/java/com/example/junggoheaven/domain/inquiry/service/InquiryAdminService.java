@@ -11,7 +11,7 @@ import com.example.junggoheaven.domain.inquiry.dto.request.RespondInquiryRequest
 import com.example.junggoheaven.domain.inquiry.dto.response.AdminInquiryListResponseDto;
 import com.example.junggoheaven.domain.inquiry.dto.response.AdminInquiryResponseDto;
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.domain.inquiry.exception.AlreadyCompletedInquiryException;
 import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
 import com.example.junggoheaven.domain.inquiry.exception.InquiryStatusSameException;

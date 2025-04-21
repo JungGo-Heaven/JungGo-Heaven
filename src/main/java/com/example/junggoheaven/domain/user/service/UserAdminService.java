@@ -23,7 +23,7 @@ public class UserAdminService {
 
 	@Transactional
 	public AdminUserInfoResponseDto updateUserStatus(Long userId, String requestStatus) {
-		User user = userFinder.findValidUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		UserStatus userStatus = user.getStatus();
 
 		if (requestStatus.equals(userStatus.name())) {

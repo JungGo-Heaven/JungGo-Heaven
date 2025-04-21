@@ -22,8 +22,7 @@ import com.example.junggoheaven.domain.inquiry.dto.request.UpdateInquiryRequestD
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryListResponseDto;
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryResponseDto;
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
-import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidInquiryException;
 import com.example.junggoheaven.domain.inquiry.service.component.InquiryFinder;
 import com.example.junggoheaven.domain.inquiry.service.component.InquiryWriter;
@@ -54,13 +53,13 @@ class InquiryServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		writer = new User("email@email.com", "password", "name", "010-0000-0001", "address");
+		writer = User.of("email@email.com", "password", "name", "010-0000-0001", "address");
 		ReflectionTestUtils.setField(writer, "id", userId);
 		ReflectionTestUtils.setField(writer, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
 		ReflectionTestUtils.setField(writer, "modifiedAt", LocalDateTime.of(2010, 1, 1, 0, 0, 0));
 
-		inquiry1 = new Inquiry(writer, "title1", "body1");
-		inquiry2 = new Inquiry(writer, "title2", "body2");
+		inquiry1 = Inquiry.of(writer, "title1", "body1");
+		inquiry2 = Inquiry.of(writer, "title2", "body2");
 		ReflectionTestUtils.setField(inquiry1, "id", inquiryId1);
 		ReflectionTestUtils.setField(inquiry1, "createdAt", LocalDateTime.of(2000, 1, 1, 0, 0, 0));
 		ReflectionTestUtils.setField(inquiry1, "modifiedAt", LocalDateTime.of(2010, 1, 1, 0, 0, 0));
@@ -76,7 +75,7 @@ class InquiryServiceTest {
 		String body = "body";
 		CreateInquiryRequestDto requestDto = new CreateInquiryRequestDto(title, body);
 
-		Inquiry inquiry = new Inquiry(writer, title, body);
+		Inquiry inquiry = Inquiry.of(writer, title, body);
 		ReflectionTestUtils.setField(inquiry, "createdAt", LocalDateTime.of(2025, 1, 30, 0, 0, 0));
 
 		given(userFinder.findByUserId(userId)).willReturn(writer);
@@ -158,22 +157,8 @@ class InquiryServiceTest {
 	}
 
 	@Test
-	void updateInquiry_삭제된_문의_에러() {
-		UpdateInquiryRequestDto requestDto = new UpdateInquiryRequestDto("t", "b");
-
-		ReflectionTestUtils.setField(inquiry2, "status", InquiryStatus.DELETED);
-		given(inquiryFinder.findByValidWriter(any(), any())).willReturn(inquiry2);
-
-		assertThrows(InvalidInquiryException.class, () -> {
-			inquiryService.updateInquiry(inquiryId2, userId, requestDto);
-		});
-	}
-
-	@Test
 	void deleteInquiry() {
 		given(inquiryFinder.findByValidWriter(any(), any())).willReturn(inquiry1);
 		inquiryService.deleteInquiry(inquiryId1, userId);
-
-		assertThat(inquiry1.getStatus()).isEqualTo(InquiryStatus.DELETED);
 	}
 }

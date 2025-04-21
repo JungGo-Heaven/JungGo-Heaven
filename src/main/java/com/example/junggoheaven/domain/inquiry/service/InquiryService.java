@@ -11,8 +11,7 @@ import com.example.junggoheaven.domain.inquiry.dto.request.UpdateInquiryRequestD
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryListResponseDto;
 import com.example.junggoheaven.domain.inquiry.dto.response.UserInquiryResponseDto;
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
-import com.example.junggoheaven.domain.inquiry.exception.AlreadyDeletedInquiryException;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.domain.inquiry.exception.InvalidInquiryException;
 import com.example.junggoheaven.domain.inquiry.service.component.InquiryFinder;
 import com.example.junggoheaven.domain.inquiry.service.component.InquiryWriter;
@@ -36,7 +35,7 @@ public class InquiryService {
 		String title = requestDto.getTitle();
 		String body = requestDto.getBody();
 
-		Inquiry save = inquiryWriter.saveInquiry(new Inquiry(writer, title, body));
+		Inquiry save = inquiryWriter.saveInquiry(Inquiry.of(writer, title, body));
 
 		return UserInquiryResponseDto.from(save);
 	}
@@ -64,10 +63,6 @@ public class InquiryService {
 		String title = requestDto.getTitle();
 		String body = requestDto.getBody();
 
-		if (inquiry.getStatus().equals(InquiryStatus.DELETED)) {
-			throw new InvalidInquiryException();
-		}
-
 		if (title != null) {
 			inquiry.updateTitle(title);
 		}
@@ -78,9 +73,8 @@ public class InquiryService {
 		return UserInquiryResponseDto.from(inquiry);
 	}
 
-	@Transactional
 	public void deleteInquiry(Long inquiryId, Long userId) {
 		Inquiry inquiry = inquiryFinder.findByValidWriter(inquiryId, userId);
-		inquiry.delete();
+		inquiryWriter.deleteInquiry(inquiry);
 	}
 }

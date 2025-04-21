@@ -55,7 +55,7 @@ class LikeServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		user = new User("email", "password", "name", "010-0000-0001", "address");
+		user = User.of("email", "password", "name", "010-0000-0001", "address");
 		ReflectionTestUtils.setField(user, "id", 1L);
 		ReflectionTestUtils.setField(user, "createdAt", LocalDateTime.of(2024,12,31,12,0,0));
 		ReflectionTestUtils.setField(user, "modifiedAt", LocalDateTime.of(2024,12,31,12,0,0));
@@ -65,7 +65,7 @@ class LikeServiceTest {
 		ReflectionTestUtils.setField(product, "createdAt", LocalDateTime.of(2025,1,31,12,0,0));
 		ReflectionTestUtils.setField(product, "modifiedAt", LocalDateTime.of(2025,1,31,12,0,0));
 
-		like = new Like(product, user);
+		like = Like.of(product, user);
 		ReflectionTestUtils.setField(like, "id", 111L);
 	}
 
@@ -73,7 +73,7 @@ class LikeServiceTest {
 	void createLike() {
 		LikeRequestDto requestDto = new  LikeRequestDto(11L);
 
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 		given(productFinder.findProductById(any())).willReturn(product);
 		given(likeFinder.getProductLikesCount(any())).willReturn(3);
 
@@ -87,7 +87,7 @@ class LikeServiceTest {
 	void createLike_unique_중복_에러_발생() {
 		LikeRequestDto requestDto = new  LikeRequestDto(11L);
 
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 		given(productFinder.findProductById(any())).willReturn(product);
 		given(likeWriter.saveLike(any())).willThrow(DataIntegrityViolationException.class);
 
@@ -133,7 +133,7 @@ class LikeServiceTest {
 
 	@Test
 	void deleteProductLikes() {
-		given(userFinder.findValidUserById(any())).willReturn(user);
+		given(userFinder.findByUserId(any())).willReturn(user);
 		given(likeFinder.getLike(any())).willReturn(like);
 
 		likeService.deleteProductLikes(1L, 111L);
@@ -143,8 +143,8 @@ class LikeServiceTest {
 
 	@Test
 	void deleteProductLikes_사용자_불일치() {
-		User otheruser = new User("email", "password", "name", "010-0000-0001", "address");
-		given(userFinder.findValidUserById(any())).willReturn(otheruser);
+		User otheruser = User.of("email", "password", "name", "010-0000-0001", "address");
+		given(userFinder.findByUserId(any())).willReturn(otheruser);
 		given(likeFinder.getLike(any())).willReturn(like);
 
 		assertThat(like.getUser()).isNotEqualTo(otheruser);

@@ -3,6 +3,8 @@ package com.example.junggoheaven.domain.image.service;
 import com.example.junggoheaven.domain.image.entity.ProductImage;
 import com.example.junggoheaven.domain.image.repository.ProductImageRepository;
 import com.example.junggoheaven.domain.image.service.S3.S3StorageService;
+import com.example.junggoheaven.domain.product.entity.Product;
+import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +17,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ProductImageService {
 
     private final ProductImageRepository productImageRepository;
     private final S3StorageService s3StorageService;
+    private final ProductFinder productFinder;
 
     @Transactional
     public void saveProductImages(List<String> uploadUrls, List<MultipartFile> originalFiles, AuthUser authUser) {
@@ -31,7 +33,7 @@ public class ProductImageService {
 
             String fullUrl = s3StorageService.buildS3Url(imageUrl);
 
-            ProductImage productImage = new ProductImage(fullUrl, originalFilename);
+            ProductImage productImage = ProductImage.of(fullUrl, originalFilename);
             productImages.add(productImage);
         }
         productImageRepository.saveAll(productImages);

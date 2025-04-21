@@ -35,11 +35,11 @@ public class LikeService {
 	private final LikeWriter likeWriter;
 
 	public LikeResponseDto createLike(Long userId, LikeRequestDto requestDto) {
-		User user = userFinder.findValidUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		Long productId = requestDto.getProductId();
 		Product product = productFinder.findProductById(productId);
 
-		Like newLike = new Like(product, user);
+		Like newLike = Like.of(product, user);
 		try {
 			likeWriter.saveLike(newLike);
 		} catch (DataIntegrityViolationException e) {
@@ -69,7 +69,7 @@ public class LikeService {
 	}
 
 	public void deleteProductLikes(Long userId, Long likeId) {
-		User user = userFinder.findValidUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		Like like = likeFinder.getLike(likeId);
 
 		if (!like.getUser().equals(user)) {

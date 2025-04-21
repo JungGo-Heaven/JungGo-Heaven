@@ -3,7 +3,7 @@ package com.example.junggoheaven.domain.product.dto.response;
 import com.example.junggoheaven.domain.image.entity.ProductImage;
 import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
-import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.domain.user.dto.user.UserInfoResponseDto;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +15,7 @@ public class ProductResponseDto {
 
 	private final Long id;
 
-	private final User user;
+	private final UserInfoResponseDto user;
 
 	private final String name;
 
@@ -33,9 +33,9 @@ public class ProductResponseDto {
 
 
 	// Product 를 받는 생성자
-	public ProductResponseDto(Product product){
+	public ProductResponseDto(Product product) {
 		this.id = product.getId();
-		this.user = product.getUser(); // Refactor 요구
+		this.user = UserInfoResponseDto.fromProduct(product); // Refactor 완료
 		this.name = product.getName();
 		this.information = product.getInformation();
 		this.price = product.getPrice();
@@ -50,7 +50,7 @@ public class ProductResponseDto {
 	public static ProductResponseDto toDto(Product product) {
 		return new ProductResponseDto(
 			product.getId(),
-			product.getUser(),
+			UserInfoResponseDto.fromProduct(product),
 			product.getName(),
 			product.getInformation(),
 			product.getPrice(),

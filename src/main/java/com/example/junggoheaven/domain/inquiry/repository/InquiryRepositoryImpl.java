@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.example.junggoheaven.domain.inquiry.entity.Inquiry;
-import com.example.junggoheaven.domain.inquiry.eunms.InquiryStatus;
+import com.example.junggoheaven.domain.inquiry.enums.InquiryStatus;
 import com.example.junggoheaven.domain.user.entity.QUser;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;

@@ -17,6 +17,7 @@ import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.exception.InvalidPasswordException;
 import com.example.junggoheaven.domain.user.exception.PasswordSameException;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.util.JwtUtil;
 import com.example.junggoheaven.global.auth.util.RefreshUtil;
 
@@ -31,12 +32,13 @@ public class UserService {
 	private final HttpServletResponse response;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final UserFinder userFinder;
+	private final UserWriter userWriter;
 	private final JwtUtil jwtUtil;
 	private final RefreshUtil refreshUtil;
 
 	@Transactional
 	public UserSelfInfoResponseDto addInfo(Long id, GuestAddInfoRequestDto requestDto) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		String password = bCryptPasswordEncoder.encode(requestDto.getPassword());
 		String phoneNumber = requestDto.getPhoneNumber();
 		String address = requestDto.getAddress();
@@ -50,7 +52,7 @@ public class UserService {
 
 	@Transactional
 	public UserSelfInfoResponseDto updateUserInfo(Long id, UpdateInfoRequestDto requestDto) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		String name = requestDto.getName();
 		String phoneNumber = requestDto.getPhoneNumber();
 		String address = requestDto.getAddress();
@@ -70,7 +72,7 @@ public class UserService {
 
 	@Transactional
 	public void updateUserPassword(Long id, UpdatePasswordRequestDto requestDto) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		String oldPassword = requestDto.getOldPassword();
 
 		if (!bCryptPasswordEncoder.matches(oldPassword, user.getPassword())) {
@@ -87,7 +89,7 @@ public class UserService {
 	
 	@Transactional
 	public UserSelfInfoResponseDto updateUserImage(Long userId, UploadProfileImageRequestDto requestDto) {
-		User user = userFinder.findValidUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		Long imageId = requestDto.getId();
 
 		ProfileImage profileImage = profileImageRepository.findById(imageId).orElseThrow(ImageUploadIOException::new);
@@ -97,14 +99,13 @@ public class UserService {
 	}
 
 	public UserSelfInfoResponseDto getMyInformation(Long id) {
-		User user = userFinder.findValidUserById(id);
+		User user = userFinder.findByUserId(id);
 		return UserSelfInfoResponseDto.from(user);
 	}
 
-	@Transactional
 	public void deleteUserAccount(Long id) {
 		User user = userFinder.findByUserId(id);
 		refreshUtil.deleteRefreshToken(String.valueOf(id));
-		user.deleteUser();
+		userWriter.delete(user);
 	}
 }
