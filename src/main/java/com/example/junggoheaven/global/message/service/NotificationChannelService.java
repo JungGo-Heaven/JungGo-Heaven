@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.junggoheaven.domain.keyword.entity.UserDocument;
+import com.example.junggoheaven.domain.keyword.entity.KeywordDocument;
 import com.example.junggoheaven.domain.keyword.service.component.KeywordFinder;
 import com.example.junggoheaven.domain.keyword.service.component.KeywordWriter;
 import com.example.junggoheaven.domain.user.entity.User;
@@ -31,7 +31,7 @@ public class NotificationChannelService {
 		User user = userFinder.findByUserId(userId);
 		List<NotificationChannel> NotiList = notificationChannelFinder.findByUserId(user.getId());
 
-		UserDocument savedUser = keywordFinder.findByUserId(userId.toString());
+		KeywordDocument savedUser = keywordFinder.findByUserId(userId.toString());
 
 		ChannelType type = ChannelType.valueOf(channelType);
 
@@ -53,7 +53,7 @@ public class NotificationChannelService {
 		User user = userFinder.findByUserId(userId);
 		List<NotificationChannel> NotiList = notificationChannelFinder.findByUserId(user.getId());
 
-		UserDocument savedUser = keywordFinder.findByUserId(userId.toString());
+		KeywordDocument savedUser = keywordFinder.findByUserId(userId.toString());
 
 		ChannelType type = ChannelType.valueOf(channelType);
 

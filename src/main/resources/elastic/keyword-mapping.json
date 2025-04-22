@@ -19,7 +19,7 @@
           "type": "keyword",
           "ignore_above": 20
         },
-        "exclude_keywords": {
+        "excludeKeywords": {
           "type": "keyword",
           "ignore_above": 20
         }

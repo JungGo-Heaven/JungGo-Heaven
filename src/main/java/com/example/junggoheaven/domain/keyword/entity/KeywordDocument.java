@@ -19,11 +19,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Document(indexName = "users")
+@Document(indexName = "keyword")
 @Setting
-@Mapping(mappingPath = "elastic/users-mapping.json")
+@Mapping(mappingPath = "elastic/keyword-mapping.json")
 @NoArgsConstructor
-public class UserDocument {
+public class KeywordDocument {
 	@Id
 	private String id;
 
@@ -40,13 +40,13 @@ public class UserDocument {
 	@Field(type = FieldType.Keyword)
 	private List<ChannelType> channels = new ArrayList<> ();
 
-	private UserDocument (String id, String email) {
+	private KeywordDocument(String id, String email) {
 		this.id = id;
 		this.email = email;
 	}
 
-	public static UserDocument of (User user) {
-		return new UserDocument(user.getId().toString(), user.getEmail());
+	public static KeywordDocument of (User user) {
+		return new KeywordDocument(user.getId().toString(), user.getEmail());
 	}
 
 	public void addKeyword(Keyword keyword) {

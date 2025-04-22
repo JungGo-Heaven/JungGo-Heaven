@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.keyword.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +14,10 @@ import com.example.junggoheaven.domain.keyword.dto.CreateExcludeKeywordRequestDt
 import com.example.junggoheaven.domain.keyword.dto.CreateKeywordRequestDto;
 import com.example.junggoheaven.domain.keyword.dto.DeleteExcludeKeywordRequestDto;
 import com.example.junggoheaven.domain.keyword.dto.DeleteKeywordRequestDto;
-import com.example.junggoheaven.domain.keyword.entity.UserDocument;
+import com.example.junggoheaven.domain.keyword.dto.KeywordsResponseDto;
+import com.example.junggoheaven.domain.keyword.entity.KeywordDocument;
 import com.example.junggoheaven.domain.keyword.service.ESKeywordService;
+import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +30,21 @@ import lombok.extern.slf4j.Slf4j;
 public class KeywordController {
 	private final ESKeywordService esKeywordService;
 
+	// test 용
 	@GetMapping("/v1/keywords/keyword/{userId}")
-	public ResponseEntity<?> findUserKeywords(@PathVariable Long userId) {
-		UserDocument userDocument = esKeywordService.findUserKeywords(userId.toString());
-		return ResponseEntity.ok(userDocument);
+	public ResponseEntity<?> findUserKeywordDocument(@PathVariable Long userId) {
+		KeywordDocument keywordDocument = esKeywordService.findUserKeywordDocument(userId.toString());
+		return ResponseEntity.ok(keywordDocument);
+	}
+
+	@GetMapping("/v1/keywords/keyword")
+	public ResponseEntity<KeywordsResponseDto> findUserKeywords(@AuthenticationPrincipal AuthUser authUser) {
+		return ResponseEntity.ok(esKeywordService.findUserKeywords(authUser.getId().toString()));
 	}
 
 	@PostMapping("/v1/keywords/keyword")
-	public ResponseEntity<?> createKeyword(@Valid @RequestBody CreateKeywordRequestDto dto) {
+	public ResponseEntity<?> createKeyword(
+		@Valid @RequestBody CreateKeywordRequestDto dto) {
 		esKeywordService.addKeyword(dto.getUserId().toString(), dto.getKeyword());
 		return ResponseEntity.ok().build();
 	}
