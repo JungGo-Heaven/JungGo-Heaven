@@ -11,9 +11,13 @@ public class ProductWriter {
 
 	private final ProductRepository productRepository;
 
-	public void saveProduct(Product product){
+	public void saveProduct(Product product) {
 		productRepository.save(product);
 
+	}
+
+	public void deleteProduct(Product product) {
+		productRepository.delete(product);
 	}
 
 
