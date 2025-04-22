@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.auction.service.auctionProduct.component;
+package com.example.junggoheaven.domain.auction.service.auctionProductService.component;
 
 import com.example.junggoheaven.domain.auction.entity.AuctionProduct;
 import com.example.junggoheaven.domain.auction.repository.AuctionProductRepository;

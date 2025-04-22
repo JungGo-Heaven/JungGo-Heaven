@@ -24,4 +24,12 @@ public class AuctionFinder {
         }
         return auction;
     }
+
+    public Auction findAuctionByIdForBid(Long id) {
+        Auction auction = auctionRepository.findAuctionByIdForBid(id);
+        if (auction == null) {
+            throw new AuctionNotFoundException();
+        }
+        return auction;
+    }
 }

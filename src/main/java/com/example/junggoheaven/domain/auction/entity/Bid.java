@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,7 +17,7 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "auction_id")
     private Auction auction;
 
@@ -24,7 +25,20 @@ public class Bid {
     @JoinColumn(name = "bidder_id")
     private User bidder;
 
-    private int bid_price;
+    @Column(name = "bid_price")
+    private Integer bidPrice;
 
-    private LocalDateTime bid_at;
+    @Column(name = "bid_at")
+    private LocalDateTime bidAt;
+
+    private Bid(Auction auction, User bidder, Integer bid_price) {
+        this.auction = auction;
+        this.bidder = bidder;
+        this.bidPrice = bid_price;
+        this.bidAt = LocalDateTime.now();
+    }
+
+    public static Bid of(Auction auction, User bidder, Integer bid_price) {
+        return new Bid(auction, bidder, bid_price);
+    }
 }

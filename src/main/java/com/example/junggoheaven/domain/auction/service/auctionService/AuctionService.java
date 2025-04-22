@@ -8,11 +8,12 @@ import com.example.junggoheaven.domain.auction.entity.Auction;
 import com.example.junggoheaven.domain.auction.entity.AuctionProduct;
 import com.example.junggoheaven.domain.auction.exception.InvalidAuctionStartTimeException;
 import com.example.junggoheaven.domain.auction.exception.NoPermissionToAuctionException;
-import com.example.junggoheaven.domain.auction.service.auctionProduct.component.AuctionProductWriter;
+import com.example.junggoheaven.domain.auction.service.auctionProductService.component.AuctionProductWriter;
 import com.example.junggoheaven.domain.auction.service.auctionService.component.AuctionFinder;
 import com.example.junggoheaven.domain.auction.service.auctionService.component.AuctionWriter;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.global.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,8 @@ public class AuctionService {
 
     private final UserFinder userFinder;
 
+    private final RedisService redisService;
+
     @Transactional
     public AuctionResponseDto createAuction(Long userId, AuctionRequestDto requestDto) {
         User seller = userFinder.findByUserId(userId);
@@ -46,7 +49,7 @@ public class AuctionService {
                 requestDto.getEndTime()
         );
         Auction savedAuction = auctionWriter.save(auction);
-
+        redisService.setAuctionTrigger(savedAuction);
         return AuctionResponseDto.from(savedAuction, savedAuctionProduct);
     }
     @Transactional(readOnly = true)

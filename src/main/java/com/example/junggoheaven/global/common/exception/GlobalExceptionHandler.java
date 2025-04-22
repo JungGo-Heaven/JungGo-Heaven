@@ -3,6 +3,10 @@ package com.example.junggoheaven.global.common.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.junggoheaven.domain.auction.controller.BidErrorBroadcaster;
+import com.example.junggoheaven.global.redis.exception.InvalidBidPriceException;
+import com.example.junggoheaven.global.redis.exception.FailedBidException;
+import com.example.junggoheaven.global.redis.exception.FailedToAcquireLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
+	private final BidErrorBroadcaster bidErrorBroadcaster;
+
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<List<ValidResponseDto>> invalidRequestExceptionException(
@@ -52,4 +58,22 @@ public class GlobalExceptionHandler {
 		ResponseDto error = ResponseDto.fail(HttpStatus.FORBIDDEN, ex.getClass().getSimpleName(), ex.getMessage());
 		return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
 	}
+
+
+	@ExceptionHandler(FailedToAcquireLockException.class)
+	public void handleLockFail(FailedToAcquireLockException ex) {
+		bidErrorBroadcaster.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getAuctionId(), ex.getUserId());
+	}
+
+	@ExceptionHandler(InvalidBidPriceException.class)
+	public void handleInvalidBid(InvalidBidPriceException ex) {
+		bidErrorBroadcaster.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getAuctionId(), ex.getUserId());
+	}
+
+	@ExceptionHandler(FailedBidException.class)
+	public void handleFailedBid(FailedBidException ex) {
+		bidErrorBroadcaster.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getAuctionId(), ex.getUserId());
+	}
+
+
 }

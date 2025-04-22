@@ -29,23 +29,28 @@ public class Auction extends TimeStamp {
     @Nullable
     private User winner;
 
-    private int start_price;
+    private Integer start_price;
 
     private LocalDateTime start_time;
 
     private LocalDateTime end_time;
 
-    private AuctionStatus status; 
+    @Enumerated(EnumType.STRING)
+    private AuctionStatus status;
 
-    private Auction(AuctionProduct auctionProduct, int start_price, LocalDateTime start_time, LocalDateTime end_time) {
+    private Auction(AuctionProduct auctionProduct, Integer start_price, LocalDateTime start_time, LocalDateTime end_time) {
         this.auctionProduct = auctionProduct;
         this.start_price = start_price;
         this.start_time = start_time;
         this.end_time = end_time;
         this.status = AuctionStatus.WAITING;
     }
-    public static Auction of(AuctionProduct auctionProduct, int start_price, LocalDateTime start_time, LocalDateTime end_time) {
+    public static Auction of(AuctionProduct auctionProduct, Integer start_price, LocalDateTime start_time, LocalDateTime end_time) {
         return new Auction(auctionProduct, start_price, start_time, end_time);
+    }
+
+    public void updateWinner(User winner) {
+        this.winner = winner;
     }
 
     public void updateAuction(UpdateAuctionRequestDto requestDto) {
@@ -53,5 +58,17 @@ public class Auction extends TimeStamp {
         this.start_time = requestDto.getStartTime();
         this.end_time = requestDto.getEndTime();
     }
+
+    public void startAuction() {
+        this.status = AuctionStatus.ONGOING;
+    }
+
+    public void failAuction() {
+        this.status = AuctionStatus.FAILED;
+    }
+    public void successfulAuction() {
+        this.status = AuctionStatus.SUCCESSFUL;
+    }
+
 
 }
