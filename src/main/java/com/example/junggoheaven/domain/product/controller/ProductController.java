@@ -6,6 +6,7 @@ import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
 import com.example.junggoheaven.domain.product.service.ProductService;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +38,7 @@ public class ProductController {
 	@PostMapping("/v1/products")
 	public ResponseDto<ProductResponseDto> saveProduct(
 		@AuthenticationPrincipal AuthUser authUser,
-		@RequestBody ProductRequestDto productRequestDto
+		@Valid @RequestBody ProductRequestDto productRequestDto
 	) {
 		ProductResponseDto productResponseDto = productService.saveProduct(authUser, productRequestDto);
 
@@ -94,7 +95,7 @@ public class ProductController {
 	public ResponseDto<ProductResponseDto> editProduct(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("productId") Long productId,
-		@RequestBody ProductRequestDto productRequestDto
+		@Valid @RequestBody ProductRequestDto productRequestDto
 	) {
 		ProductResponseDto productResponseDto = productService.editProduct(authUser, productId, productRequestDto);
 
@@ -110,7 +111,7 @@ public class ProductController {
 	public ResponseDto<ProductResponseDto> setSellStatus(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("productId") Long productId,
-		@RequestBody ProductSellStatusRequestDto productSellStatusRequestDto
+		@Valid @RequestBody ProductSellStatusRequestDto productSellStatusRequestDto
 	) {
 		ProductResponseDto productResponseDto = productService.setSellStatus(authUser, productId,
 			productSellStatusRequestDto);
