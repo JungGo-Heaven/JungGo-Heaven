@@ -5,6 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.junggoheaven.domain.keyword.entity.UserDocument;
+import com.example.junggoheaven.domain.keyword.service.component.KeywordFinder;
+import com.example.junggoheaven.domain.keyword.service.component.KeywordWriter;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.message.entity.NotificationChannel;
@@ -20,11 +23,15 @@ public class NotificationChannelService {
 
 	private final NotificationChannelWriter notificationChannelWriter;
 	private final NotificationChannelFinder notificationChannelFinder;
+	private final KeywordFinder keywordFinder;
+	private final KeywordWriter keywordWriter;
 	private final UserFinder userFinder;
 
-	public void createNotificationChannel(Long userId, String channelType) {
+	public void addNotificationChannel(Long userId, String channelType) {
 		User user = userFinder.findByUserId(userId);
 		List<NotificationChannel> NotiList = notificationChannelFinder.findByUserId(user.getId());
+
+		UserDocument savedUser = keywordFinder.findByUserId(userId.toString());
 
 		ChannelType type = ChannelType.valueOf(channelType);
 
@@ -36,6 +43,9 @@ public class NotificationChannelService {
 
 		NotificationChannel notificationChannel = NotificationChannel.of(type, user);
 		notificationChannelWriter.write(notificationChannel);
+
+		savedUser.addChannel(type);
+		keywordWriter.write(savedUser);
 	}
 
 	@Transactional
@@ -43,11 +53,15 @@ public class NotificationChannelService {
 		User user = userFinder.findByUserId(userId);
 		List<NotificationChannel> NotiList = notificationChannelFinder.findByUserId(user.getId());
 
+		UserDocument savedUser = keywordFinder.findByUserId(userId.toString());
+
 		ChannelType type = ChannelType.valueOf(channelType);
 
 		for (NotificationChannel channel : NotiList) {
 			if (channel.getChannelType().equals(type)) {
 				notificationChannelWriter.delete(channel);
+				savedUser.deleteChannel(type);
+				keywordWriter.write(savedUser);
 				break;
 			}
 		}

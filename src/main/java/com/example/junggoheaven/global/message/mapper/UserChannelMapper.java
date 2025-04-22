@@ -64,7 +64,8 @@ public class UserChannelMapper {
 			email.getUserList().size(),
 			kakao.getUserList().size(),
 			fcm.getUserList().size(),
-			web.getUserList().size());
+			web.getUserList().size()
+		);
 
 		eventPublisher.publishEvent(email);
 		eventPublisher.publishEvent(kakao);

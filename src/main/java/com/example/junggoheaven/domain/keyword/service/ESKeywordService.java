@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 import static com.example.junggoheaven.domain.keyword.entity.UserDocument.Keyword;
 
 import com.example.junggoheaven.domain.keyword.entity.UserDocument;
+import com.example.junggoheaven.domain.keyword.exception.ExcludeKeywordAlreadyExistsException;
+import com.example.junggoheaven.domain.keyword.exception.ExcludeKeywordSizeOverException;
+import com.example.junggoheaven.domain.keyword.exception.KeywordAlreadyExistsException;
+import com.example.junggoheaven.domain.keyword.exception.KeywordSizeOverException;
 import com.example.junggoheaven.domain.keyword.repository.UserDocumentRepository;
 import com.example.junggoheaven.domain.keyword.service.component.KeywordFinder;
 import com.example.junggoheaven.domain.keyword.service.component.KeywordWriter;
@@ -33,20 +37,16 @@ public class ESKeywordService {
 		List<Keyword> keywords = userDocument.getKeywords();
 
 		if (keywords.size() >= MAX_KEYWORDS_COUNT) {
-			// todo: throw error
-			return;
+			throw new KeywordSizeOverException();
 		}
 
 		for (Keyword k : keywords) {
 			if (k.getKeyword().equals(keyword)) {
-				// todo: throw error
-				return;
+				throw new KeywordAlreadyExistsException();
 			}
 		}
 
-		Keyword k = Keyword.of(keyword);
-
-		userDocument.addKeyword(k);
+		userDocument.addKeyword(Keyword.of(keyword));
 
 		keywordWriter.write(userDocument);
 	}
@@ -54,58 +54,43 @@ public class ESKeywordService {
 	public void deleteKeyword(String userId, String keyword) {
 		UserDocument userDocument = keywordFinder.findByUserId(userId);
 
-		List<Keyword> keywords = userDocument.getKeywords();
-
-		for (Keyword k : keywords) {
-			if (k.getKeyword().equals(keyword)) {
-				userDocument.deleteKeyword(k);
-				break;
-			}
-		}
-
+		userDocument.deleteKeyword(keyword);
 		keywordWriter.write(userDocument);
 	}
 
-	public void addExcludeKeywords(String userId, String keyword, List<String> excludeKeywords) {
+	public void addExcludeKeywords(String userId, String keyword, String excludeKeyword) {
 		UserDocument userDocument = keywordFinder.findByUserId(userId);
 
 		List<Keyword> keywords = userDocument.getKeywords();
-		System.out.println("email: " + userDocument.getEmail());
-		System.out.println("keywords: " + keywords.size());
 
 		for (Keyword k : keywords) {
 			if (k.getKeyword().equals(keyword)) {
-				if (k.getExcludeKeywords().size() + excludeKeywords.size() >= MAX_EXCLUDE_KEYWORDS_COUNT) {
-					// todo: throw error
-					return;
+				if (k.getExcludeKeywords().size() >= MAX_EXCLUDE_KEYWORDS_COUNT) {
+					throw new ExcludeKeywordSizeOverException();
 				}
-				k.addExcludeKeywords(excludeKeywords);
-				break;
+
+				if (k.getExcludeKeywords().contains(excludeKeyword)) {
+					throw new ExcludeKeywordAlreadyExistsException();
+				}
+
+				k.addExcludeKeywords(excludeKeyword);
+				keywordWriter.write(userDocument);
+				return;
 			}
 		}
-
-		keywordWriter.write(userDocument);
 	}
 
 	public void deleteExcludeKeyword(String userId, String keyword, String excludeKeyword) {
 		UserDocument userDocument = keywordFinder.findByUserId(userId);
 
 		List<Keyword> keywords = userDocument.getKeywords();
-		boolean found = false;
 
 		for (Keyword k : keywords) {
 			if (k.getKeyword().equals(keyword)) {
-				for (String ek: k.getExcludeKeywords()) {
-					if (ek.equals(excludeKeyword)) {
-						k.deleteExcludeKeyword(excludeKeyword);
-						found = true;
-						break;
-					}
-				}
+				k.deleteExcludeKeyword(excludeKeyword);
+				keywordWriter.write(userDocument);
 			}
-			if (found) break;
 		}
 
-		keywordWriter.write(userDocument);
 	}
 }

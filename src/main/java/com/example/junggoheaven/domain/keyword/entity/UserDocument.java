@@ -8,21 +8,17 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Mapping;
 import org.springframework.data.elasticsearch.annotations.Setting;
-import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 import com.example.junggoheaven.domain.user.entity.User;
-import com.example.junggoheaven.global.message.entity.NotificationChannel;
+import com.example.junggoheaven.global.message.enums.ChannelType;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-// users 인덱스에는 하나의 Document Type 만 저장된다.
 @Document(indexName = "users")
 @Setting
 @Mapping(mappingPath = "elastic/users-mapping.json")
@@ -42,7 +38,7 @@ public class UserDocument {
 
 	@Enumerated(EnumType.STRING)
 	@Field(type = FieldType.Keyword)
-	private List<NotificationChannel> channels = new ArrayList<> ();
+	private List<ChannelType> channels = new ArrayList<> ();
 
 	private UserDocument (String id, String email) {
 		this.id = id;
@@ -57,8 +53,16 @@ public class UserDocument {
 		keywords.add(keyword);
 	}
 
-	public void deleteKeyword(Keyword keyword) {
-		keywords.remove(keyword);
+	public void deleteKeyword(String keyword) {
+		keywords.removeIf(k -> k.getKeyword().equals(keyword));
+	}
+
+	public void addChannel(ChannelType channel) {
+		channels.add(channel);
+	}
+
+	public void deleteChannel(ChannelType channel) {
+		channels.remove(channel);
 	}
 
 	@Getter
@@ -78,12 +82,12 @@ public class UserDocument {
 			return new Keyword(keyword);
 		}
 
-		public void addExcludeKeywords(List<String> keywords) {
-			this.excludeKeywords.addAll(keywords);
+		public void addExcludeKeywords(String keyword) {
+			this.excludeKeywords.add(keyword);
 		}
 
 		public void deleteExcludeKeyword(String excludeKeyword) {
-			this.excludeKeywords.remove(excludeKeyword);
+			this.excludeKeywords.removeIf(ek -> ek.equals(excludeKeyword));
 		}
 	}
 }

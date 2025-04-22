@@ -1,7 +1,5 @@
 package com.example.junggoheaven.domain.keyword.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.junggoheaven.domain.keyword.dto.CreateExcludeKeywordsRequestDto;
+import com.example.junggoheaven.domain.keyword.dto.CreateExcludeKeywordRequestDto;
 import com.example.junggoheaven.domain.keyword.dto.CreateKeywordRequestDto;
 import com.example.junggoheaven.domain.keyword.dto.DeleteExcludeKeywordRequestDto;
 import com.example.junggoheaven.domain.keyword.dto.DeleteKeywordRequestDto;
@@ -41,9 +39,9 @@ public class KeywordController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PostMapping("/v1/keywords/excludeKeywords")
-	public ResponseEntity<?> createExcludeKeyword(@Valid @RequestBody CreateExcludeKeywordsRequestDto dto) {
-		esKeywordService.addExcludeKeywords(dto.getUserId().toString(), dto.getKeyword(), dto.getExcludeKeywords());
+	@PostMapping("/v1/keywords/excludeKeyword")
+	public ResponseEntity<?> createExcludeKeyword(@Valid @RequestBody CreateExcludeKeywordRequestDto dto) {
+		esKeywordService.addExcludeKeywords(dto.getUserId().toString(), dto.getKeyword(), dto.getExcludeKeyword());
 		return ResponseEntity.ok().build();
 	}
 
@@ -53,7 +51,7 @@ public class KeywordController {
 		return ResponseEntity.ok().build();
 	}
 
-	@DeleteMapping("/v1/keywords/excludeKeywords")
+	@DeleteMapping("/v1/keywords/excludeKeyword")
 	public ResponseEntity<?> deleteExcludeKeyword(@Valid @RequestBody DeleteExcludeKeywordRequestDto dto) {
 		esKeywordService.deleteExcludeKeyword(dto.getUserId().toString(), dto.getKeyword(), dto.getExcludeKeyword());
 		return ResponseEntity.ok().build();
