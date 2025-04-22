@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<User,Long>, UserCustomRepo
 	Boolean existsByEmail(String email);
 
 	List<User> findUsersByIdBetween(Long startId, Long endId);
+
+	Optional<User> findByCustomerKey(String customerKey);
 }

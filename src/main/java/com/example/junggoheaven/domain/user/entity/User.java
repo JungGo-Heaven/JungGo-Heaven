@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
@@ -23,6 +24,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -41,7 +43,7 @@ public class User extends TimeStamp {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(unique = true)
+	@Column(nullable = false, unique = true)
 	private String email;
 	private String password;
 	private String name;
@@ -55,6 +57,8 @@ public class User extends TimeStamp {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "profile_image_id")
 	private ProfileImage profileImage;
+	@Column(unique = true)
+	private String customerKey;
 
 	@Builder
 	private User(String email, String password, String name, String phoneNumber, String address) {
@@ -117,5 +121,13 @@ public class User extends TimeStamp {
 
 	public void updateProfileImage(ProfileImage profileImage) {
 		this.profileImage = profileImage;
+	}
+
+	// insert 이후, id를 이용해 customerKey 생성 -> 결제 기능 수행에 필요
+	@PostPersist
+	public void generateCustomerKey() {
+		if (this.customerKey == null && this.id != null) {
+			this.customerKey = UUID.nameUUIDFromBytes(("user-" + this.id).getBytes()).toString();
+		}
 	}
 }
