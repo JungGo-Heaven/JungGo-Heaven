@@ -90,6 +90,8 @@ public class SecurityConfig {
 			)
 
 			.authorizeHttpRequests(auth -> auth
+				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**"), new AntPathRequestMatcher("/api/v2/location/**"), new AntPathRequestMatcher("/chat/**")).permitAll()
+				.requestMatchers("test/**").permitAll()
 				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**"), new AntPathRequestMatcher("/chat/**")).permitAll()
 				.requestMatchers("/api/*/payments/virtual/webhook").permitAll()
 				.requestMatchers("/test/**").permitAll()
