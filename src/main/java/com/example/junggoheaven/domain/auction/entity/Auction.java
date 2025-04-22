@@ -35,7 +35,7 @@ public class Auction extends TimeStamp {
 
     private LocalDateTime end_time;
 
-    private AuctionStatus status;
+    private AuctionStatus status; 
 
     private Auction(AuctionProduct auctionProduct, int start_price, LocalDateTime start_time, LocalDateTime end_time) {
         this.auctionProduct = auctionProduct;
