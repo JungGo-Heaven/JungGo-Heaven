@@ -4,8 +4,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.junggoheaven.domain.user.entity.User;
-import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.domain.user.service.component.UserChecker;
+import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.dto.reqeust.LoginRequestDto;
 import com.example.junggoheaven.global.auth.dto.reqeust.SignupRequestDto;

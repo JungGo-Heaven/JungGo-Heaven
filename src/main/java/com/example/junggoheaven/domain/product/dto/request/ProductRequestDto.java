@@ -24,7 +24,4 @@ public class ProductRequestDto {
 
 	private final Long productImageId;
 
-
-
-
 }
