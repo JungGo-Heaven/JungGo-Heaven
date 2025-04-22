@@ -1,5 +1,6 @@
-package com.example.junggoheaven.domain.user.entity;
+package com.example.junggoheaven.domain.keyword.entity;
 
+import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.common.entity.TimeStamp;
 
 import jakarta.persistence.Column;
@@ -10,12 +11,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserKeyword extends TimeStamp {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

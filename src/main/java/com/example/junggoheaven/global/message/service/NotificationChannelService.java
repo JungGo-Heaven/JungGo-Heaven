@@ -23,7 +23,7 @@ public class NotificationChannelService {
 	private final UserFinder userFinder;
 
 	public void createNotificationChannel(Long userId, String channelType) {
-		User user = userFinder.findNonDeletedUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		List<NotificationChannel> NotiList = notificationChannelFinder.findByUserId(user.getId());
 
 		ChannelType type = ChannelType.valueOf(channelType);
@@ -40,7 +40,7 @@ public class NotificationChannelService {
 
 	@Transactional
 	public void deleteNotificationChannel(Long userId, String channelType) {
-		User user = userFinder.findNonDeletedUserById(userId);
+		User user = userFinder.findByUserId(userId);
 		List<NotificationChannel> NotiList = notificationChannelFinder.findByUserId(user.getId());
 
 		ChannelType type = ChannelType.valueOf(channelType);

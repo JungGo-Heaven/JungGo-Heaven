@@ -8,6 +8,8 @@ import com.example.junggoheaven.domain.image.entity.ProfileImage;
 import com.example.junggoheaven.domain.image.exception.ImageUploadIOException;
 import com.example.junggoheaven.domain.image.repository.ProfileImageRepository;
 import com.example.junggoheaven.domain.image.service.ProfileImageService;
+import com.example.junggoheaven.domain.keyword.entity.UserDocument;
+import com.example.junggoheaven.domain.keyword.repository.UserDocumentRepository;
 import com.example.junggoheaven.domain.user.dto.user.GuestAddInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdateInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdatePasswordRequestDto;
@@ -35,6 +37,7 @@ public class UserService {
 	private final UserWriter userWriter;
 	private final JwtUtil jwtUtil;
 	private final RefreshUtil refreshUtil;
+	private final UserDocumentRepository userDocumentRepository;
 
 	@Transactional
 	public UserSelfInfoResponseDto addInfo(Long id, GuestAddInfoRequestDto requestDto) {
@@ -44,6 +47,7 @@ public class UserService {
 		String address = requestDto.getAddress();
 
 		user.guestAddInfo(password, phoneNumber, address);
+		userDocumentRepository.save(UserDocument.of(user));
 
 		String refreshToken = refreshUtil.getRefreshToken(String.valueOf(user.getId()));
 		jwtUtil.reissueAccessToken(refreshToken, response);

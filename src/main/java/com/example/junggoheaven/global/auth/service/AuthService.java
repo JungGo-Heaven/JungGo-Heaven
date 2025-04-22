@@ -3,6 +3,8 @@ package com.example.junggoheaven.global.auth.service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.junggoheaven.domain.keyword.entity.UserDocument;
+import com.example.junggoheaven.domain.keyword.repository.UserDocumentRepository;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.domain.user.service.component.UserChecker;
@@ -29,6 +31,7 @@ public class AuthService {
 	private final UserWriter userWriter;
 	private final UserChecker userReader;
 	private final UserFinder userFinder;
+	private final UserDocumentRepository userDocumentRepository;
 
 	public SignupResponseDto signup(SignupRequestDto requestDto) {
 		String email = requestDto.getEmail();
@@ -43,6 +46,7 @@ public class AuthService {
 
 		User user = User.of(email, password, name, phoneNumber, address);
 		User saveUser = userWriter.saveUser(user);
+		userDocumentRepository.save(UserDocument.of(user));
 
 		return SignupResponseDto.from(saveUser);
 	}
