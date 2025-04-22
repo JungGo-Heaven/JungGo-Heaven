@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GeoCoordinate {
 
-    private final Double longitude; // x
-    private final Double latitude; // y
+    private final Double longitude; // x값(경도)
+    private final Double latitude; // y값(위도)
 }
