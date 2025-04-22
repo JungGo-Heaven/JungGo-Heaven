@@ -55,7 +55,6 @@ public class RedisKeyExpirationListner extends KeyExpirationEventMessageListener
         if(expiredKey.startsWith("bid:auction:")) {
             Long auctionId = Long.parseLong(expiredKey.split(":")[2]);
             Auction auction = auctionFinder.findAuctionById(auctionId);
-            //낙찰자 선정 로직 필요함.
             Optional<Bid> bid = bidFinder.findTopByAuctionOrderByBidPriceDesc(auction);
             if(!bid.isPresent()) {
                 auction.failAuction();
