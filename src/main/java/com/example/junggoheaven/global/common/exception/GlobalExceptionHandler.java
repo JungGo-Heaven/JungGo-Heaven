@@ -52,4 +52,10 @@ public class GlobalExceptionHandler {
 		ResponseDto error = ResponseDto.fail(HttpStatus.FORBIDDEN, ex.getClass().getSimpleName(), ex.getMessage());
 		return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
 	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ResponseDto> handleException(Exception ex){
+		ResponseDto error = ResponseDto.fail(HttpStatus.BAD_REQUEST, ex.getClass().getSimpleName(), ex.getMessage());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+	}
 }
