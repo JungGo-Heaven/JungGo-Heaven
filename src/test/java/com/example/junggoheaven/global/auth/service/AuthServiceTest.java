@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.example.junggoheaven.domain.keyword.repository.KeywordDocumentRepository;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.exception.EmailNotFoundException;
 import com.example.junggoheaven.domain.user.service.component.UserChecker;
@@ -52,6 +53,8 @@ class AuthServiceTest {
 	private UserChecker userReader;
 	@Mock
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	@Mock
+	private KeywordDocumentRepository keywordDocumentRepository;
 
 	User user;
 	String email = "email@email.com";

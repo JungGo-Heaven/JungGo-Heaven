@@ -46,7 +46,7 @@ public class AuthService {
 
 		User user = User.of(email, password, name, phoneNumber, address);
 		User saveUser = userWriter.saveUser(user);
-		keywordDocumentRepository.save(KeywordDocument.of(user));
+		keywordDocumentRepository.save(KeywordDocument.of(saveUser));
 
 		return SignupResponseDto.from(saveUser);
 	}
