@@ -20,4 +20,7 @@ public class OrderWriter {
 		return orderRepository.save(order);
 	}
 
+	public void cancelOrder(Order order) {
+		orderRepository.delete(order);
+	}
 }

@@ -11,5 +11,5 @@ public interface VirtualAccountService {
 
 	String virtualWebhook(String eventType, String orderId, String status, WebhookDataInfo data);
 
-	OrderResponseDto sending(String orderId);
+	OrderResponseDto sending(Long orderId);
 }

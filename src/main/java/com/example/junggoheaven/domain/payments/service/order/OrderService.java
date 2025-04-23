@@ -16,18 +16,18 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-	
+
 	private final UserFinder userFinder;
 	private final ProductFinder productFinder;
 	private final OrderFinder orderFinder;
 	private final OrderWriter orderWriter;
 
 	public OrderResponseDto createOrder(Long userId, CreateOrderRequestDto createOrderRequestDto) {
-		Long buyerId = createOrderRequestDto.getBuyerId();			// 구매자 ID
-		Long productId = createOrderRequestDto.getProductId();		// 판매 상품 ID
-		String detail = createOrderRequestDto.getDetail();			// 판매 상품 내용
-		Long amount = createOrderRequestDto.getAmount();			// 판매 가격
-		String method = createOrderRequestDto.getMethod();			// 결제 수단
+		Long buyerId = createOrderRequestDto.getBuyerId();            // 구매자 ID
+		Long productId = createOrderRequestDto.getProductId();        // 판매 상품 ID
+		String detail = createOrderRequestDto.getDetail();            // 판매 상품 내용
+		Long amount = createOrderRequestDto.getAmount();            // 판매 가격
+		String method = createOrderRequestDto.getMethod();            // 결제 수단
 
 		Product product = productFinder.findProductById(productId);
 		User buyer = userFinder.findByUserId(buyerId);
@@ -35,5 +35,10 @@ public class OrderService {
 
 		Order order = Order.of(product, buyer, seller, detail, amount, PaymentMethod.of(method));
 		return OrderResponseDto.from(orderWriter.saveOrder(order));
+	}
+
+	public void cancelOrder(Long orderId) {
+		Order order = orderFinder.findByOrderId(orderId);
+		orderWriter.cancelOrder(order);
 	}
 }

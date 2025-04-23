@@ -3,6 +3,7 @@ package com.example.junggoheaven.domain.payments.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -32,6 +33,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Table(name = "orders")
+@SQLDelete(sql = "UPDATE orders SET status = 'CANCELED' WHERE id = ?")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class Order {
