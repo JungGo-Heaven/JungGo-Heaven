@@ -14,4 +14,10 @@ public class BaseException extends RuntimeException {
 		this.errorCode = errorCode;
 		this.status = errorCode.getHttpStatus();
 	}
+
+	protected BaseException(ErrorCode errorCode, String message) {
+		super(errorCode.getDefaultMessage()+":"+message);
+		this.errorCode = errorCode;
+		this.status = errorCode.getHttpStatus();
+	}
 }

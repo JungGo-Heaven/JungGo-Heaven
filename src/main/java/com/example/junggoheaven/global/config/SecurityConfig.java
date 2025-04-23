@@ -92,6 +92,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(new AntPathRequestMatcher("/api/*/auth/**"), new AntPathRequestMatcher("/chat/**")).permitAll()
 				.requestMatchers("/api/*/payments/virtual/webhook").permitAll()
+				.requestMatchers("/test/**").permitAll()
 				.anyRequest().authenticated())
 
 			.build();
