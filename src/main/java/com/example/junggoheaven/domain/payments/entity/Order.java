@@ -81,6 +81,10 @@ public class Order {
 			.product(product).buyer(buyer).seller(seller).details(details).amount(amount).method(method).build();
 	}
 
+	public void updateStatus(OrderStatus orderStatus) {
+		this.status = orderStatus;
+	}
+
 	@PostPersist
 	public void generateOrderKey() {
 		if (this.orderKey == null && this.id != null) {
