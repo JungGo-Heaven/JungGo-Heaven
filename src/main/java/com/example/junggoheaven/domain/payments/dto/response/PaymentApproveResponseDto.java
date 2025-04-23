@@ -1,11 +1,8 @@
 package com.example.junggoheaven.domain.payments.dto.response;
 
-import java.time.LocalDateTime;
-
 import com.example.junggoheaven.domain.payments.dto.toss.VirtualAccountInfo;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,11 +35,26 @@ public class PaymentApproveResponseDto {
 		this.virtualAccount = virtualAccount;
 	}
 
+	public static PaymentApproveResponseDto of(String paymentKey, String orderId, String orderName, String status,
+		String requestedAt, String approvedAt, Long totalAmount, String method, VirtualAccountInfo virtualAccount) {
+		return PaymentApproveResponseDto.builder()
+			.paymentKey(paymentKey)
+			.orderId(orderId)
+			.orderName(orderName)
+			.status(status)
+			.requestedAt(requestedAt)
+			.approvedAt(approvedAt)
+			.totalAmount(totalAmount)
+			.method(method)
+			.virtualAccount(virtualAccount)
+			.build();
+	}
+
 	public String getAccountNumber() {
 		return virtualAccount != null ? virtualAccount.getAccountNumber() : null;
 	}
 
-	public String getDueDate(){
+	public String getDueDate() {
 		return virtualAccount != null ? virtualAccount.getDueDate() : null;
 	}
 }
