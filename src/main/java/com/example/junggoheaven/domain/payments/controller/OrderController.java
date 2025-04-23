@@ -1,6 +1,8 @@
 package com.example.junggoheaven.domain.payments.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +28,11 @@ public class OrderController {
 	public ResponseDto<OrderResponseDto> createOrder(@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody CreateOrderRequestDto createOrderRequestDto) {
 		return ResponseDto.success(orderService.createOrder(authUser.getId(), createOrderRequestDto));
+	}
+
+	@DeleteMapping("/orders/{orderId}")
+	public ResponseDto<Void> cancelOrder(@PathVariable("orderId") Long orderId) {
+		orderService.cancelOrder(orderId);
+		return ResponseDto.success(null);
 	}
 }

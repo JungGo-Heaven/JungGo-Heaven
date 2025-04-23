@@ -21,7 +21,7 @@ public class PaymentViewController {
 	private final String BASE_URL = "http://localhost:8080/api/v1/payments";
 
 	@GetMapping("/payments/sending")
-	public String sending(@RequestParam String orderId, Model model) {
+	public String sending(@RequestParam Long orderId, Model model) {
 		model.addAttribute("baseUrl", BASE_URL);
 
 		OrderResponseDto responseDto = virtualAccountService.sending(orderId);

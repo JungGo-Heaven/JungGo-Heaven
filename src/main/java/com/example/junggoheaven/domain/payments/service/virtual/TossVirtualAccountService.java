@@ -25,9 +25,7 @@ import com.example.junggoheaven.domain.payments.service.order.OrderFinder;
 import com.example.junggoheaven.global.aop.Payment;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TossVirtualAccountService implements VirtualAccountService {
@@ -87,18 +85,18 @@ public class TossVirtualAccountService implements VirtualAccountService {
 
 		// https://docs.tosspayments.com/reference#payment-%EA%B0%9D%EC%B2%B4 status 상태 코드 확인
 		switch (tossStatus) {
-			case "DONE" -> order.updateStatus(OrderStatus.PAYMENT_COMPLETED);		// 인증된 결제수단으로 요청한 결제가 승인된 상태
-			case "CANCELED" -> order.updateStatus(OrderStatus.CANCELED);			// 승인된 결제가 취소된 상태
-			case "ABORTED" -> order.updateStatus(OrderStatus.FAILED);				// 결제 승인이 실패한 상태
-			case "EXPIRED" -> order.updateStatus(OrderStatus.EXPIRED);				// 결제 유효 시간 30분이 지나 거래가 취소된 상태
+			case "DONE" -> order.updateStatus(OrderStatus.PAYMENT_COMPLETED);        // 인증된 결제수단으로 요청한 결제가 승인된 상태
+			case "CANCELED" -> order.updateStatus(OrderStatus.CANCELED);            // 승인된 결제가 취소된 상태
+			case "ABORTED" -> order.updateStatus(OrderStatus.FAILED);                // 결제 승인이 실패한 상태
+			case "EXPIRED" -> order.updateStatus(OrderStatus.EXPIRED);                // 결제 유효 시간 30분이 지나 거래가 취소된 상태
 		}
 
 		return "update status: " + order.getStatus().name();
 	}
 
 	@Override
-	public OrderResponseDto sending(String orderId) {
-		Order order = orderFinder.findByOrderId(Long.valueOf(orderId));
+	public OrderResponseDto sending(Long orderId) {
+		Order order = orderFinder.findByOrderId(orderId);
 		return OrderResponseDto.from(order);
 	}
 
