@@ -1,6 +1,4 @@
-package com.example.junggoheaven.domain.payments.dto.request;
-
-import com.example.junggoheaven.domain.payments.dto.toss.WebhookDataInfo;
+package com.example.junggoheaven.domain.payments.dto.toss;
 
 import lombok.Getter;
 

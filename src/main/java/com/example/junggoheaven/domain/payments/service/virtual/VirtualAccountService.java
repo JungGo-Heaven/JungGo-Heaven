@@ -5,6 +5,10 @@ import com.example.junggoheaven.domain.payments.dto.response.PaymentApproveRespo
 import com.example.junggoheaven.domain.payments.dto.response.PaymentWebhookResponseDto;
 import com.example.junggoheaven.domain.payments.dto.toss.VirtualAccountInfo;
 import com.example.junggoheaven.domain.payments.dto.toss.WebhookDataInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public interface VirtualAccountService {
 	PaymentApproveResponseDto createVirtualAccount(Long userId, Long orderId, String bank);
@@ -12,4 +16,6 @@ public interface VirtualAccountService {
 	String virtualWebhook(String eventType, String orderId, String status, WebhookDataInfo data);
 
 	OrderResponseDto sending(Long orderId);
+
+	PaymentApproveResponseDto paymentConfirm(Long amount, String orderKey, String paymentKey);
 }
