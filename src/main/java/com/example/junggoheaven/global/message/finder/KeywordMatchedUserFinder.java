@@ -29,10 +29,11 @@ public class KeywordMatchedUserFinder {
 	@Async
 	@EventListener
 	public void findKeywordMatchedUser(ProductRegisteredEvent event) {
+		long startedAt = System.currentTimeMillis();
 		String name = event.getNotificationMessage();
 
 		List<MatchedUserDto> userList = userKeywordRepository.findAllUserIdByProductName(name);
-
+		log.info("End: {}", System.currentTimeMillis() - startedAt);
 		log.info("Total Users are {}", userList.size());
 		eventPublisher.publishEvent( new ChannelMappingEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage(), userList));
 		log.info("KeywordMatchedUserFinder Done");

@@ -14,7 +14,7 @@
 // import org.springframework.test.context.TestPropertySource;
 //
 // import com.example.junggoheaven.domain.user.entity.User;
-// import com.example.junggoheaven.domain.user.entity.UserKeyword;
+// import com.example.junggoheaven.domain.keyword.entity.UserKeyword;
 // import com.example.junggoheaven.domain.user.repository.UserBulkRepository;
 // import com.example.junggoheaven.domain.user.repository.UserKeywordBulkRepository;
 // import com.example.junggoheaven.domain.user.repository.UserRepository;

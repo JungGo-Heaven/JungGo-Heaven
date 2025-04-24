@@ -1,7 +1,7 @@
 package com.example.junggoheaven.domain.user.repository;
 
+import static com.example.junggoheaven.domain.keyword.entity.QUserKeyword.*;
 import static com.example.junggoheaven.domain.user.entity.QUser.*;
-import static com.example.junggoheaven.domain.user.entity.QUserKeyword.*;
 import static com.example.junggoheaven.global.message.entity.QNotificationChannel.*;
 import static com.querydsl.core.group.GroupBy.*;
 

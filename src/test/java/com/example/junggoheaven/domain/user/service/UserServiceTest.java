@@ -21,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.junggoheaven.domain.image.entity.ProfileImage;
 import com.example.junggoheaven.domain.image.repository.ProfileImageRepository;
+import com.example.junggoheaven.domain.keyword.repository.KeywordDocumentRepository;
 import com.example.junggoheaven.domain.user.dto.user.GuestAddInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdateInfoRequestDto;
 import com.example.junggoheaven.domain.user.dto.user.UpdatePasswordRequestDto;
@@ -53,6 +54,8 @@ class UserServiceTest {
 	private RefreshUtil refreshUtil;
 	@Mock
 	private JwtUtil jwtUtil;
+	@Mock
+	private KeywordDocumentRepository keywordDocumentRepository;
 
 	ProfileImage profileImage;
 	User guestUser;

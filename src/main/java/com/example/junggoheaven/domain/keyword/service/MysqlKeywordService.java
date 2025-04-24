@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.user.service;
+package com.example.junggoheaven.domain.keyword.service;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.junggoheaven.domain.user.entity.User;
-import com.example.junggoheaven.domain.user.entity.UserKeyword;
+import com.example.junggoheaven.domain.keyword.entity.UserKeyword;
 import com.example.junggoheaven.domain.user.repository.UserKeywordRepository;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserKeywordService {
+public class MysqlKeywordService {
 	private final UserKeywordRepository userKeywordRepository;
 	private final UserFinder userFinder;
 
