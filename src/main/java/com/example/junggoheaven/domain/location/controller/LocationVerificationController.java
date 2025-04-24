@@ -2,9 +2,7 @@ package com.example.junggoheaven.domain.location.controller;
 
 import com.example.junggoheaven.domain.location.dto.LocationVerificationRequest;
 import com.example.junggoheaven.domain.location.exception.LocationVerificationRequiredException;
-import com.example.junggoheaven.domain.location.exception.NotInMyTownException;
 import com.example.junggoheaven.domain.location.service.LocationVerificationService;
-import com.example.junggoheaven.global.common.response.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
