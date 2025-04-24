@@ -4,6 +4,12 @@ package com.example.junggoheaven.domain.product.service;
 import com.example.junggoheaven.domain.image.entity.ProductImage;
 import com.example.junggoheaven.domain.image.exception.UnexpectedErrorException;
 import com.example.junggoheaven.domain.image.repository.ProductImageRepository;
+import com.example.junggoheaven.domain.location.dto.GeoCoordinate;
+import com.example.junggoheaven.domain.location.dto.LocationVerificationRequest;
+import com.example.junggoheaven.domain.location.exception.LocationVerificationRequiredException;
+import com.example.junggoheaven.domain.location.service.GeoService;
+import com.example.junggoheaven.domain.location.service.LocationVerificationService;
+import com.example.junggoheaven.domain.location.util.GeoUtil;
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
 import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
 import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
@@ -23,6 +29,8 @@ import com.example.junggoheaven.global.message.publisher.EventPublisher;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
 
 	private final ProductFinder productFinder;
@@ -45,6 +54,10 @@ public class ProductService {
 
 	private final EventPublisher eventPublisher;
 
+	private final GeoService geoService;
+
+	private final LocationVerificationService locationVerificationService;
+
 	/*
 		상품 등록 메서드
 	*/
@@ -52,6 +65,25 @@ public class ProductService {
 	public ProductResponseDto saveProduct(AuthUser authUser, ProductRequestDto productRequestDto) {
 
 		User user = userFinder.findByUserId(authUser.getId());
+		GeoCoordinate currentLocation = geoService.getGeoData(productRequestDto.getAddress());
+
+		LocationVerificationRequest request = LocationVerificationRequest.of(
+				currentLocation.getLongitude(),
+				currentLocation.getLatitude(),
+				user.getId());
+
+		boolean isVerified = locationVerificationService.authenticateLocation(request);
+
+		if (!isVerified) {
+			throw new LocationVerificationRequiredException();
+		}
+
+		// 인증 통과 후 lastVerifiedAt 업데이트
+		locationVerificationService.updateLastVerified(user);
+
+		//이하 Product 저장 로직
+		// Point는 항상 경도,위도 순으로 저장
+		Point location = GeoUtil.createPoint(currentLocation.getLongitude(), currentLocation.getLatitude());
 
 		if(productRequestDto.getProductImageId() == null){
 
@@ -60,14 +92,17 @@ public class ProductService {
 				productRequestDto.getName(),
 				productRequestDto.getInformation(),
 				productRequestDto.getPrice(),
-				null
+				null,
+					productRequestDto.getAddress(),
+					currentLocation.getLongitude(),
+					currentLocation.getLatitude(),
+					location
 			);
 
 			productWriter.saveProduct(product);
 			eventPublisher.publishEventAfterTransaction(new ProductRegisteredEvent(this, user.getId(), product.getName()));
 
 			return new ProductResponseDto(product);
-
 		}
 
 
@@ -76,11 +111,15 @@ public class ProductService {
 
 
 		Product product = new Product(
-			user,
-			productRequestDto.getName(),
-			productRequestDto.getInformation(),
-			productRequestDto.getPrice(),
-			productImage
+				user,
+				productRequestDto.getName(),
+				productRequestDto.getInformation(),
+				productRequestDto.getPrice(),
+				productImage,
+				productRequestDto.getAddress(),
+				currentLocation.getLongitude(),
+				currentLocation.getLatitude(),
+				location
 		);
 
 		productWriter.saveProduct(product);
@@ -214,5 +253,13 @@ public class ProductService {
 		return new ProductResponseDto(product);
 	}
 
+	// 가입 시 등록된 위치로 부터 10km 반경 안에 있는 product 조회 메서드
+	public Page<ProductResponseDto> findNearbyProductsByUserAddress(Long userId, double radius, Pageable pageable) {
+		User user = userFinder.findByUserId(userId);
+		GeoCoordinate userLocation = geoService.getGeoData(user.getAddress());
 
+		Point location = GeoUtil.createPoint(userLocation.getLongitude(), userLocation.getLatitude());
+		Page<Product> nearbyProducts = productFinder.findNearbyProductsByLocation(location, radius, pageable);
+		return nearbyProducts.map(ProductResponseDto::new);
+	}
 }
