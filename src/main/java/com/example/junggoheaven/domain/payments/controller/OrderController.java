@@ -18,19 +18,19 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class OrderController {
 
 	private final OrderService orderService;
 
-	@PostMapping("/orders")
+	@PostMapping("/v1/orders")
 	public ResponseDto<OrderResponseDto> createOrder(@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody CreateOrderRequestDto createOrderRequestDto) {
 		return ResponseDto.success(orderService.createOrder(authUser.getId(), createOrderRequestDto));
 	}
 
-	@DeleteMapping("/orders/{orderId}")
+	@DeleteMapping("/v1/orders/{orderId}")
 	public ResponseDto<Void> cancelOrder(@PathVariable("orderId") Long orderId) {
 		orderService.cancelOrder(orderId);
 		return ResponseDto.success(null);

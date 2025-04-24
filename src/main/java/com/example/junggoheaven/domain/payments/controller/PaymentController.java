@@ -20,27 +20,27 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class PaymentController {
 
 	private final VirtualAccountService virtualAccountService;
 
-	@PostMapping("/payments/virtual")
+	@PostMapping("/v1/payments/virtual")
 	public ResponseDto<PaymentApproveResponseDto> createVirtualAccount(@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody VirtualPaymentRequestDto requestDto) {
 		return ResponseDto.success(virtualAccountService.createVirtualAccount(authUser.getId(),
 			requestDto.getOrderId(), requestDto.getBank()));
 	}
 
-	@PostMapping("/payments/virtual/webhook")
+	@PostMapping("/v1/payments/virtual/webhook")
 	public ResponseDto<String> virtualWebhook(@RequestBody PaymentWebhookRequestDto requestDto) {
 		return ResponseDto.success(
 			virtualAccountService.virtualWebhook(requestDto.getEventType(), requestDto.getOrderId(),
 				requestDto.getStatus(), requestDto.getData()));
 	}
 
-	@PostMapping("/payments/confirm")
+	@PostMapping("/v1/payments/confirm")
 	public ResponseDto<PaymentApproveResponseDto> paymentsConfirm(
 		@Valid @RequestBody PaymentsConfirmRequestDto requestDto) {
 		return ResponseDto.success(
