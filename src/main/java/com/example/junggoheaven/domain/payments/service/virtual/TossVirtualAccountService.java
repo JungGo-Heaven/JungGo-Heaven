@@ -109,7 +109,7 @@ public class TossVirtualAccountService implements VirtualAccountService {
 		Map<String, Object> body = Map.of(
 			"amount", amount,
 			"orderId", orderKey,
-			"paymentKey", paymentKey)
+			"paymentKey", paymentKey);
 
 		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 		ResponseEntity<PaymentApproveResponseDto> responseEntity = restTemplate.postForEntity(
