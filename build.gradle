@@ -70,6 +70,14 @@ dependencies {
     // ElasticSearch
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'co.elastic.clients:elasticsearch-java:8.18.0'
+
+    //JsonParser
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
+    //GeometryFactory
+    implementation 'org.locationtech.jts:jts-core:1.18.2'
+    implementation 'org.hibernate:hibernate-spatial:6.6.11.Final'
+
 }
 
 tasks.named('test') {
