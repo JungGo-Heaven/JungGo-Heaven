@@ -1,0 +1,132 @@
+name: Deploy with AWS CodeDeploy
+
+on:
+  workflow_run:
+    workflows: ["Build and Docker Push"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # "Build and Docker Push"가 성공했을 때 or 직접 workflow 실행했을 때 실행
+
+    steps:
+      # Docker에 올린 이미지를 download
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download image tag
+        uses: actions/download-artifact@v3
+        with:
+          name: image-tag
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+
+      - name: Set image tag
+        id: set-tag
+        run: |
+          if [ -f "image-tag.txt" ]; then
+            echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          fi
+
+      - name: Create appspec.yml
+        run: |
+          cat > appspec.yml << EOF
+          version: 0.0
+          os: linux
+          files:
+            - source: /
+              destination: /home/ubuntu/app
+          hooks:
+            BeforeInstall:
+              - location: scripts/before_install.sh
+                timeout: 300
+                runas: ubuntu
+            AfterInstall:
+              - location: scripts/after_install.sh
+                timeout: 300
+                runas: ubuntu
+            ApplicationStart:
+              - location: scripts/start_application.sh
+                timeout: 300
+                runas: ubuntu
+          EOF
+
+      - name: Create deployment scripts
+        run: |
+          mkdir -p scripts
+          
+#           현재 실행 중인 프로그램 백업
+          cat > scripts/before_install.sh << EOF
+          CONTAINER_RUNNING=\$(docker ps -q -f name=app)
+          if [ ! -z "\$CONTAINER_RUNNING" ]; then
+            BACKUP_NAME="app_backup_\$(date +'%Y%m%d%H%M%S')"
+            docker rename app \$BACKUP_NAME
+            docker stop \$BACKUP_NAME
+          fi
+          EOF
+          
+#           Docker에서 이미지를 내려 받아 설치
+          cat > scripts/after_install.sh << EOF
+          docker pull ${{ secrets.REPOSITORY }}/${{ secrets.IMAGE }}:${IMAGE_TAG}
+          EOF
+          
+#           애플리케이션 실행
+          cat > scripts/start_application.sh << EOF
+          docker run -d --name app \
+            -p 8080:8080 \
+            --restart unless-stopped \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            -e DB_HOST=${{ secrets.DB_HOST }} \
+            -e DB_PORT=${{ secrets.DB_PORT }} \
+            -e DB_NAME=${{ secrets.DB_NAME }} \
+            -e DB_USERNAME=${{ secrets.DB_USERNAME }} \ 
+            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            -e RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }} \
+            -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
+            ${{ secrets.REPOSITORY }}/${{ secrets.IMAGE }}:${IMAGE_TAG}
+          
+         # 애플리케이션 성공 확인
+          sleep 10
+          NEW_CONTAINER_RUNNING=\$(docker ps -q -f name=app)
+          if [ -z "\$NEW_CONTAINER_RUNNING" ]; then
+            echo "New container failed to start, rolling back..."
+            BACKUP_NAME=\$(docker ps -a --filter "name=app_backup" --format "{{.Names}}" | head -n 1)
+          #  애플리케이션 실행을 실패한 경우 -> 백업 파일 실행
+            if [ ! -z "\$BACKUP_NAME" ]; then
+              docker rename \$BACKUP_NAME app
+              docker start app
+            fi
+            exit 1
+          # 성공한 경우 과거 파일 정리     
+          else
+            docker container prune -f
+            docker image prune -a -f
+          fi
+          EOF
+          
+          chmod +x scripts/*.sh
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+#        zip 파일로 압축
+      - name: Create deployment bundle
+        run: zip -r deploy.zip appspec.yml scripts/
+
+      - name: Deploy to AWS CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name ${{ secrets.AWS_CODEDEPLOY_APP_NAME }} \
+            --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --s3-location bucket=${{ secrets.AWS_S3_BUCKET }},bundleType=zip,key=deploy.zip \
+            --file-exists-behavior OVERWRITE
