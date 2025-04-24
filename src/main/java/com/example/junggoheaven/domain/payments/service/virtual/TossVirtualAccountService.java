@@ -23,6 +23,7 @@ import com.example.junggoheaven.domain.payments.enums.OrderStatus;
 import com.example.junggoheaven.domain.payments.exception.OrderAmountException;
 import com.example.junggoheaven.domain.payments.service.order.OrderFinder;
 import com.example.junggoheaven.global.aop.Payment;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TossVirtualAccountService implements VirtualAccountService {
 
+	private final ObjectMapper objectMapper;
 	private final RestTemplate restTemplate;
 	private final OrderFinder orderFinder;
 	private final VirtualAccountWriter virtualAccountWriter;
@@ -98,6 +100,25 @@ public class TossVirtualAccountService implements VirtualAccountService {
 	public OrderResponseDto sending(Long orderId) {
 		Order order = orderFinder.findByOrderId(orderId);
 		return OrderResponseDto.from(order);
+	}
+
+	@Override
+	public PaymentApproveResponseDto paymentConfirm(Long amount, String orderKey, String paymentKey) {
+		HttpHeaders headers = createHeaders();
+
+		Map<String, Object> body = Map.of(
+			"amount", amount,
+			"orderId", orderKey,
+			"paymentKey", paymentKey)
+
+		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+		ResponseEntity<PaymentApproveResponseDto> responseEntity = restTemplate.postForEntity(
+			"https://api.tosspayments.com/v1/payments/confirm",
+			request,
+			PaymentApproveResponseDto.class
+		);
+
+		return responseEntity.getBody();
 	}
 
 	private HttpHeaders createHeaders() {
