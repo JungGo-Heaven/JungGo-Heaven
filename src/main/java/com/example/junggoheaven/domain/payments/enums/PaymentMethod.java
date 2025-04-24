@@ -9,7 +9,9 @@ import lombok.Getter;
 @Getter
 public enum PaymentMethod {
 	VIRTUAL_ACCOUNT("가상계좌"),
-	CARD_PAYMENT("카드");
+	CARD_PAYMENT("카드"),
+	EASY_PAYMENT("간편결제"),
+	PHONE_PAYMENT("휴대폰");
 
 	private String method;
 
