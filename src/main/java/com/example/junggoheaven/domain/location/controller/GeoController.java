@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v2/location", method = RequestMethod.GET)
+@RequestMapping(value = "/api/v1/location", method = RequestMethod.GET)
 public class GeoController {
 
     private final GeoService geoService;

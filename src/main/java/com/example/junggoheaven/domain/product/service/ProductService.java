@@ -253,7 +253,7 @@ public class ProductService {
 		return new ProductResponseDto(product);
 	}
 
-	// 가입 시 등록된 위치로 부터 10km 반경 안에 있는 product 조회 메서드
+	// 가입 시 등록된 위치로 부터 1km 반경 안에 있는 product 조회 메서드
 	public Page<ProductResponseDto> findNearbyProductsByUserAddress(Long userId, double radius, Pageable pageable) {
 		User user = userFinder.findByUserId(userId);
 		GeoCoordinate userLocation = geoService.getGeoData(user.getAddress());
