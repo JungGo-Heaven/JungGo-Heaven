@@ -12,7 +12,7 @@ import com.example.junggoheaven.domain.payments.service.virtual.VirtualAccountSe
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class PaymentViewController {
 
@@ -20,7 +20,7 @@ public class PaymentViewController {
 
 	private final String BASE_URL = "http://localhost:8080/api/v1/payments";
 
-	@GetMapping("/payments/sending")
+	@GetMapping("/v1/payments/sending")
 	public String sending(@RequestParam Long orderId, Model model) {
 		model.addAttribute("baseUrl", BASE_URL);
 
@@ -37,7 +37,7 @@ public class PaymentViewController {
 		return "sending";
 	}
 
-	@GetMapping("/payments/virtual/success")
+	@GetMapping("/v1/payments/virtual/success")
 	public String virtualSuccess(@RequestParam String paymentKey,
 		@RequestParam String orderId,
 		@RequestParam String amount,
@@ -52,7 +52,7 @@ public class PaymentViewController {
 		return "toss_success";
 	}
 
-	@GetMapping("/payments/virtual/fail")
+	@GetMapping("/v1/payments/virtual/fail")
 	public String virtualFailWebhook(@RequestParam String message, @RequestParam String status, Model model) {
 
 		model.addAttribute("baseUrl", BASE_URL);

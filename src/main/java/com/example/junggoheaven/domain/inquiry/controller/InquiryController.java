@@ -24,37 +24,37 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class InquiryController {
 
 	private final InquiryService inquiryService;
 
-	@PostMapping("/inquiries")
+	@PostMapping("/v1/inquiries")
 	public ResponseDto<UserInquiryResponseDto> createInquiry(@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody CreateInquiryRequestDto requestDto) {
 		return ResponseDto.success(inquiryService.createInquiry(authUser.getId(), requestDto));
 	}
 
-	@GetMapping("/inquiries/{inquiryId}")
+	@GetMapping("/v1/inquiries/{inquiryId}")
 	public ResponseDto<UserInquiryResponseDto> getInquiry(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable Long inquiryId) {
 		return ResponseDto.success(inquiryService.getInquiry(authUser, inquiryId));
 	}
 
-	@GetMapping("/inquiries/my")
+	@GetMapping("/v1/inquiries/my")
 	public ResponseDto<Page<UserInquiryListResponseDto>> getMyInquiries(@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		return ResponseDto.success(inquiryService.getMyInquiries(authUser.getId(), pageNumber, pageSize));
 	}
 
-	@PatchMapping("/inquiries/{inquiryId}")
+	@PatchMapping("/v1/inquiries/{inquiryId}")
 	public ResponseDto<UserInquiryResponseDto> updateInquiry(@PathVariable Long inquiryId,
 		@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody UpdateInquiryRequestDto requestDto) {
 		return ResponseDto.success(inquiryService.updateInquiry(inquiryId, authUser.getId(), requestDto));
 	}
 
-	@DeleteMapping("/inquiries/{inquiryId}")
+	@DeleteMapping("/v1/inquiries/{inquiryId}")
 	public ResponseDto<Void> deleteInquiry(@PathVariable Long inquiryId, @AuthenticationPrincipal AuthUser authUser) {
 		inquiryService.deleteInquiry(inquiryId, authUser.getId());
 		return ResponseDto.success(null);

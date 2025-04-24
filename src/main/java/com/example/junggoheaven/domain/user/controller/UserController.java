@@ -23,43 +23,43 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserController {
 
 	private final UserService userService;
 
 	@Secured(UserRole.Authority.GUEST)
-	@PatchMapping("/users/additional-info")
+	@PatchMapping("/v1/users/additional-info")
 	public ResponseDto<UserSelfInfoResponseDto> guestUserAddInfo(@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody GuestAddInfoRequestDto requestDto) {
 		return ResponseDto.success(userService.addInfo(authUser.getId(), requestDto));
 	}
 
-	@PatchMapping("/users/my")
+	@PatchMapping("/v1/users/my")
 	public ResponseDto<UserSelfInfoResponseDto> updateUserInfo(@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody UpdateInfoRequestDto requestDto) {
 		return ResponseDto.success(userService.updateUserInfo(authUser.getId(), requestDto));
 	}
 
-	@PatchMapping("/users/my/password")
+	@PatchMapping("/v1/users/my/password")
 	public ResponseDto<Void> updateUserPassword(@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody UpdatePasswordRequestDto requestDto) {
 		userService.updateUserPassword(authUser.getId(), requestDto);
 		return ResponseDto.success(null);
 	}
 
-	@PatchMapping("/users/my/image")
+	@PatchMapping("/v1/users/my/image")
 	public ResponseDto<UserSelfInfoResponseDto> updateUserImage(@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody UploadProfileImageRequestDto requestDto) {
 		return ResponseDto.success(userService.updateUserImage(authUser.getId(), requestDto));
 	}
 
-	@GetMapping("/users/my")
+	@GetMapping("/v1/users/my")
 	public ResponseDto<UserSelfInfoResponseDto> getMyInformation(@AuthenticationPrincipal AuthUser authUser) {
 		return ResponseDto.success(userService.getMyInformation(authUser.getId()));
 	}
 
-	@DeleteMapping("/users/my")
+	@DeleteMapping("/v1/users/my")
 	public ResponseDto<Void> deleteUserAccount(@AuthenticationPrincipal AuthUser authUser) {
 		userService.deleteUserAccount(authUser.getId());
 		return ResponseDto.success(null);
