@@ -45,7 +45,7 @@ public class UserService {
 		String phoneNumber = requestDto.getPhoneNumber();
 		String address = requestDto.getAddress();
 
-		user.guestAddInfo(password, phoneNumber, address);
+		user.guestAddInfo(password, phoneNumber, address, null);
 		keywordDocumentRepository.save(KeywordDocument.of(user));
 
 		String refreshToken = refreshUtil.getRefreshToken(String.valueOf(user.getId()));
