@@ -29,7 +29,7 @@
             const button = document.getElementById("payment-button");
 
             // ------  결제위젯 초기화 ------ https://docs.tosspayments.com/sdk/v2/js
-            const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+            const clientKey = [[${@environment.getProperty('toss.payments.client-key')}]];
             const customerKey = [[${customerKey}]];
             const tossPayments = TossPayments(clientKey);
             const widgets = tossPayments.widgets({
@@ -57,8 +57,8 @@
                 await widgets.requestPayment({
                     orderId: [[${orderId}]],
                     orderName: [[${orderName}]],
-                    successUrl: [[${baseUrl}]] + "/virtual/success",
-                    failUrl: [[${baseUrl}]] + "/virtual/fail",
+                    successUrl: window.location.origin + [[${baseUrl}]] + "/success",
+                    failUrl: window.location.origin + [[${baseUrl}]] + "/fail",
                     customerEmail: [[${customerEmail}]],
                     customerName: [[${customerName}]],
                     customerMobilePhone: [[${customerMobilePhone}]],

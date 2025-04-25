@@ -11,7 +11,8 @@ public enum PaymentMethod {
 	VIRTUAL_ACCOUNT("가상계좌"),
 	CARD_PAYMENT("카드"),
 	EASY_PAYMENT("간편결제"),
-	PHONE_PAYMENT("휴대폰");
+	PHONE_PAYMENT("휴대폰"),
+	ACCOUNT_TRANSFER("계좌이체");
 
 	private String method;
 

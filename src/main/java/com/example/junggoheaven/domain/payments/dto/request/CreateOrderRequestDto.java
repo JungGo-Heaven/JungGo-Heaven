@@ -19,7 +19,7 @@ public class CreateOrderRequestDto {
 	@NotNull(message = "판매 가격을 입력해주세요.")
 	private Long amount;
 	@NotBlank(message = "결제 수단을 선택해주세요.")
-	@ValidEnum(enumClass = PaymentMethod.class, message = "VIRTUAL_ACCOUNT, CARD_PAYMENT 중에서 입력해주세요.")
+	@ValidEnum(enumClass = PaymentMethod.class, message = "VIRTUAL_ACCOUNT, CARD_PAYMENT, EASY_PAYMENT, PHONE_PAYMENT, ACCOUNT_TRANSFER 중에서 입력해주세요.")
 	private String method;
 
 	@Builder

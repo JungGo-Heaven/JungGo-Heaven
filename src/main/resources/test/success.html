@@ -42,14 +42,14 @@
     // 쿼리 파라미터 값이 결제 요청할 때 보낸 데이터와 동일한지 반드시 확인하세요.
     // 클라이언트에서 결제 금액을 조작하는 행위를 방지할 수 있습니다.
     const urlParams = new URLSearchParams(window.location.search);
-    const baseUrl = "\/api\/v1\/payments";
+    const baseUrl = "\/v1\/payments";
 
     // 서버로 결제 승인에 필요한 결제 정보를 보내세요.
     async function confirm() {
         var requestData = {
-            paymentKey: "tviva20250423173732oHu68",
-            orderId: "c9a86763-7699-38f4-b902-561727688089",
-            amount: "1000",
+            paymentKey: "tgen_20250425163338DuqP3",
+            orderId: "5359d46a-a8a2-3e15-9d64-d7da2e2fb292",
+            amount: "100",
         };
 
         const response = await fetch(baseUrl + "/confirm", {

@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.payments.service.virtual;
+package com.example.junggoheaven.domain.payments.service.payment;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;

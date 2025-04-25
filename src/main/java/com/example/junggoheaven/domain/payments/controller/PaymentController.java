@@ -10,11 +10,9 @@ import com.example.junggoheaven.domain.payments.dto.request.PaymentsConfirmReque
 import com.example.junggoheaven.domain.payments.dto.toss.PaymentWebhookRequestDto;
 import com.example.junggoheaven.domain.payments.dto.request.VirtualPaymentRequestDto;
 import com.example.junggoheaven.domain.payments.dto.response.PaymentApproveResponseDto;
-import com.example.junggoheaven.domain.payments.service.virtual.VirtualAccountService;
+import com.example.junggoheaven.domain.payments.service.payment.VirtualAccountService;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
-import com.example.junggoheaven.global.common.annotation.ValidEnum;
 import com.example.junggoheaven.global.common.response.ResponseDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
