@@ -2,6 +2,8 @@ package com.example.junggoheaven.domain.auction.rabbitMQ;
 
 import com.example.junggoheaven.domain.auction.entity.Auction;
 import com.example.junggoheaven.domain.auction.rabbitMQ.dto.BidMessage;
+import com.example.junggoheaven.global.common.exception.ErrorCode;
+import com.example.junggoheaven.global.redis.RedisErrorPublisher;
 import com.example.junggoheaven.global.redis.exception.InvalidBidPriceException;
 import com.example.junggoheaven.domain.auction.service.auctionService.component.AuctionFinder;
 import com.example.junggoheaven.domain.auction.service.bidService.BidService;
@@ -9,13 +11,16 @@ import com.example.junggoheaven.global.config.RabbitMQConfig;
 import com.example.junggoheaven.global.redis.RedisService;
 import com.example.junggoheaven.global.redis.exception.FailedBidException;
 import com.example.junggoheaven.global.redis.exception.FailedToAcquireLockException;
+import com.example.junggoheaven.global.redis.exception.RedisErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -27,6 +32,7 @@ public class BidConsumer {
     private final RedissonClient redissonClient;
     private final RedisService redisService;
     private final AuctionFinder auctionFinder;
+    private final RedisErrorPublisher redisErrorPublisher;
 
     @RabbitListener(queues = RabbitMQConfig.BID_QUEUE)
     public void consume(BidMessage message) {
@@ -54,7 +60,14 @@ public class BidConsumer {
             bidService.createBid(message.userId(), message.auctionId(), message.bidPrice());
         } catch (Exception e){
             log.error(" 입찰 처리 중 예외 발생 - message: {}", message, e);
-            throw new FailedBidException(message.auctionId(), message.userId());
+            redisErrorPublisher.broadcastError(
+                    RedisErrorCode.FAILED_BID,
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage(),
+                    message.userId(),
+                    Map.of("auctionId", message.auctionId())
+            );
+
         }
     }
 }

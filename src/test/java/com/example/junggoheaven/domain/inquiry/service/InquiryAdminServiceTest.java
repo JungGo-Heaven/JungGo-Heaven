@@ -160,20 +160,20 @@ class InquiryAdminServiceTest {
 
 	@Test
 	void changeInquiryStatus() {
-		InquiryStatus status = InquiryStatus.COMPLETED;
+		String status = InquiryStatus.COMPLETED.name();
 		InquiryStatusRequestDto requestDto = new InquiryStatusRequestDto(1L, status);
 		given(inquiryFinder.findInquiryById(any())).willReturn(inquiry1);
 
 		AdminInquiryResponseDto responseDto = inquiryAdminService.changeInquiryStatus(requestDto);
 
 		assertThat(responseDto).isNotNull();
-		assertThat(responseDto.getInquiryStatus()).isEqualTo(status.name());
+		assertThat(responseDto.getInquiryStatus()).isEqualTo(status);
 		assertThat(responseDto.getInquiryStatus()).isEqualTo(inquiry1.getStatus().name());
 	}
 
 	@Test
 	void changeInquiryStatus_동일한_상태코드() {
-		InquiryStatus status = inquiry1.getStatus();
+		String status = inquiry1.getStatus().name();
 		InquiryStatusRequestDto requestDto = new InquiryStatusRequestDto(1L, status);
 		given(inquiryFinder.findInquiryById(any())).willReturn(inquiry1);
 

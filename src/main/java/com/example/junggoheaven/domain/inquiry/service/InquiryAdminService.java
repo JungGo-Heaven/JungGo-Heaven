@@ -65,7 +65,7 @@ public class InquiryAdminService {
 	@Transactional
 	public AdminInquiryResponseDto changeInquiryStatus(InquiryStatusRequestDto requestDto) {
 		Long inquiryId = requestDto.getInquiryId();
-		InquiryStatus updateStatus = requestDto.getStatus();
+		InquiryStatus updateStatus = InquiryStatus.of(requestDto.getStatus());
 		Inquiry inquiry = inquiryFinder.findInquiryById(inquiryId);
 
 		if (inquiry.getStatus().equals(updateStatus)) {

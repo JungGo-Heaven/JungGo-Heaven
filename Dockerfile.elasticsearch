@@ -1,8 +1,6 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:8.7.1 AS builder
-
-CMD bin/elasticsearch-plugin install analysis-nori
-
 FROM docker.elastic.co/elasticsearch/elasticsearch:8.7.1
+
+RUN elasticsearch-plugin install --batch analysis-nori
 
 ENV node.name=es-node \
     cluster.name=search-cluster \

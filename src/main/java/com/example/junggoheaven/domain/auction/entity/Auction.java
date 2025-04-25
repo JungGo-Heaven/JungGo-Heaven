@@ -9,12 +9,16 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE auction SET status = 'DELETED' WHERE id = ?")
+@Filter(name = "deletedFilter", condition = "status <> 'DELETED'")
 public class Auction extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

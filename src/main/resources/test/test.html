@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="https://static.toss.im/icons/png/4x/icon-toss-logo.png" />
+    <link rel="stylesheet" type="text/css" href="../static/toss_style.css" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>토스페이먼츠 샘플 프로젝트</title>
+    <!-- 토스페이먼츠 SDK 추가 -->
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+</head>
+
+<body>
+<!-- 주문서 영역 -->
+<div class="wrapper">
+    <div class="box_section" style="padding: 40px 30px 50px 30px; margin-top: 30px; margin-bottom: 50px">
+        <!-- 결제 UI -->
+        <div id="payment-method"></div>
+        <!-- 이용약관 UI -->
+        <div id="agreement"></div>
+        <!-- 결제하기 버튼 -->
+        <button class="button" id="payment-button" style="margin-top: 30px">결제하기</button>
+    </div>
+    <script>
+        main();
+
+        async function main() {
+            const button = document.getElementById("payment-button");
+
+            // ------  결제위젯 초기화 ------ https://docs.tosspayments.com/sdk/v2/js
+            const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+            const customerKey = "d6d77053-92bc-3af6-b332-8bea8c4c6904";
+            const tossPayments = TossPayments(clientKey);
+            const widgets = tossPayments.widgets({
+                customerKey,
+            });
+
+            // ------  주문서의 결제 금액 설정 ------
+            await widgets.setAmount({
+                currency: "KRW",
+                value: 100,
+            });
+
+            await Promise.all([
+                // ------  결제 UI 렌더링 ------
+                widgets.renderPaymentMethods({
+                    selector: "#payment-method",
+                    variantKey: "DEFAULT",
+                }),
+                // ------  이용약관 UI 렌더링 ------
+                widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" }),
+            ]);
+
+            // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------ https://docs.tosspayments.com/sdk/v2/js#widgetsrequestpayment
+            button.addEventListener("click", async function () {
+                await widgets.requestPayment({
+                    orderId: "8f3fbc6c-26fb-32da-8dd7-cfb899faeece",
+                    orderName: "\uD140\uBE14\uB7EC 1\uAC1C",
+                    successUrl: "http:\/\/localhost:8080\/api\/v1\/payments" + "/virtual/success"
+                        + "?paymentKey=" + encodeURIComponent("tviva20250423184657lpKB9")
+                        + "&orderId=" + encodeURIComponent("8f3fbc6c-26fb-32da-8dd7-cfb899faeece")
+                        + "&amount=" + encodeURIComponent(100)
+                        + "&paymentType=NORMAL",
+                    failUrl: "http:\/\/localhost:8080\/api\/v1\/payments" + "/virtual/fail",
+                    customerEmail: "email1@email.com",
+                    customerName: "user1",
+                    customerMobilePhone: "01012344567",
+                });
+            });
+        }
+    </script>
+</div>
+</body>
+
+</html>

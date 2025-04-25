@@ -27,6 +27,8 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -70,6 +72,16 @@ dependencies {
 
     //redisson
     implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
+
+    // ElasticSearch
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'co.elastic.clients:elasticsearch-java:8.18.0'
+
+    //GenericJackson2JsonRedisSerializer 날짜 직렬화
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    //tsid
+    implementation 'com.github.f4b6a3:tsid-creator:5.2.6'
 
 }
 

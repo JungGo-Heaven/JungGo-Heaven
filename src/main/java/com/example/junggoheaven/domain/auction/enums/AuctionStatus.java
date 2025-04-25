@@ -5,5 +5,5 @@ public enum AuctionStatus {
     ONGOING,
     SUCCESSFUL,
     FAILED,
-    DELETE
+    DELETED
 }

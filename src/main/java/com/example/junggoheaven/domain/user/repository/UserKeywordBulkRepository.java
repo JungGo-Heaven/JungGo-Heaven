@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.example.junggoheaven.domain.user.entity.UserKeyword;
+import com.example.junggoheaven.domain.keyword.entity.UserKeyword;
 
 import lombok.RequiredArgsConstructor;
 

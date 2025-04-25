@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class ChatDeleteNotificationDto {
+    private Long chatRoomId;
     private Long deleterId;
     private List<Long> deletedMessageIds;
 }

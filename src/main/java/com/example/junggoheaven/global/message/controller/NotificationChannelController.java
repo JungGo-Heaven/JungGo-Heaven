@@ -23,7 +23,7 @@ public class NotificationChannelController {
 
 	@PostMapping("/v1/notifications")
 	public ResponseEntity<?> createNotificationChannel(@AuthenticationPrincipal AuthUser authUser, @RequestBody CreateNotificationRequestDto dto) {
-		notificationChannelService.createNotificationChannel(authUser.getId(), dto.getChannelType());
+		notificationChannelService.addNotificationChannel(authUser.getId(), dto.getChannelType());
 		return ResponseEntity.ok().build();
 	}
 

@@ -7,9 +7,8 @@ public enum RedisErrorCode implements ErrorCode {
 
     FAILED_TO_ACQUIRE_LOCK("FAILED_TO_ACQUIRE_LOCK", HttpStatus.LOCKED, "현재 서버에 요청이 많습니다. 다시 시도해주세요"),
     FAILED_BID("FAILED_BID", HttpStatus.BAD_REQUEST, "입찰에 실패하였습니다."),
-    INVALID_BID_PRICE("INVALID_BID_PRICE", HttpStatus.BAD_REQUEST, "입찰 금액은 최고가 이상이어야 합니다.");
-
-
+    INVALID_BID_PRICE("INVALID_BID_PRICE", HttpStatus.BAD_REQUEST, "입찰 금액은 최고가 이상이어야 합니다."),
+    FAILED_SAVE_TO_ZSET("FAILED_SAVE_TO_ZSET", HttpStatus.BAD_REQUEST, "ZSet 저장 중 오류");
 
     private String code;
     private HttpStatus httpStatus;

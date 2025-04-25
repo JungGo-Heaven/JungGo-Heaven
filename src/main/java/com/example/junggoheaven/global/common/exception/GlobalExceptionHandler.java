@@ -3,10 +3,8 @@ package com.example.junggoheaven.global.common.exception;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.junggoheaven.domain.auction.controller.BidErrorBroadcaster;
-import com.example.junggoheaven.global.redis.exception.InvalidBidPriceException;
-import com.example.junggoheaven.global.redis.exception.FailedBidException;
-import com.example.junggoheaven.global.redis.exception.FailedToAcquireLockException;
+import com.example.junggoheaven.global.redis.RedisErrorPublisher;
+import com.example.junggoheaven.global.redis.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
-	private final BidErrorBroadcaster bidErrorBroadcaster;
+	private final RedisErrorPublisher redisErrorPublisher;
 
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -60,20 +58,14 @@ public class GlobalExceptionHandler {
 	}
 
 
-	@ExceptionHandler(FailedToAcquireLockException.class)
-	public void handleLockFail(FailedToAcquireLockException ex) {
-		bidErrorBroadcaster.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getAuctionId(), ex.getUserId());
+    @ExceptionHandler(Exception.class)
+	public ResponseEntity<ResponseDto> handleException(Exception ex){
+		ResponseDto error = ResponseDto.fail(HttpStatus.BAD_REQUEST, ex.getClass().getSimpleName(), ex.getMessage());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 	}
 
-	@ExceptionHandler(InvalidBidPriceException.class)
-	public void handleInvalidBid(InvalidBidPriceException ex) {
-		bidErrorBroadcaster.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getAuctionId(), ex.getUserId());
-	}
-
-	@ExceptionHandler(FailedBidException.class)
-	public void handleFailedBid(FailedBidException ex) {
-		bidErrorBroadcaster.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getAuctionId(), ex.getUserId());
-	}
-
-
+    @ExceptionHandler(BroadcastException.class)
+	public void handleBroadcastError(BroadcastException ex) {
+		redisErrorPublisher.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getUserId(), ex.getContext());
+    }
 }

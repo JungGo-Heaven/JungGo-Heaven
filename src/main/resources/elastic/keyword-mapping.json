@@ -1,0 +1,38 @@
+{
+  "properties": {
+    "id": {
+      "type": "text"
+    },
+    "email": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 100
+        }
+      }
+    },
+    "keywords": {
+      "type": "nested",
+      "properties": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 20
+        },
+        "excludeKeywords": {
+          "type": "keyword",
+          "ignore_above": 20
+        }
+      }
+    },
+    "channels": {
+      "type": "keyword",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 20
+        }
+      }
+    }
+  }
+}

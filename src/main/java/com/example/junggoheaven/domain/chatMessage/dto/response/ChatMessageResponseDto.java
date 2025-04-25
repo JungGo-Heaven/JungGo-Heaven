@@ -18,4 +18,5 @@ public class ChatMessageResponseDto {
     private String imageUrl;
     private LocalDateTime sendAt;
     private MessageType messageType;
+    private Boolean isRead;
 }

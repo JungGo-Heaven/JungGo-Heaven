@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.junggoheaven.domain.user.service.UserKeywordService;
+import com.example.junggoheaven.domain.keyword.service.MysqlKeywordService;
 import com.example.junggoheaven.global.message.event.TestEventPublisher;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TestController {
 	private final TestEventPublisher testEventPublisher;
-	private final UserKeywordService userKeywordService;
+	private final MysqlKeywordService mysqlKeywordService;
 
 	@GetMapping("/v1/publish/{name}")
 	public ResponseEntity<?> testPublishV1(@PathVariable String name) {
@@ -38,7 +38,7 @@ public class TestController {
 
 	@PostMapping("/keywords/{userId}")
 	public ResponseEntity<Void> addKeywords(@PathVariable Long userId, @RequestBody List<String> keywords) {
-		userKeywordService.addKeywords(userId, keywords);
+		mysqlKeywordService.addKeywords(userId, keywords);
 		return ResponseEntity.ok().build();
 	}
 }

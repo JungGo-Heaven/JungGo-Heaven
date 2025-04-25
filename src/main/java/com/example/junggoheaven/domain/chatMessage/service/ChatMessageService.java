@@ -5,8 +5,10 @@ import com.example.junggoheaven.domain.chatMessage.dto.request.ChatMessageReques
 import com.example.junggoheaven.domain.chatMessage.dto.request.ChatReadRequestDto;
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageResponseDto;
 import com.example.junggoheaven.domain.chatMessage.entity.ChatMessage;
+import com.example.junggoheaven.domain.chatMessage.enums.MessageType;
 import com.example.junggoheaven.domain.chatMessage.exception.ChatRoomMissMatchException;
 import com.example.junggoheaven.domain.chatMessage.exception.NoPermissionToChatMessage;
+import com.example.junggoheaven.domain.chatMessage.redis.dto.RedisChatMessageDto;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageChecker;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageFinder;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageWriter;
@@ -17,6 +19,8 @@ import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.global.common.entity.IdGenerator;
+import com.example.junggoheaven.global.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +30,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ChatMessageService {
-    private final ChatMessageChecker chatMessageChecker;
     private final ChatMessageFinder chatMessageFinder;
     private final ChatMessageWriter chatMessageWriter;
 
@@ -37,34 +40,53 @@ public class ChatMessageService {
 
     private final UserFinder userFinder;
 
+    private final RedisService redisService;
+
+    @Transactional
     public ChatMessageResponseDto createMessage(ChatMessageRequestDto requestDto, Long userId) {
         User user = userFinder.findByUserId(userId);
         ChatRoom chatRoom;
-        ChatMessage chatMessage;
+        RedisChatMessageDto redisChatMessageDto;
 
         if(requestDto.getChatRoomId() != null) {
             chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
-            chatMessage = ChatMessage.of(chatRoom, user, requestDto.getMessage(), requestDto.getMessageType());
+            redisChatMessageDto = new RedisChatMessageDto(
+                    chatRoom.getId(),
+                    user.getId(),
+                    IdGenerator.generateId(),
+                    requestDto.getMessage(),
+                    null,
+                    null,
+                    MessageType.TEXT
+            );
         } else {
             Product product = productFinder.findProductById(requestDto.getProductId());
             ChatRoom newChatRoom = ChatRoom.of(product, user);
             ChatRoom savedChatRoom = chatRoomWriter.save(newChatRoom);
-            chatMessage = ChatMessage.of(savedChatRoom, user, requestDto.getMessage(), requestDto.getMessageType());
+            redisChatMessageDto = new RedisChatMessageDto(
+                    savedChatRoom.getId(),
+                    user.getId(),
+                    IdGenerator.generateId(),
+                    requestDto.getMessage(),
+                    null,
+                    null,
+                    MessageType.TEXT
+            );
         }
-
-        ChatMessage savedMessage = chatMessageWriter.save(chatMessage);
+        redisService.saveChatMessageToZSet(redisChatMessageDto);
 
         return new ChatMessageResponseDto(
-                savedMessage.getChatRoom().getId(),
-                savedMessage.getId(),
-                savedMessage.getSender().getId(),
-                savedMessage.getMessage(),
-                savedMessage.getChatRoomImage() != null ? savedMessage.getChatRoomImage().getChatRoomImageUrl() : null,
-                savedMessage.getSendAt(),
-                savedMessage.getMessageType()
+                redisChatMessageDto.getChatRoomId(),
+                redisChatMessageDto.getChatMessageId(),
+                redisChatMessageDto.getSenderId(),
+                redisChatMessageDto.getMessage(),
+                null,
+                redisChatMessageDto.getSendAt(),
+                redisChatMessageDto.getMessageType(),
+                false
         );
     }
-
+    @Transactional
     public void isRead(ChatReadRequestDto requestDto, Long userId) {
         ChatRoom chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
         User user = userFinder.findByUserId(userId);
@@ -91,5 +113,20 @@ public class ChatMessageService {
             }
             message.isDeleted();
         }
+    }
+    @Transactional
+    public void saveAll(List<RedisChatMessageDto> batch) {
+        List<ChatMessage> messages = batch.stream()
+                .map(dto -> ChatMessage.of(
+                        dto.getChatMessageId(),
+                        chatRoomFinder.findByChatRoomId(dto.getChatRoomId()),
+                        userFinder.findByUserId(dto.getSenderId()),
+                        dto.getMessage(),
+                        dto.getMessageType(),
+                        dto.getSendAt(),
+                        dto.getIsRead()
+                ))
+                .toList();
+        chatMessageWriter.saveAll(messages);
     }
 }

@@ -6,6 +6,7 @@ import com.example.junggoheaven.domain.chatMessage.dto.request.ChatReadRequestDt
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatDeleteNotificationDto;
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageResponseDto;
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatReadNotificationDto;
+import com.example.junggoheaven.domain.chatMessage.redis.RedisChatMessagePublisher;
 import com.example.junggoheaven.domain.chatMessage.service.ChatMessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -18,7 +19,7 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class ChatMessageHandler {
     private final ChatMessageService chatMessageService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final RedisChatMessagePublisher redisChatMessagePublisher;
 
     @MessageMapping("/api/v1/chat-rooms/message")
     public void sendMessage(ChatMessageRequestDto chatMessageRequestDto,
@@ -26,11 +27,7 @@ public class ChatMessageHandler {
         Long userId = Long.parseLong(principal.getName());
         ChatMessageResponseDto saved = chatMessageService.createMessage(chatMessageRequestDto, userId);
 
-        // 상대방에게 브로드캐스트
-        simpMessagingTemplate.convertAndSend(
-                "/sub/chat/room/" + chatMessageRequestDto.getChatRoomId(),
-                saved
-        );
+        redisChatMessagePublisher.publish("chat.message", saved);
     }
 
     /**
@@ -52,10 +49,9 @@ public class ChatMessageHandler {
         Long userId = Long.parseLong(principal.getName());
         chatMessageService.isRead(requestDto, userId);
 
-        simpMessagingTemplate.convertAndSend(
-                "/sub/chat/room/" + requestDto.getChatRoomId(),
-                new ChatReadNotificationDto(userId, requestDto.getReadMessageIds())
-        );
+        ChatReadNotificationDto responseDto = new ChatReadNotificationDto(requestDto.getChatRoomId(), userId, requestDto.getReadMessageIds());
+
+        redisChatMessagePublisher.publishRead("chat.message", responseDto);
     }
 
     @MessageMapping("/api/v1/chat-rooms/message/delete")
@@ -63,10 +59,9 @@ public class ChatMessageHandler {
         Long userId = Long.parseLong(principal.getName());
         chatMessageService.deleteMessage(requestDto, userId);
 
-        simpMessagingTemplate.convertAndSend(
-                "/sub/chat/room/" + requestDto.getChatRoomId(),
-                new ChatDeleteNotificationDto(userId, requestDto.getDeleteMessageIds())
-        );
+        ChatDeleteNotificationDto responseDto = new ChatDeleteNotificationDto(requestDto.getChatRoomId(), userId, requestDto.getDeleteMessageIds());
+
+        redisChatMessagePublisher.publishDelete("chat.message", responseDto);
     }
 
 

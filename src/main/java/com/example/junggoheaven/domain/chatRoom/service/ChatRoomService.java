@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class ChatRoomService {
      * 존재한다면 채팅방Id를 통해 채팅메세지 테이블에 접근하여 sendAt(메세지 보낸날짜)을 오름차순으로 정렬하여 채팅 리스트를 가져옴
      * 존재하지 않는다면 빈 리스트를 응답
      */
+    @Transactional(readOnly = true)
     public ResponseDto<ChatRoomEnterResponseDto> enterChatRoom(Long productId, AuthUser authUser){
         Optional<ChatRoom> chatRoom = chatRoomFinder.findByProductIdAndBuyerIdOpt(productId, authUser.getId());
 
@@ -46,7 +48,8 @@ public class ChatRoomService {
                             m.getMessage(),
                             m.getChatRoomImage() != null ? m.getChatRoomImage().getChatRoomImageUrl() : null,
                             m.getSendAt(),
-                            m.getMessageType()
+                            m.getMessageType(),
+                            m.getIsRead()
                     ))
                     .toList();
 
@@ -56,6 +59,7 @@ public class ChatRoomService {
         return ResponseDto.success(new ChatRoomEnterResponseDto()); // 저장된 채팅방이 없으므로 빈 배열 응답
     }
 
+    @Transactional(readOnly = true)
     public ResponseDto<Page<ChatRoomsResponseDto>> getChatRooms(Long authUserId, Pageable pageable){
         Page<ChatRoom> chatRooms = chatRoomFinder.findPagingChatRooms(authUserId, pageable);
 
@@ -72,6 +76,7 @@ public class ChatRoomService {
         return ResponseDto.success(response);
     }
 
+    @Transactional
     public void exitChatRoom(Long chatRoomId, AuthUser authUser){
         ChatRoom chatRoom = chatRoomFinder.findByChatRoomId(chatRoomId);
 
