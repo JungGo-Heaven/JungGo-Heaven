@@ -134,7 +134,6 @@ public class S3StorageService implements StorageService {
                 UploadResponse upload = upload(image, type, authUser, resourceId);
                 String fullUrl = buildCloudFrontUrl(upload.getUploadUrl());
                 responses.add(fullUrl);
-//                responses.add(upload.getUploadUrl());
             } catch (Exception e) {
                 log.error("{} 번째 업로드 중 예외 발생: {}", counter, e.getLocalizedMessage());
                 throw new ImageUploadIOException();
