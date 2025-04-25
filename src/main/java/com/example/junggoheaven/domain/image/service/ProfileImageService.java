@@ -30,3 +30,4 @@ public class ProfileImageService {
         return profileImageRepository.save(profileImage);
     }
 }
+
