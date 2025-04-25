@@ -94,7 +94,7 @@ class TossVirtualAccountServiceTest {
 		String EXPIRED = "EXPIRED";
 
 		WebhookDataInfo data = WebhookDataInfo.of("lastTransactionKey", "paymentKey", "orderId", "orderName",
-			DONE, "requestedAt", "useEscrow", "secret", 300L, 30L, "method", accountInfo);
+			DONE, "requestedAt", "useEscrow", "secret", 300L, 30L, "method", accountInfo, null, null, null, null);
 
 		given(orderFinder.findByOrderKey(any())).willReturn(order);
 
@@ -118,7 +118,7 @@ class TossVirtualAccountServiceTest {
 	@Test
 	void virtualWebhook_가격_비교_실패() {
 		WebhookDataInfo data = WebhookDataInfo.of("lastTransactionKey", "paymentKey", "orderId", "orderName",
-			"DONE", "requestedAt", "useEscrow", "secret", 3000L, 30L, "method", accountInfo);
+			"DONE", "requestedAt", "useEscrow", "secret", 3000L, 30L, "method", accountInfo, null, null, null, null);
 		given(orderFinder.findByOrderKey(any())).willReturn(order);
 
 		assertThrows(OrderAmountException.class, () -> {
