@@ -19,11 +19,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.CreatedDate;
+import org.locationtech.jts.geom.Point;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 
 @Entity
@@ -54,6 +59,18 @@ public class Product extends TimeStamp {
 	@Column(nullable = false)
 	private Long price;
 
+	@Column(nullable = false)
+	private String address;
+
+	@Column(nullable = false)
+	private Double longitude;
+
+	@Column(nullable = false)
+	private Double latitude;
+
+	@Column(columnDefinition = "POINT SRID 4326")
+	private Point location;
+
 	@Enumerated(EnumType.STRING)
 	private SellStatus sellStatus;
 
@@ -73,7 +90,11 @@ public class Product extends TimeStamp {
 		String name,
 		String information,
 		Long price,
-		ProductImage productImage
+		ProductImage productImage,
+		String address,
+		Double longitude,
+		Double latitude,
+		Point location
 	) {
 		this.user = user;
 		this.name = name;
@@ -83,6 +104,10 @@ public class Product extends TimeStamp {
 		this.productImage = productImage;
 		//this.deletedAt = null;
 		this.status = ProductStatus.NORMAL;
+		this.address = address;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.location = location;
 	}
 
 	// 테스트 꼬임 방지용 생성자
@@ -99,7 +124,6 @@ public class Product extends TimeStamp {
 		this.sellStatus = SellStatus.ONSALE;
 		//this.deletedAt = null;
 	}
-
 
 	public void softDeleteSetDateTime() {
 		this.deletedAt = LocalDateTime.now();

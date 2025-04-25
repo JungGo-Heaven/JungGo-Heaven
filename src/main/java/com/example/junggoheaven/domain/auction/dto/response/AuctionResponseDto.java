@@ -14,7 +14,7 @@ public class AuctionResponseDto {
     private Long auctionId;
     private Long auctionProductId;
     private String auctionProductName;
-    private String information;
+    private String description;
     private int startPrice;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

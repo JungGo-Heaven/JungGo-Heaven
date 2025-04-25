@@ -57,11 +57,13 @@ public class User extends TimeStamp {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "profile_image_id")
 	private ProfileImage profileImage;
+	@Column(name = "last_verified_at")
+	private LocalDateTime lastVerifiedAt;
 	@Column(unique = true)
 	private String customerKey;
 
 	@Builder
-	private User(String email, String password, String name, String phoneNumber, String address) {
+	private User(String email, String password, String name, String phoneNumber, String address, LocalDateTime lastVerifiedAt) {
 		this.email = email;
 		this.password = password;
 		this.name = name;
@@ -69,6 +71,7 @@ public class User extends TimeStamp {
 		this.address = address;
 		this.role = UserRole.ROLE_USER;
 		this.status = UserStatus.ACTIVE;
+		this.lastVerifiedAt = lastVerifiedAt;
 	}
 
 	@Builder
@@ -98,13 +101,14 @@ public class User extends TimeStamp {
 		this.password = password;
 	}
 
-	public void guestAddInfo(String password, String phoneNumber, String address) {
+	public void guestAddInfo(String password, String phoneNumber, String address, LocalDateTime lastVerifiedAt) {
 		this.password = password;
 		if (phoneNumber != null && !phoneNumber.isBlank()) {
 			this.phoneNumber = phoneNumber;
 		}
 		this.address = address;
 		this.role = UserRole.ROLE_USER;
+		this.lastVerifiedAt = lastVerifiedAt;
 	}
 
 	public void updateName(String name) {
@@ -122,6 +126,8 @@ public class User extends TimeStamp {
 	public void updateProfileImage(ProfileImage profileImage) {
 		this.profileImage = profileImage;
 	}
+
+	public void updateLastVerifiedAt(LocalDateTime lastVerifiedAt) {this.lastVerifiedAt = lastVerifiedAt;}
 
 	// insert 이후, id를 이용해 customerKey 생성 -> 결제 기능 수행에 필요
 	@PostPersist

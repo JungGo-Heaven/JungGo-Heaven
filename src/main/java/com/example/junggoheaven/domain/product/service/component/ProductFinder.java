@@ -7,6 +7,7 @@ import com.example.junggoheaven.domain.product.repository.ProductRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,4 +34,9 @@ public class ProductFinder {
 	public List<Product> findLikeTop5Products(List<Long> ids){
 		return productRepository.findByIdIn(ids);
 	}
+
+	public Page<Product> findNearbyProductsByLocation(Point location, double radius, Pageable pageable) {
+		return productRepository.findNearbyProductsByLocation(location, radius, pageable);
+	}
+
 }

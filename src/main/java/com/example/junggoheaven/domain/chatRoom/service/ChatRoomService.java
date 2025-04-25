@@ -8,6 +8,13 @@ import com.example.junggoheaven.domain.chatRoom.dto.response.ChatRoomsResponseDt
 import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
 import com.example.junggoheaven.domain.chatRoom.exception.ChatRoomForbidden;
 import com.example.junggoheaven.domain.chatRoom.service.component.ChatRoomFinder;
+import com.example.junggoheaven.domain.location.dto.LocationVerificationRequest;
+import com.example.junggoheaven.domain.location.exception.LocationVerificationRequiredException;
+import com.example.junggoheaven.domain.location.service.LocationVerificationService;
+import com.example.junggoheaven.domain.product.entity.Product;
+import com.example.junggoheaven.domain.product.service.component.ProductFinder;
+import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +34,12 @@ public class ChatRoomService {
 
     private final ChatMessageFinder chatMessageFinder;
 
+    private final ProductFinder productFinder;
+
+    private final UserFinder userFinder;
+
+    private final LocationVerificationService locationVerificationService;
+
     /***
      * 채팅방이 데이터베이스에 저장되는 조건은 채팅방에 입장했을 때가 아니라 처음 메세지를 보냈을 때이다.
      * productId와 요청자(구매자 -> 구매자가 항상 먼저 판매자에게 채팅을 걸 수 있기 때문에)id를 통해 채팅방이 존재하는 지 확인.
@@ -36,6 +49,24 @@ public class ChatRoomService {
      */
     @Transactional(readOnly = true)
     public ResponseDto<ChatRoomEnterResponseDto> enterChatRoom(Long productId, AuthUser authUser){
+        // '내 동네 인증' 절차 걸쳐야 채팅방 입장 가능!
+        User user = userFinder.findByUserId(authUser.getId());
+        Product product = productFinder.findProductById(productId);
+
+        LocationVerificationRequest request = LocationVerificationRequest.of(
+                product.getLongitude(),
+                product.getLatitude(),
+                user.getId());
+
+        boolean isVerified = locationVerificationService.authenticateLocation(request);
+
+        if (!isVerified) {
+            throw new LocationVerificationRequiredException();
+        }
+
+        // 인증 통과 후 lastVerifiedAt 업데이트
+        locationVerificationService.updateLastVerified(user);
+
         Optional<ChatRoom> chatRoom = chatRoomFinder.findByProductIdAndBuyerIdOpt(productId, authUser.getId());
 
         if(chatRoom.isPresent()){

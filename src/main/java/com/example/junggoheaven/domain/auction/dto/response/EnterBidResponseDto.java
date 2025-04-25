@@ -17,6 +17,7 @@ public class EnterBidResponseDto {
     private LocalDateTime endTime;
     private Long bidId;
     private String bidderName;
+    private Integer bidPrice;
 
     public static EnterBidResponseDto of(Auction auction, @Nullable Bid bid) {
         return new EnterBidResponseDto(
@@ -25,7 +26,8 @@ public class EnterBidResponseDto {
                 auction.getStart_price(),
                 auction.getEnd_time(),
                 bid != null ? bid.getId() : null,
-                bid != null ? bid.getBidder().getName() : null
+                bid != null ? bid.getBidder().getName() : null,
+                bid != null ? bid.getBidPrice() : null
         );
     }
 }

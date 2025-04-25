@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class ChatMessageFinderTest {
         chatRoom = ChatRoom.of(null, sender);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
 
-        chatMessage = ChatMessage.of(chatRoom, sender, "test message", MessageType.TEXT);
+        chatMessage = ChatMessage.of(1L, chatRoom, sender, "test message", MessageType.TEXT, LocalDateTime.now(), false);
     }
 
     @Test

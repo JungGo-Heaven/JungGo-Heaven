@@ -3,6 +3,7 @@ package com.example.junggoheaven.domain.product.controller;
 import com.example.junggoheaven.domain.product.dto.request.ProductRequestDto;
 import com.example.junggoheaven.domain.product.dto.request.ProductSellStatusRequestDto;
 import com.example.junggoheaven.domain.product.dto.response.ProductResponseDto;
+import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.service.ProductService;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
@@ -134,5 +135,15 @@ public class ProductController {
 
 	}
 
+	// 1km 반경 이내의 product를 가까운 거리 순으로 정렬하여 조회
+	@GetMapping("/v2/products/nearby")
+	public ResponseDto<Page<ProductResponseDto>> getNearbyProductsByUserLocation(
+			@AuthenticationPrincipal AuthUser authUser,
+			@RequestParam(defaultValue = "1000") double radius,
+			@PageableDefault Pageable pageable
+	) {
+		Page<ProductResponseDto> nearbyProducts = productService.findNearbyProductsByUserAddress(authUser.getId(), radius, pageable);
+		return ResponseDto.success(nearbyProducts);
+	}
 
 }

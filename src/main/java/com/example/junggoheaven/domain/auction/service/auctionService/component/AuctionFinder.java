@@ -25,6 +25,7 @@ public class AuctionFinder {
         return auction;
     }
 
+    @Deprecated //DB 비관적락 방식
     public Auction findAuctionByIdForBid(Long id) {
         Auction auction = auctionRepository.findAuctionByIdForBid(id);
         if (auction == null) {
