@@ -22,11 +22,15 @@ public class WebhookDataInfo {
 	private Long vat;
 	private String method;
 	private VirtualAccountInfo virtualAccount;
+	private CardInfo card;
+	private MobilePhoneInfo mobilePhone;
+	private TransferInfo transfer;
+	private EasyPayInfo easyPay;
 
 	@Builder
 	private WebhookDataInfo(String lastTransactionKey, String paymentKey, String orderId, String orderName,
 		String status, String requestedAt, String useEscrow, String secret, Long totalAmount, Long vat, String method,
-		VirtualAccountInfo virtualAccount) {
+		VirtualAccountInfo virtualAccount, CardInfo card,  MobilePhoneInfo mobilePhone, TransferInfo transfer, EasyPayInfo easyPay) {
 		this.lastTransactionKey = lastTransactionKey;
 		this.paymentKey = paymentKey;
 		this.orderId = orderId;
@@ -39,14 +43,19 @@ public class WebhookDataInfo {
 		this.vat = vat;
 		this.method = method;
 		this.virtualAccount = virtualAccount;
+		this.card = card;
+		this.mobilePhone = mobilePhone;
+		this.transfer = transfer;
+		this.easyPay = easyPay;
 	}
 
 	public static WebhookDataInfo of(String lastTransactionKey, String paymentKey, String orderId, String orderName,
 		String status, String requestedAt, String useEscrow, String secret, Long totalAmount, Long vat, String method,
-		VirtualAccountInfo virtualAccount) {
+		VirtualAccountInfo virtualAccount, CardInfo card,  MobilePhoneInfo mobilePhone, TransferInfo transfer, EasyPayInfo easyPay) {
 		return WebhookDataInfo.builder()
 			.lastTransactionKey(lastTransactionKey).paymentKey(paymentKey).orderId(orderId).orderName(orderName)
 			.status(status).requestedAt(requestedAt).useEscrow(useEscrow).secret(secret).totalAmount(totalAmount)
-			.vat(vat).method(method).virtualAccount(virtualAccount).build();
+			.vat(vat).method(method).virtualAccount(virtualAccount).card(card).mobilePhone(mobilePhone).transfer(transfer).easyPay(easyPay).build();
 	}
+
 }

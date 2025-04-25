@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.payments.service.virtual;
+package com.example.junggoheaven.domain.payments.service.payment;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

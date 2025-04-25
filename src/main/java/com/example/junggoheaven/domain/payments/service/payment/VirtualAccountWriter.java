@@ -1,4 +1,4 @@
-package com.example.junggoheaven.domain.payments.service.virtual;
+package com.example.junggoheaven.domain.payments.service.payment;
 
 import org.springframework.stereotype.Service;
 

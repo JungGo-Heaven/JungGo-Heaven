@@ -56,14 +56,10 @@
             // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------ https://docs.tosspayments.com/sdk/v2/js#widgetsrequestpayment
             button.addEventListener("click", async function () {
                 await widgets.requestPayment({
-                    orderId: "8f3fbc6c-26fb-32da-8dd7-cfb899faeece",
-                    orderName: "\uD140\uBE14\uB7EC 1\uAC1C",
-                    successUrl: "http:\/\/localhost:8080\/api\/v1\/payments" + "/virtual/success"
-                        + "?paymentKey=" + encodeURIComponent("tviva20250423184657lpKB9")
-                        + "&orderId=" + encodeURIComponent("8f3fbc6c-26fb-32da-8dd7-cfb899faeece")
-                        + "&amount=" + encodeURIComponent(100)
-                        + "&paymentType=NORMAL",
-                    failUrl: "http:\/\/localhost:8080\/api\/v1\/payments" + "/virtual/fail",
+                    orderId: "5359d46a-a8a2-3e15-9d64-d7da2e2fb292",
+                    orderName: "\uC778\uD615",
+                    successUrl: window.location.origin + "\/v1\/payments" + "/success.html",
+                    failUrl: window.location.origin + "\/v1\/payments" + "/fail.html",
                     customerEmail: "email1@email.com",
                     customerName: "user1",
                     customerMobilePhone: "01012344567",
