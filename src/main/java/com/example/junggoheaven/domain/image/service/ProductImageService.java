@@ -31,7 +31,7 @@ public class ProductImageService {
             String imageUrl = uploadUrls.get(i);
             String originalFilename = originalFiles.get(i).getOriginalFilename();
 
-            String fullUrl = s3StorageService.buildS3Url(imageUrl);
+            String fullUrl = s3StorageService.buildCloudFrontUrl(imageUrl);
 
             ProductImage productImage = ProductImage.of(fullUrl, originalFilename);
             productImages.add(productImage);

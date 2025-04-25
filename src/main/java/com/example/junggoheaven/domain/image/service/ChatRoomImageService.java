@@ -52,7 +52,7 @@ public class ChatRoomImageService {
             String imageUrl = uploadUrls.get(i);
             String originalFilename = originalFiles.get(i).getOriginalFilename();
 
-            String fullUrl = s3StorageService.buildS3Url(imageUrl);
+            String fullUrl = s3StorageService.buildCloudFrontUrl(imageUrl);
 
             RedisChatMessageDto redisDto = new RedisChatMessageDto(
                     chatRoom.getId(),
