@@ -13,4 +13,8 @@ public class ReviewWriter {
     public Review save(Review review) {
         return reviewRepository.save(review);
     }
+
+    public void delete(Review review) {
+        reviewRepository.delete(review);
+    }
 }

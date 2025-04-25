@@ -35,6 +35,8 @@ public class ChatRoomImage extends TimeStamp {
     }
 
     public static ChatRoomImage of(ChatMessage chatMessage, String chatRoomImageUrl, String keyName) {
-        return new ChatRoomImage(chatMessage, chatRoomImageUrl, keyName);
+        ChatRoomImage image = new ChatRoomImage(chatMessage, chatRoomImageUrl, keyName);
+        chatMessage.updateChatRoomImage(image);
+        return image;
     }
 }

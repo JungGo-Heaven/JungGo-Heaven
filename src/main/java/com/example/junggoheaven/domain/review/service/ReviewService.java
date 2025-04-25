@@ -29,7 +29,7 @@ public class ReviewService {
         User user = userFinder.findByUserId(userId);
         User reviewer = userFinder.findByUserId(reviewerId);
 
-        Review review = new Review(user, reviewer, requestDto);
+        Review review = Review.of(user, reviewer, requestDto);
         reviewWriter.save(review);
     }
 
@@ -61,7 +61,7 @@ public class ReviewService {
         if(!review.getReviewer().getId().equals(userId)) {
             throw new ReviewForbiddenException();
         }
-        review.deleteReview();
+        reviewWriter.delete(review);
     }
 
     @Transactional(readOnly = true)

@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -71,14 +72,14 @@ public class ChatRoomServiceTest {
         ReflectionTestUtils.setField(product, "longitude", 127.001); // 예시 값
         ReflectionTestUtils.setField(product, "latitude", 37.567);   // 예시 값
 
-        chatRoom = new ChatRoom(product, buyerUser);
+        chatRoom = ChatRoom.of(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
     }
 
     @Test
     public void 존재하는_채팅방_입장() {
         // given
-        List<ChatMessage> messages = Arrays.asList(new ChatMessage(chatRoom, buyerUser, "testtest", MessageType.TEXT));
+        List<ChatMessage> messages = Arrays.asList(ChatMessage.of(1L, chatRoom, buyerUser, "testtest", MessageType.TEXT, LocalDateTime.now(), false));
 
         AuthUser authUser = new AuthUser(1L, "buyer@n.com", UserRole.ROLE_USER, "Buyer");
 

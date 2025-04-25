@@ -3,6 +3,8 @@ package com.example.junggoheaven.global.common.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.junggoheaven.global.redis.RedisErrorPublisher;
+import com.example.junggoheaven.global.redis.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
+	private final RedisErrorPublisher redisErrorPublisher;
+
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<List<ValidResponseDto>> invalidRequestExceptionException(
@@ -53,9 +57,15 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
 	}
 
-	@ExceptionHandler(Exception.class)
+
+    @ExceptionHandler(Exception.class)
 	public ResponseEntity<ResponseDto> handleException(Exception ex){
 		ResponseDto error = ResponseDto.fail(HttpStatus.BAD_REQUEST, ex.getClass().getSimpleName(), ex.getMessage());
 		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 	}
+
+    @ExceptionHandler(BroadcastException.class)
+	public void handleBroadcastError(BroadcastException ex) {
+		redisErrorPublisher.broadcastError(ex.getErrorCode(), ex.getStatus(), ex.getMessage(), ex.getUserId(), ex.getContext());
+    }
 }

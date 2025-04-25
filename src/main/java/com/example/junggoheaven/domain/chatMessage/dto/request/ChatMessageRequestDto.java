@@ -18,6 +18,4 @@ public class ChatMessageRequestDto {
 
     @NotBlank(message = "메시지 내용을 입력해주세요.")
     private String message;
-    @NotBlank
-    private MessageType messageType;
 }

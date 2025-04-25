@@ -32,7 +32,7 @@ public class ChatRoomWriterTest {
         sender = User.of("sender@n.com", "Sender", "123456789");
         ReflectionTestUtils.setField(sender, "id", 1L);
 
-        chatRoom = new ChatRoom(null, sender);
+        chatRoom = ChatRoom.of(null, sender);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
     }
 

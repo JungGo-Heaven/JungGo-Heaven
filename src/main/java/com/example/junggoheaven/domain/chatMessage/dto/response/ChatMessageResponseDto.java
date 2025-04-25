@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor 
 @NoArgsConstructor
 public class ChatMessageResponseDto {
     private Long chatRoomId;
@@ -18,4 +18,5 @@ public class ChatMessageResponseDto {
     private String imageUrl;
     private LocalDateTime sendAt;
     private MessageType messageType;
+    private Boolean isRead;
 }

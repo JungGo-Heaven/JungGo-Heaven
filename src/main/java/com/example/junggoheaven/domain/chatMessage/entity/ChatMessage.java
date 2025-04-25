@@ -4,11 +4,15 @@ import com.example.junggoheaven.domain.chatMessage.enums.MessageType;
 import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
 import com.example.junggoheaven.domain.image.entity.ChatRoomImage;
 import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.global.common.entity.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,10 +21,11 @@ import java.util.List;
 @Entity
 @Table(name = "chat_message")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE chat_message SET messageType = 'DELETED' WHERE id = ?")
+@Filter(name = "deletedFilter", condition = "messageType <> 'DELETED'")
 public class ChatMessage {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,6 +39,7 @@ public class ChatMessage {
     @Nullable
     private String message;
 
+    @Enumerated(EnumType.STRING)
     private MessageType messageType;
 
     @OneToOne(mappedBy = "chatMessage")
@@ -46,22 +52,32 @@ public class ChatMessage {
     private Boolean isRead;
 
 
-    public ChatMessage(ChatRoom chatRoom, User sender, String message, MessageType messageType) {
+    private ChatMessage(Long id, ChatRoom chatRoom, User sender, String message, MessageType messageType, LocalDateTime sendAt, Boolean isRead) {
+        this.id = id;
         this.chatRoom = chatRoom;
         this.sender = sender;
         this.message = message;
         this.messageType = messageType;
-        this.sendAt = LocalDateTime.now();
-        this.isRead = false;
+        this.sendAt = sendAt;
+        this.isRead = isRead;
     }
 
-    public ChatMessage(ChatRoom chatRoom, User sender){
+    private ChatMessage(Long id,ChatRoom chatRoom, User sender, MessageType messageType, LocalDateTime sendAt, Boolean isRead) {
+        this.id = id;
         this.chatRoom = chatRoom;
         this.sender = sender;
-        this.messageType = MessageType.IMAGE;
-        this.sendAt = LocalDateTime.now();
-        this.isRead = false;
+        this.messageType = messageType;
+        this.sendAt = sendAt;
+        this.isRead = isRead;
     }
+
+    public static ChatMessage of(Long id, ChatRoom chatRoom, User sender, String message, MessageType messageType, LocalDateTime sendAt, Boolean isRead) {
+        return new ChatMessage(id, chatRoom, sender, message, messageType, sendAt, isRead);
+    }
+    public static ChatMessage of(Long id, ChatRoom chatRoom, User sender, MessageType messageType, LocalDateTime sendAt, Boolean isRead) {
+        return new ChatMessage(id, chatRoom, sender, messageType, sendAt, isRead);
+    }
+
 
     public void isRead() {
         this.isRead = true;
@@ -69,5 +85,9 @@ public class ChatMessage {
 
     public void isDeleted() {
         this.messageType = MessageType.DELETED;
+    }
+
+    public void updateChatRoomImage(ChatRoomImage chatRoomImage) {
+        this.chatRoomImage = chatRoomImage;
     }
 }
