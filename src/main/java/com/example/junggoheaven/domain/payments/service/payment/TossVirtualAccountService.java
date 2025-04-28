@@ -73,8 +73,7 @@ public class TossVirtualAccountService implements VirtualAccountService {
 		order.updateStatus(OrderStatus.VIRTUAL_ACCOUNT_ISSUED);
 
 		eventPublisher.publishEventAfterTransaction(
-			new OrderStatusChangeEvent(this,
-				order.getBuyer().getId(),
+			new OrderStatusChangeEvent(this, order.getBuyer().getId(),
 				order.getId()
 					+ " 에 대한 가상계좌가 발급되었습니다.\n"
 					+ order.getDetails()));
@@ -103,7 +102,12 @@ public class TossVirtualAccountService implements VirtualAccountService {
 			case "EXPIRED" -> order.updateStatus(OrderStatus.EXPIRED);                // 결제 유효 시간 30분이 지나 거래가 취소된 상태
 		}
 
-		eventPublisher.publishEventAfterTransaction(new OrderStatusChangeEvent(this, order.getSeller().getId(), tossStatus));
+		eventPublisher.publishEventAfterTransaction(
+			new OrderStatusChangeEvent(this, order.getSeller().getId(),
+			order.getId()
+			+ "에 대한 상태가 변경되었습니다.\n"
+			+ "Status: " + tossStatus));
+
 		return "update status: " + order.getStatus().name();
 	}
 
