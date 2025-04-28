@@ -44,26 +44,37 @@ public class KeywordController {
 
 	@PostMapping("/v1/keywords/keyword")
 	public ResponseEntity<?> createKeyword(
-		@Valid @RequestBody CreateKeywordRequestDto dto) {
-		esKeywordService.addKeyword(dto.getUserId().toString(), dto.getKeyword());
+		@AuthenticationPrincipal AuthUser authUser,
+		@Valid @RequestBody CreateKeywordRequestDto dto
+	) {
+		esKeywordService.addKeyword(authUser.getId().toString(), dto.getKeyword());
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/v1/keywords/excludeKeyword")
-	public ResponseEntity<?> createExcludeKeyword(@Valid @RequestBody CreateExcludeKeywordRequestDto dto) {
-		esKeywordService.addExcludeKeywords(dto.getUserId().toString(), dto.getKeyword(), dto.getExcludeKeyword());
+	public ResponseEntity<?> createExcludeKeyword(
+		@AuthenticationPrincipal AuthUser authUser,
+		@Valid @RequestBody CreateExcludeKeywordRequestDto dto
+	) {
+		esKeywordService.addExcludeKeywords(authUser.getId().toString(), dto.getKeyword(), dto.getExcludeKeyword());
 		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping("/v1/keywords/keyword")
-	public ResponseEntity<?> deleteKeyword(@Valid @RequestBody DeleteKeywordRequestDto dto) {
-		esKeywordService.deleteKeyword(dto.getUserId().toString(), dto.getKeyword());
+	public ResponseEntity<?> deleteKeyword(
+		@AuthenticationPrincipal AuthUser authUser,
+		@Valid @RequestBody DeleteKeywordRequestDto dto
+	) {
+		esKeywordService.deleteKeyword(authUser.getId().toString(), dto.getKeyword());
 		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping("/v1/keywords/excludeKeyword")
-	public ResponseEntity<?> deleteExcludeKeyword(@Valid @RequestBody DeleteExcludeKeywordRequestDto dto) {
-		esKeywordService.deleteExcludeKeyword(dto.getUserId().toString(), dto.getKeyword(), dto.getExcludeKeyword());
+	public ResponseEntity<?> deleteExcludeKeyword(
+		@AuthenticationPrincipal AuthUser authUser,
+		@Valid @RequestBody DeleteExcludeKeywordRequestDto dto
+	) {
+		esKeywordService.deleteExcludeKeyword(authUser.getId().toString(), dto.getKeyword(), dto.getExcludeKeyword());
 		return ResponseEntity.ok().build();
 	}
 }

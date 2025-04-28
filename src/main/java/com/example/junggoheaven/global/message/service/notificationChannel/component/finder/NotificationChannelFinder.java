@@ -1,4 +1,4 @@
-package com.example.junggoheaven.global.message.service.component.finder;
+package com.example.junggoheaven.global.message.service.notificationChannel.component.finder;
 
 import java.util.List;
 

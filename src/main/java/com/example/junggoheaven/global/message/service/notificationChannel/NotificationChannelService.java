@@ -1,4 +1,4 @@
-package com.example.junggoheaven.global.message.service;
+package com.example.junggoheaven.global.message.service.notificationChannel;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.message.entity.NotificationChannel;
 import com.example.junggoheaven.global.message.enums.ChannelType;
-import com.example.junggoheaven.global.message.service.component.finder.NotificationChannelFinder;
-import com.example.junggoheaven.global.message.service.component.writer.NotificationChannelWriter;
+import com.example.junggoheaven.global.message.service.notificationChannel.component.finder.NotificationChannelFinder;
+import com.example.junggoheaven.global.message.service.notificationChannel.component.writer.NotificationChannelWriter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +27,7 @@ public class NotificationChannelService {
 	private final KeywordWriter keywordWriter;
 	private final UserFinder userFinder;
 
-	public void addNotificationChannel(Long userId, String channelType) {
+	public void addNotificationChannel(Long userId, String channelType, String token) {
 		User user = userFinder.findByUserId(userId);
 		List<NotificationChannel> NotiList = notificationChannelFinder.findByUserId(user.getId());
 
@@ -41,10 +41,10 @@ public class NotificationChannelService {
 			}
 		}
 
-		NotificationChannel notificationChannel = NotificationChannel.of(type, user);
+		NotificationChannel notificationChannel = NotificationChannel.of(type, token, user);
 		notificationChannelWriter.write(notificationChannel);
 
-		savedUser.addChannel(type);
+		savedUser.addChannel(type, token);
 		keywordWriter.write(savedUser);
 	}
 

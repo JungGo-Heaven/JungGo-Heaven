@@ -1,7 +1,11 @@
 package com.example.junggoheaven.global.message.event;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.ApplicationEvent;
 
+import com.example.junggoheaven.global.message.dto.MatchedUserDto;
 import com.example.junggoheaven.global.message.entity.NotificationEventLog;
 import com.example.junggoheaven.global.message.enums.NotificationType;
 
@@ -13,6 +17,7 @@ public class NotificationEvent extends ApplicationEvent {
 	private final Long userId;
 	private final NotificationType notificationType;
 	private final String notificationMessage;
+	private final List<MatchedUserDto> userList;
 	@Setter
 	private NotificationEventLog notificationEventLog;
 
@@ -21,5 +26,6 @@ public class NotificationEvent extends ApplicationEvent {
 		this.userId = userId;
 		this.notificationType = notificationType;
 		this.notificationMessage = notificationMessage;
+		this.userList = new ArrayList<>();
 	}
 }

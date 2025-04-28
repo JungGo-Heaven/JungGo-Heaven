@@ -8,7 +8,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.example.junggoheaven.global.message.dto.MatchedUserDto;
+import com.example.junggoheaven.global.message.dto.NotificationChannelDto;
 import com.example.junggoheaven.global.message.enums.ChannelType;
+import com.example.junggoheaven.global.message.event.NotificationEvent;
 import com.example.junggoheaven.global.message.event.mapper.ChannelMappingEvent;
 import com.example.junggoheaven.global.message.event.pusher.PushByEmailEvent;
 import com.example.junggoheaven.global.message.event.pusher.PushByFCMEvent;
@@ -35,17 +37,15 @@ public class UserChannelMapper {
 	public void channelMapper(ChannelMappingEvent event) {
 		List<MatchedUserDto> userList = event.getUserList();
 		PushByEmailEvent email = new PushByEmailEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
-		PushByKakaoEvent kakao = new PushByKakaoEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
 		PushByFCMEvent fcm = new PushByFCMEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
 		PushByWebPushEvent web = new PushByWebPushEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
 
+		List<NotificationEvent> events = List.of(email, fcm, web);
+
 		userList.forEach(user -> {
-			Set<ChannelType> channelTypes = user.getChannelTypes();
+			List<ChannelType> channelTypes = user.getChannels().stream().map(NotificationChannelDto::getChannelType).toList();
 			for (ChannelType channelType : channelTypes) {
 				switch (channelType) {
-					case KAKAO_TALK:
-						kakao.getUserList().add(user);
-						break;
 					case EMAIL:
 						email.getUserList().add(user);
 						break;
@@ -59,17 +59,13 @@ public class UserChannelMapper {
 			}
 		});
 
-		log.info("총 사용자 수: {}, Email 사용자 수: {}, KakaoTalk 사용자 수: {}, FCM 사용자 수: {}, Web Push 사용자 수: {}",
+		log.info("총 사용자 수: {}, Email 사용자 수: {}, FCM 사용자 수: {}, Web Push 사용자 수: {}",
 			userList.size(),
 			email.getUserList().size(),
-			kakao.getUserList().size(),
 			fcm.getUserList().size(),
 			web.getUserList().size()
 		);
 
-		eventPublisher.publishEvent(email);
-		eventPublisher.publishEvent(kakao);
-		eventPublisher.publishEvent(fcm);
-		eventPublisher.publishEvent(web);
+		events.stream().filter(e -> !e.getUserList().isEmpty()).forEach(eventPublisher::publishEvent);
 	}
 }

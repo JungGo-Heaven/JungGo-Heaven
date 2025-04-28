@@ -1,36 +1,29 @@
 {
   "properties": {
     "id": {
-      "type": "text"
+      "type": "keyword"
     },
     "email": {
-      "type": "text",
-      "fields": {
-        "keyword": {
-          "type": "keyword",
-          "ignore_above": 100
-        }
-      }
+      "type": "keyword"
     },
     "keywords": {
       "type": "nested",
       "properties": {
         "keyword": {
-          "type": "keyword",
-          "ignore_above": 20
+          "type": "text"
         },
-        "excludeKeywords": {
-          "type": "keyword",
-          "ignore_above": 20
+        "exclude_keywords": {
+          "type": "text"
         }
       }
     },
     "channels": {
-      "type": "keyword",
-      "fields": {
-        "keyword": {
-          "type": "keyword",
-          "ignore_above": 20
+      "properties": {
+        "channel": {
+          "type": "keyword"
+        },
+        "token": {
+          "type": "keyword"
         }
       }
     }
