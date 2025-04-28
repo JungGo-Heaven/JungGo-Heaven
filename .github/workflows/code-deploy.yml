@@ -14,7 +14,6 @@ jobs:
     # "Build and Docker Push"가 성공했을 때 or 직접 workflow 실행했을 때 실행
 
     steps:
-#       Docker에 올린 이미지를 download
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -56,69 +55,12 @@ jobs:
                 runas: ubuntu
           EOF
 
-#       docker-compose.yml 설정
+#        docker-compose.yml 설정
       - name: Create docker-compose.yml
         run: |
-          cat > docker-compose.yml << 'EOF'
-          version: '3'
-
-          services:
-            app:
-              image: ${{ secrets.REPOSITORY }}/${{ secrets.IMAGE }}:${IMAGE_TAG}
-              container_name: app
-              restart: unless-stopped
-              ports:
-                - "8080:8080"
-              environment:
-                - SPRING_PROFILES_ACTIVE=prod
-              volumes:
-                - ./config:/app/config
-              depends_on:
-                - redis
-                - es
-                - rabbitmq
-
-            redis:
-              image: redis:latest
-              container_name: redis
-              ports:
-                - "6379:6379"
-
-            es:
-              build:
-                context: ./elasticsearch
-                dockerfile: Dockerfile.elasticsearch
-              container_name: es
-              volumes:
-                - es-data:/usr/share/elasticsearch/data
-              ports:
-                - "9200:9200"
-                - "9300:9300"
-
-            kibana:
-              build:
-                context: ./kibana
-                dockerfile: Dockerfile.kibana
-              container_name: kibana
-              ports:
-                - "5601:5601"
-              depends_on:
-                - es
-
-            rabbitmq:
-              image: rabbitmq:4-management
-              container_name: rabbitmq
-              ports:
-                - "5672:5672"
-                - "15672:15672"
-              environment:
-                RABBITMQ_DEFAULT_USER: guest
-                RABBITMQ_DEFAULT_PASS: guest
-
-          volumes:
-            es-data:
-              driver: local
-          EOF
+          cat > docker-compose.yml << 'DOCKERCOMPOSE'
+          ${{ secrets.DOCKER_COMPOSE }}
+          DOCKERCOMPOSE
 
       - name: Create deployment scripts
         run: |
@@ -134,12 +76,9 @@ jobs:
           USER elasticsearch
           EOF
 
-#           Elasticsearch 설정 파일 생성
+#           Elasticsearch 설정 파일을 secrets에서 불러와서 작성
           cat > elasticsearch/elasticsearch.yml << 'EOF'
-          cluster.name: "docker-cluster"
-          network.host: 0.0.0.0
-          discovery.type: single-node
-          xpack.security.enabled: false
+          ${{ secrets.ELASTICSEARCH_YML }}
           EOF
 
 #           Kibana Dockerfile 생성
@@ -148,17 +87,14 @@ jobs:
           COPY kibana.yml /usr/share/kibana/config/
           EOF
 
-#           Kibana 설정 파일 생성
+#           Kibana 설정 파일을 secrets에서 불러와서 작성
           cat > kibana/kibana.yml << 'EOF'
-          server.name: kibana
-          server.host: "0.0.0.0"
-          elasticsearch.hosts: ["http://es:9200"]
-          xpack.security.enabled: false
+          ${{ secrets.KIBANA_YML }}
           EOF
 
 #           현재 실행 중인 프로그램 백업
           cat > scripts/before_install.sh << 'EOF'
-
+               
 #           Docker Compose가 설치되어 있는지 확인
           if ! command -v docker-compose &> /dev/null; then
             echo "Installing Docker Compose..."
@@ -178,8 +114,8 @@ jobs:
 
 #           애플리케이션 설정 파일 생성
           cat > scripts/after_install.sh << 'EOF'
-
-#           application.yml 파일 생성
+               
+#           application.yml 파일을 secrets에서 불러와서 작성
           mkdir -p /home/ubuntu/app/config
           cat > /home/ubuntu/app/config/application.yml << 'APPYML'
           ${{ secrets.APPLICATION_YML }}
@@ -190,7 +126,7 @@ jobs:
 
 #           애플리케이션 실행
           cat > scripts/start_application.sh << 'EOF'
-
+               
 #           Docker 이미지 푸시
           cd /home/ubuntu/app
           docker-compose pull app || true
@@ -199,7 +135,7 @@ jobs:
           docker-compose up -d
           sleep 20
 
-#           앱 컨테이너 실행 확인
+#           컨테이너 실행 확인
           APP_RUNNING=$(docker ps -q -f name=app)
           if [ -z "$APP_RUNNING" ]; then
             echo "Application failed to start, rolling back..."
@@ -231,7 +167,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-#       zip 파일로 압축
       - name: Create deployment bundle
         run: zip -r deploy.zip appspec.yml scripts/ docker-compose.yml elasticsearch/ kibana/
 
@@ -242,4 +177,4 @@ jobs:
             --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --s3-location bucket=${{ secrets.AWS_S3_BUCKET }},bundleType=zip,key=deploy.zip \
-            --file-exists-behavior OVERWRITE  --file-exists-behavior OVERWRITE
+            --file-exists-behavior OVERWRITE
