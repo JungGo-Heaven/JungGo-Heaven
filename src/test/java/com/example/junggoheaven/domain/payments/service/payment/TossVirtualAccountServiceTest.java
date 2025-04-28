@@ -29,6 +29,7 @@ import com.example.junggoheaven.domain.payments.exception.OrderAmountException;
 import com.example.junggoheaven.domain.payments.service.order.OrderFinder;
 import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.user.entity.User;
+import com.example.junggoheaven.global.message.publisher.EventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class TossVirtualAccountServiceTest {
@@ -41,6 +42,8 @@ class TossVirtualAccountServiceTest {
 	private OrderFinder orderFinder;
 	@Mock
 	private VirtualAccountWriter virtualAccountWriter;
+	@Mock
+	private EventPublisher eventPublisher;
 
 	VirtualAccount virtualAccount;
 	VirtualAccountInfo accountInfo;
