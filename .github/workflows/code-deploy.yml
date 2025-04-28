@@ -14,7 +14,7 @@ jobs:
     # "Build and Docker Push"가 성공했을 때 or 직접 workflow 실행했을 때 실행
 
     steps:
-      # Docker에 올린 이미지를 download
+#       Docker에 올린 이미지를 download
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -56,59 +56,172 @@ jobs:
                 runas: ubuntu
           EOF
 
+#       docker-compose.yml 설정
+      - name: Create docker-compose.yml
+        run: |
+          cat > docker-compose.yml << 'EOF'
+          version: '3'
+
+          services:
+            app:
+              image: ${{ secrets.REPOSITORY }}/${{ secrets.IMAGE }}:${IMAGE_TAG}
+              container_name: app
+              restart: unless-stopped
+              ports:
+                - "8080:8080"
+              environment:
+                - SPRING_PROFILES_ACTIVE=prod
+              volumes:
+                - ./config:/app/config
+              depends_on:
+                - redis
+                - es
+                - rabbitmq
+
+            redis:
+              image: redis:latest
+              container_name: redis
+              ports:
+                - "6379:6379"
+
+            es:
+              build:
+                context: ./elasticsearch
+                dockerfile: Dockerfile.elasticsearch
+              container_name: es
+              volumes:
+                - es-data:/usr/share/elasticsearch/data
+              ports:
+                - "9200:9200"
+                - "9300:9300"
+
+            kibana:
+              build:
+                context: ./kibana
+                dockerfile: Dockerfile.kibana
+              container_name: kibana
+              ports:
+                - "5601:5601"
+              depends_on:
+                - es
+
+            rabbitmq:
+              image: rabbitmq:4-management
+              container_name: rabbitmq
+              ports:
+                - "5672:5672"
+                - "15672:15672"
+              environment:
+                RABBITMQ_DEFAULT_USER: guest
+                RABBITMQ_DEFAULT_PASS: guest
+
+          volumes:
+            es-data:
+              driver: local
+          EOF
+
       - name: Create deployment scripts
         run: |
           mkdir -p scripts
-          
+          mkdir -p elasticsearch kibana
+
+#           Elasticsearch Dockerfile 생성
+          cat > elasticsearch/Dockerfile.elasticsearch << 'EOF'
+          FROM docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+          COPY elasticsearch.yml /usr/share/elasticsearch/config/
+          USER root
+          RUN chown elasticsearch:elasticsearch /usr/share/elasticsearch/config/elasticsearch.yml
+          USER elasticsearch
+          EOF
+
+#           Elasticsearch 설정 파일 생성
+          cat > elasticsearch/elasticsearch.yml << 'EOF'
+          cluster.name: "docker-cluster"
+          network.host: 0.0.0.0
+          discovery.type: single-node
+          xpack.security.enabled: false
+          EOF
+
+#           Kibana Dockerfile 생성
+          cat > kibana/Dockerfile.kibana << 'EOF'
+          FROM docker.elastic.co/kibana/kibana:8.12.0
+          COPY kibana.yml /usr/share/kibana/config/
+          EOF
+
+#           Kibana 설정 파일 생성
+          cat > kibana/kibana.yml << 'EOF'
+          server.name: kibana
+          server.host: "0.0.0.0"
+          elasticsearch.hosts: ["http://es:9200"]
+          xpack.security.enabled: false
+          EOF
+
 #           현재 실행 중인 프로그램 백업
-          cat > scripts/before_install.sh << EOF
-          CONTAINER_RUNNING=\$(docker ps -q -f name=app)
-          if [ ! -z "\$CONTAINER_RUNNING" ]; then
-            BACKUP_NAME="app_backup_\$(date +'%Y%m%d%H%M%S')"
-            docker rename app \$BACKUP_NAME
-            docker stop \$BACKUP_NAME
+          cat > scripts/before_install.sh << 'EOF'
+
+#           Docker Compose가 설치되어 있는지 확인
+          if ! command -v docker-compose &> /dev/null; then
+            echo "Installing Docker Compose..."
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+
+#           서비스가 실행 중인 경우 백업
+          if [ -f "/home/ubuntu/app/docker-compose.yml" ]; then
+            cd /home/ubuntu/app
+            BACKUP_DIR="/home/ubuntu/app_backup_$(date +'%Y%m%d%H%M%S')"
+            mkdir -p $BACKUP_DIR
+            cp -r * $BACKUP_DIR/
+            docker-compose down || true
           fi
           EOF
-          
-#           Docker에서 이미지를 내려 받아 설치
-          cat > scripts/after_install.sh << EOF
-          docker pull ${{ secrets.REPOSITORY }}/${{ secrets.IMAGE }}:${IMAGE_TAG}
+
+#           애플리케이션 설정 파일 생성
+          cat > scripts/after_install.sh << 'EOF'
+
+#           application.yml 파일 생성
+          mkdir -p /home/ubuntu/app/config
+          cat > /home/ubuntu/app/config/application.yml << 'APPYML'
+          ${{ secrets.APPLICATION_YML }}
+          APPYML
+
+          chmod -R 755 /home/ubuntu/app
           EOF
-          
+
 #           애플리케이션 실행
-          cat > scripts/start_application.sh << EOF
-          docker run -d --name app \
-            -p 8080:8080 \
-            --restart unless-stopped \
-            -e SPRING_PROFILES_ACTIVE=prod \
-            -e DB_HOST=${{ secrets.DB_HOST }} \
-            -e DB_PORT=${{ secrets.DB_PORT }} \
-            -e DB_NAME=${{ secrets.DB_NAME }} \
-            -e DB_USERNAME=${{ secrets.DB_USERNAME }} \ 
-            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            -e RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }} \
-            -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
-            ${{ secrets.REPOSITORY }}/${{ secrets.IMAGE }}:${IMAGE_TAG}
-          
-         # 애플리케이션 성공 확인
-          sleep 10
-          NEW_CONTAINER_RUNNING=\$(docker ps -q -f name=app)
-          if [ -z "\$NEW_CONTAINER_RUNNING" ]; then
-            echo "New container failed to start, rolling back..."
-            BACKUP_NAME=\$(docker ps -a --filter "name=app_backup" --format "{{.Names}}" | head -n 1)
-          #  애플리케이션 실행을 실패한 경우 -> 백업 파일 실행
-            if [ ! -z "\$BACKUP_NAME" ]; then
-              docker rename \$BACKUP_NAME app
-              docker start app
+          cat > scripts/start_application.sh << 'EOF'
+
+#           Docker 이미지 푸시
+          cd /home/ubuntu/app
+          docker-compose pull app || true
+
+#           Docker Compose로 서비스 시작
+          docker-compose up -d
+          sleep 20
+
+#           앱 컨테이너 실행 확인
+          APP_RUNNING=$(docker ps -q -f name=app)
+          if [ -z "$APP_RUNNING" ]; then
+            echo "Application failed to start, rolling back..."
+
+#             백업이 있는 경우 복원
+            BACKUP_DIR=$(find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d | sort -r | head -n 1)
+            if [ ! -z "$BACKUP_DIR" ]; then
+              echo "Restoring from backup: $BACKUP_DIR"
+              rm -rf /home/ubuntu/app/*
+              cp -r $BACKUP_DIR/* /home/ubuntu/app/
+              cd /home/ubuntu/app
+              docker-compose up -d
             fi
             exit 1
-          # 성공한 경우 과거 파일 정리     
           else
-            docker container prune -f
-            docker image prune -a -f
+            echo "Application started successfully"
+#             백업 및 이미지 정리
+            find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d -mtime +7 -exec rm -rf {} \;
+            docker system prune -af --volumes
           fi
           EOF
-          
+
           chmod +x scripts/*.sh
 
       - name: Configure AWS credentials
@@ -118,9 +231,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-#        zip 파일로 압축
+#       zip 파일로 압축
       - name: Create deployment bundle
-        run: zip -r deploy.zip appspec.yml scripts/
+        run: zip -r deploy.zip appspec.yml scripts/ docker-compose.yml elasticsearch/ kibana/
 
       - name: Deploy to AWS CodeDeploy
         run: |
@@ -129,4 +242,4 @@ jobs:
             --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --s3-location bucket=${{ secrets.AWS_S3_BUCKET }},bundleType=zip,key=deploy.zip \
-            --file-exists-behavior OVERWRITE
+            --file-exists-behavior OVERWRITE  --file-exists-behavior OVERWRITE
