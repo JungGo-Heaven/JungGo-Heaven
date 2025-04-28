@@ -7,7 +7,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import com.example.junggoheaven.global.message.entity.NotificationEventLog;
 import com.example.junggoheaven.global.message.event.NotificationEvent;
-import com.example.junggoheaven.global.message.service.component.writer.NotificationEventLogWriter;
+import com.example.junggoheaven.global.message.service.notificationChannel.component.writer.NotificationEventLogWriter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

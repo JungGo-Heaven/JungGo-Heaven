@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.message.dto.CreateNotificationRequestDto;
 import com.example.junggoheaven.global.message.dto.DeleteNotificationRequestDto;
-import com.example.junggoheaven.global.message.service.NotificationChannelService;
+import com.example.junggoheaven.global.message.service.notificationChannel.NotificationChannelService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +23,7 @@ public class NotificationChannelController {
 
 	@PostMapping("/v1/notifications")
 	public ResponseEntity<?> createNotificationChannel(@AuthenticationPrincipal AuthUser authUser, @RequestBody CreateNotificationRequestDto dto) {
-		notificationChannelService.addNotificationChannel(authUser.getId(), dto.getChannelType());
+		notificationChannelService.addNotificationChannel(authUser.getId(), dto.getChannelType(), dto.getToken());
 		return ResponseEntity.ok().build();
 	}
 

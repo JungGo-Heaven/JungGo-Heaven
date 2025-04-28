@@ -25,16 +25,17 @@ public class KeywordMatchedUserFinder {
 	/*
 	* 상품 게시글 등록시 해당 게시글 이름에 포함된 Keyword 를 등록한 User 를 선별하는 Component
 	* 선별 후 채널을 분류하는 ChannelMapper 를 호출한다.
+	* Mysql DataBase 에서 Like Query 를 통해서 선별한다.
 	* */
 	@Async
-	@EventListener
+	// @EventListener
 	public void findKeywordMatchedUser(ProductRegisteredEvent event) {
 		long startedAt = System.currentTimeMillis();
 		String name = event.getNotificationMessage();
 
 		List<MatchedUserDto> userList = userKeywordRepository.findAllUserIdByProductName(name);
-		log.info("End: {}", System.currentTimeMillis() - startedAt);
-		log.info("Total Users are {}", userList.size());
+		log.info("Mysql End: {}", System.currentTimeMillis() - startedAt);
+		log.info("Total Users by Mysql are {}", userList.size());
 		eventPublisher.publishEvent( new ChannelMappingEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage(), userList));
 		log.info("KeywordMatchedUserFinder Done");
 	}

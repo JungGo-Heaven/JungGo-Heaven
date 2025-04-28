@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.example.junggoheaven.global.message.dto.MatchedUserDto;
+import com.example.junggoheaven.global.message.dto.NotificationChannelDto;
 import com.example.junggoheaven.global.message.enums.ChannelType;
 import com.example.junggoheaven.global.message.event.mapper.ChannelMappingEvent;
 import com.example.junggoheaven.global.message.event.pusher.PushByEmailEvent;
@@ -40,7 +41,7 @@ public class UserChannelMapper {
 		PushByWebPushEvent web = new PushByWebPushEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
 
 		userList.forEach(user -> {
-			Set<ChannelType> channelTypes = user.getChannelTypes();
+			List<ChannelType> channelTypes = user.getChannels().stream().map(NotificationChannelDto::getChannelType).toList();
 			for (ChannelType channelType : channelTypes) {
 				switch (channelType) {
 					case KAKAO_TALK:

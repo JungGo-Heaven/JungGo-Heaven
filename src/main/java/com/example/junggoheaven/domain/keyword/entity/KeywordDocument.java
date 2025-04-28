@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Mapping;
 import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.global.message.enums.ChannelType;
@@ -19,7 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Document(indexName = "keyword")
+@Document(indexName = "keyword", writeTypeHint = WriteTypeHint.FALSE)
 @Setting
 @Mapping(mappingPath = "elastic/keyword-mapping.json")
 @NoArgsConstructor
@@ -36,9 +37,8 @@ public class KeywordDocument {
 	@Field(type = FieldType.Nested)
 	private List<Keyword> keywords = new ArrayList<>();
 
-	@Enumerated(EnumType.STRING)
-	@Field(type = FieldType.Keyword)
-	private List<ChannelType> channels = new ArrayList<> ();
+	@Field(type = FieldType.Object)
+	private List<Channel> channels = new ArrayList<> ();
 
 	private KeywordDocument(String id, String email) {
 		this.id = id;
@@ -57,12 +57,13 @@ public class KeywordDocument {
 		keywords.removeIf(k -> k.getKeyword().equals(keyword));
 	}
 
-	public void addChannel(ChannelType channel) {
-		channels.add(channel);
+	public void addChannel(ChannelType channel, String token) {
+
+		channels.add(Channel.of(channel, token));
 	}
 
 	public void deleteChannel(ChannelType channel) {
-		channels.remove(channel);
+		channels.removeIf(c -> c.getChannel().equals(channel));
 	}
 
 	@Getter
@@ -88,6 +89,25 @@ public class KeywordDocument {
 
 		public void deleteExcludeKeyword(String excludeKeyword) {
 			this.excludeKeywords.removeIf(ek -> ek.equals(excludeKeyword));
+		}
+	}
+
+	@Getter
+	@NoArgsConstructor
+	public static class Channel{
+		@Enumerated(EnumType.STRING)
+		@Field(type = FieldType.Keyword)
+		private ChannelType channel;
+		@Field(type = FieldType.Keyword)
+		private String token;
+
+		private Channel(ChannelType channel, String token) {
+			this.channel = channel;
+			this.token = token;
+		}
+
+		public static Channel of (ChannelType channel, String token) {
+			return new Channel(channel, token);
 		}
 	}
 }

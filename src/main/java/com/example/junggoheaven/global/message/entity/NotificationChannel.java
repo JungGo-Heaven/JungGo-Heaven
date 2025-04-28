@@ -28,16 +28,20 @@ public class NotificationChannel {
 	@Column(nullable = false)
 	private ChannelType channelType;
 
+	@Column(nullable = false)
+	private String token;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	private NotificationChannel (ChannelType channelType, User user) {
+	private NotificationChannel (ChannelType channelType, String token, User user) {
 		this.channelType = channelType;
+		this.token = token;
 		this.user = user;
 	}
 
-	public static NotificationChannel of(ChannelType channelType, User user) {
-		return new NotificationChannel(channelType, user);
+	public static NotificationChannel of(ChannelType channelType, String token, User user) {
+		return new NotificationChannel(channelType, token, user);
 	}
 }

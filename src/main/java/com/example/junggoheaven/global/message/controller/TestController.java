@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.junggoheaven.domain.keyword.service.MysqlKeywordService;
-import com.example.junggoheaven.global.message.event.TestEventPublisher;
+import com.example.junggoheaven.global.message.publisher.TestEventPublisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,12 @@ public class TestController {
 	@GetMapping("/v1/publish/{name}")
 	public ResponseEntity<?> testPublishV1(@PathVariable String name) {
 		testEventPublisher.publishProductRegisteredEvent("v1", name);
+		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/v1/publish/OrderStatus/{userId}")
+	public ResponseEntity<?> testPublishOrderStatus(@PathVariable Long userId) {
+		testEventPublisher.publishOrderStatusChangedEvent(userId);
 		return ResponseEntity.ok().build();
 	}
 

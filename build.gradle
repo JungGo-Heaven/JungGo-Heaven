@@ -30,6 +30,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
+    // JAVA MAIL
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -89,6 +92,8 @@ dependencies {
 
     //tsid
     implementation 'com.github.f4b6a3:tsid-creator:5.2.6'
+
+
 
 }
 

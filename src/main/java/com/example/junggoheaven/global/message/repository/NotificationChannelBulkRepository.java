@@ -16,11 +16,12 @@ public class NotificationChannelBulkRepository {
 
 	private static final int BATCH_SIZE = 1000;
 	public void insert(List<NotificationChannel> notificationChannels) {
-		String sql = "INSERT INTO notification_channel (user_id, channel_type) VALUES (?, ?)";
+		String sql = "INSERT INTO notification_channel (user_id, channel_type, token) VALUES (?, ?, ?)";
 
 		jdbcTemplate.batchUpdate(sql, notificationChannels, BATCH_SIZE, (ps, notificationChannel) -> {
 			ps.setLong(1, notificationChannel.getUser().getId());
 			ps.setString(2, notificationChannel.getChannelType().name());
+			ps.setString(3, notificationChannel.getToken());
 		});
 	}
 }

@@ -13,4 +13,6 @@ public class CreateNotificationRequestDto {
 	@NotBlank(message = "등록하려는 채널을 입력하세요.")
 	@ValidEnum(enumClass = ChannelType.class, message = "알림 채널이 존재하지 않습니다.")
 	private final String channelType;
+
+	private final String token;
 }

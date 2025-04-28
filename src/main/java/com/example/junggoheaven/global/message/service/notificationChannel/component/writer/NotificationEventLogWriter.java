@@ -1,4 +1,4 @@
-package com.example.junggoheaven.global.message.service.component.writer;
+package com.example.junggoheaven.global.message.service.notificationChannel.component.writer;
 
 import org.springframework.stereotype.Component;
 
