@@ -23,6 +23,8 @@ import com.example.junggoheaven.domain.payments.enums.OrderStatus;
 import com.example.junggoheaven.domain.payments.exception.OrderAmountException;
 import com.example.junggoheaven.domain.payments.service.order.OrderFinder;
 import com.example.junggoheaven.global.aop.Payment;
+import com.example.junggoheaven.global.message.event.finder.OrderStatusChangeEvent;
+import com.example.junggoheaven.global.message.publisher.EventPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class TossVirtualAccountService implements VirtualAccountService {
 	private final RestTemplate restTemplate;
 	private final OrderFinder orderFinder;
 	private final VirtualAccountWriter virtualAccountWriter;
+	private final EventPublisher eventPublisher;
 
 	@Value("${toss.payments.secret-key}")
 	private String SECRET_KEY;
@@ -69,6 +72,13 @@ public class TossVirtualAccountService implements VirtualAccountService {
 		virtualAccountWriter.save(account);
 		order.updateStatus(OrderStatus.VIRTUAL_ACCOUNT_ISSUED);
 
+		eventPublisher.publishEventAfterTransaction(
+			new OrderStatusChangeEvent(this,
+				order.getBuyer().getId(),
+				order.getId()
+					+ " 에 대한 가상계좌가 발급되었습니다.\n"
+					+ order.getDetails()));
+
 		return responseEntity.getBody();
 	}
 
@@ -93,6 +103,7 @@ public class TossVirtualAccountService implements VirtualAccountService {
 			case "EXPIRED" -> order.updateStatus(OrderStatus.EXPIRED);                // 결제 유효 시간 30분이 지나 거래가 취소된 상태
 		}
 
+		eventPublisher.publishEventAfterTransaction(new OrderStatusChangeEvent(this, order.getSeller().getId(), tossStatus));
 		return "update status: " + order.getStatus().name();
 	}
 
