@@ -61,21 +61,20 @@ jobs:
           ${{ secrets.DOCKER_COMPOSE }}
           DOCKERCOMPOSE
 
+        # 현재 실행 중인 프로그램 백업
       - name: Create deployment scripts
         run: |
           mkdir -p scripts
-
-#           현재 실행 중인 프로그램 백업
           cat > scripts/before_install.sh << 'EOF'
-               
-#           Docker Compose가 설치되어 있는지 확인
+
+          # Docker Compose가 설치되어 있는지 확인
           if ! command -v docker-compose &> /dev/null; then
             echo "Installing Docker Compose..."
             sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
           fi
 
-#           서비스가 실행 중인 경우 백업
+          # 서비스가 실행 중인 경우 백업
           if [ -f "/home/ubuntu/app/docker-compose.yml" ]; then
             cd /home/ubuntu/app
             BACKUP_DIR="/home/ubuntu/app_backup_$(date +'%Y%m%d%H%M%S')"
@@ -85,10 +84,10 @@ jobs:
           fi
           EOF
 
-#           애플리케이션 설정 파일 생성
+          # 애플리케이션 설정 파일 생성
           cat > scripts/after_install.sh << 'EOF'
-               
-#           application.yml 파일을 secrets에서 불러와서 작성
+
+          # application.yml 파일을 secrets에서 불러와서 작성
           mkdir -p /home/ubuntu/app/config
           cat > /home/ubuntu/app/config/application.yml << 'APPYML'
           ${{ secrets.APPLICATION_YML }}
@@ -97,23 +96,23 @@ jobs:
           chmod -R 755 /home/ubuntu/app
           EOF
 
-#           애플리케이션 실행
+          # 애플리케이션 실행
           cat > scripts/start_application.sh << 'EOF'
-               
-#           Docker 이미지 풀
+
+          # Docker 이미지 풀
           cd /home/ubuntu/app
           docker-compose pull redis rabbitmq || true
 
-#           Docker Compose로 서비스 시작
+          # Docker Compose로 서비스 시작
           docker-compose up -d
           sleep 20
 
-#           컨테이너 실행 확인
+          # 컨테이너 실행 확인
           APP_RUNNING=$(docker ps -q -f name=app)
           if [ -z "$APP_RUNNING" ]; then
             echo "Application failed to start, rolling back..."
 
-#             백업이 있는 경우 복원
+            # 백업이 있는 경우 복원
             BACKUP_DIR=$(find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d | sort -r | head -n 1)
             if [ ! -z "$BACKUP_DIR" ]; then
               echo "Restoring from backup: $BACKUP_DIR"
@@ -125,7 +124,7 @@ jobs:
             exit 1
           else
             echo "Application started successfully"
-#             백업 및 이미지 정리
+            # 백업 및 이미지 정리
             find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d -mtime +7 -exec rm -rf {} \;
             docker system prune -af --volumes
           fi
@@ -140,7 +139,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-#      Docker-compose 배포 번들 생성
+        # Docker-compose 배포 번들 생성
       - name: Create deployment bundle
         run: zip -r deploy.zip appspec.yml scripts/ docker-compose.yml
 
