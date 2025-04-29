@@ -36,6 +36,12 @@ public class TestController {
 		return ResponseEntity.ok().build();
 	}
 
+	@GetMapping("/v1/publish/email/{userId}")
+	public ResponseEntity<?> testPublishPushByEmail(@PathVariable Long userId) {
+		testEventPublisher.publishPushByEmailEvent(userId);
+		return ResponseEntity.ok().build();
+	}
+
 	@GetMapping("/v2/publish/{name}")
 	public ResponseEntity<?> testPublishV2(@PathVariable String name) {
 		testEventPublisher.publishProductRegisteredEvent("v2", name);
