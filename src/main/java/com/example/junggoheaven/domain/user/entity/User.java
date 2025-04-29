@@ -55,6 +55,7 @@ public class User extends TimeStamp {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "profile_image_id")
 	private ProfileImage profileImage;
+	private Boolean bespokeAgree;
 
 	@Builder
 	private User(String email, String password, String name, String phoneNumber, String address) {
@@ -65,6 +66,7 @@ public class User extends TimeStamp {
 		this.address = address;
 		this.role = UserRole.ROLE_USER;
 		this.status = UserStatus.ACTIVE;
+		this.bespokeAgree = false;
 	}
 
 	@Builder
@@ -74,6 +76,7 @@ public class User extends TimeStamp {
 		this.phoneNumber = phoneNumber;
 		this.role = UserRole.ROLE_GUEST;
 		this.status = UserStatus.ACTIVE;
+		this.bespokeAgree = false;
 	}
 
 	public static User of(String email, String password, String name, String phoneNumber, String address) {
@@ -118,4 +121,6 @@ public class User extends TimeStamp {
 	public void updateProfileImage(ProfileImage profileImage) {
 		this.profileImage = profileImage;
 	}
+
+	public void updateBespokeAgree(boolean bespokeAgree) { this.bespokeAgree = bespokeAgree; }
 }

@@ -30,4 +30,8 @@ public class UserInfoResponseDto {
 		return new UserInfoResponseDto(user);
 	}
 
+	public static UserInfoResponseDto fromUser(User user) {
+		return new UserInfoResponseDto(user);
+	}
+
 }
