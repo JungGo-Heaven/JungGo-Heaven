@@ -38,6 +38,9 @@ public class S3StorageService implements StorageService {
     private final S3Client s3Client;
     private final UserFinder userFinder;
 
+    @Value("${cloudfront.domain}")
+    private String cloudFrontDomain;
+
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
 
@@ -68,6 +71,7 @@ public class S3StorageService implements StorageService {
                 .bucket(bucket)
                 .key(key)
                 .contentType(image.getContentType())
+                .cacheControl("public, max-age=7776000") // 캐시 3개월
                 .build();
 
         try {
@@ -128,7 +132,8 @@ public class S3StorageService implements StorageService {
             try {
                 counter++;
                 UploadResponse upload = upload(image, type, authUser, resourceId);
-                responses.add(upload.getUploadUrl());
+                String fullUrl = buildCloudFrontUrl(upload.getUploadUrl());
+                responses.add(fullUrl);
             } catch (Exception e) {
                 log.error("{} 번째 업로드 중 예외 발생: {}", counter, e.getLocalizedMessage());
                 throw new ImageUploadIOException();
@@ -138,7 +143,7 @@ public class S3StorageService implements StorageService {
     }
 
     // S3에 업로드된 객체 URL과 동일한 URL로 변경
-    public String buildS3Url(String key) {
-        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
+    public String buildCloudFrontUrl(String key) {
+        return "https://" + cloudFrontDomain + "/" + key;
     }
 }
