@@ -56,7 +56,7 @@ public class ReviewServiceTest {
         ReflectionTestUtils.setField(reviewer, "id", 2L);
 
         reviewRequestDto = new ReviewRequestDto((byte) 5, "친절하고 답변이 빠르십니다.");
-        review = new Review(user, reviewer, reviewRequestDto);
+        review = Review.of(user, reviewer, reviewRequestDto);
         ReflectionTestUtils.setField(review, "id", 1L);
     }
 

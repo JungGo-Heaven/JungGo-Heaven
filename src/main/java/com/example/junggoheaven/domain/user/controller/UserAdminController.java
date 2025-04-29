@@ -22,26 +22,26 @@ import lombok.RequiredArgsConstructor;
 
 @Secured(UserRole.Authority.ADMIN)
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserAdminController {
 
 	private final UserAdminService userAdminService;
 
-	@PatchMapping("/users/status")
+	@PatchMapping("/v1/users/status")
 	public ResponseDto<AdminUserInfoResponseDto> updateUserStatus(
 		@Valid @RequestBody AdminUserStatusUpdateRequestDto requestDto) {
 		return ResponseDto.success(userAdminService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
 	}
 
-	@GetMapping("/users")
+	@GetMapping("/v1/users")
 	public ResponseDto<Page<AdminUserListResponseDto>> getAdminUserPage(@RequestParam(required = false) String status,
 		@RequestParam(required = false) String email, @RequestParam(defaultValue = "0") int pageNumber,
 		@RequestParam(defaultValue = "10") int pageSize) {
 		return ResponseDto.success(userAdminService.getAdminUserPage(status, email, pageNumber, pageSize));
 	}
 
-	@GetMapping("/users/{userId}")
+	@GetMapping("/v1/users/{userId}")
 	public ResponseDto<AdminUserInfoResponseDto> getAdminUserInfo(@PathVariable Long userId) {
 		return ResponseDto.success(userAdminService.getAdminUserInfo(userId));
 	}

@@ -25,32 +25,32 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Secured(UserRole.Authority.ADMIN)
 public class InquiryAdminController {
 
 	private final InquiryAdminService inquiryAdminService;
 
-	@PatchMapping("/inquiries/{inquiryId}/response")
+	@PatchMapping("/v1/inquiries/{inquiryId}/response")
 	public ResponseDto<AdminInquiryResponseDto> respondToInquiry(@PathVariable Long inquiryId,
 		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody RespondInquiryRequestDto requestDto) {
 		return ResponseDto.success(inquiryAdminService.respondToInquiry(inquiryId, authUser.getId(), requestDto));
 	}
 
-	@PatchMapping("/inquiries/{inquiryId}/update-response")
+	@PatchMapping("/v1/inquiries/{inquiryId}/update-response")
 	public ResponseDto<AdminInquiryResponseDto> updateRespond(@PathVariable Long inquiryId,
 		@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody RespondInquiryRequestDto requestDto) {
 		return ResponseDto.success(inquiryAdminService.updateRespond(inquiryId, authUser.getId(), requestDto));
 	}
 
-	@PatchMapping("/inquiries/status")
+	@PatchMapping("/v1/inquiries/status")
 	public ResponseDto<AdminInquiryResponseDto> changeInquiryStatus(@Valid @RequestBody InquiryStatusRequestDto requestDto) {
 		return ResponseDto.success(inquiryAdminService.changeInquiryStatus(requestDto));
 	}
 
-	@GetMapping("/inquiries")
+	@GetMapping("/v1/inquiries")
 	public ResponseDto<Page<AdminInquiryListResponseDto>> getInquiryList(
 		@RequestParam(required = false) String title,
 		@RequestParam(required = false) String status,

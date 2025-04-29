@@ -37,8 +37,8 @@ public class ProfileImageServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(profileImageService, "bucket", "test-bucket");
-        ReflectionTestUtils.setField(profileImageService, "region", "ap-northeast-2");
+        ReflectionTestUtils.setField(profileImageService, "cloudFrontDomain", "d111111abcdef8.cloudfront.net");
+
     }
 
     @Test
@@ -49,7 +49,7 @@ public class ProfileImageServiceTest {
         );
         AuthUser authUser = new AuthUser(1L, "a@a.com", ROLE_USER, "test");
         Long userId = authUser.getId();
-        UploadResponse uploadResponse = new UploadResponse("http://testImage.com");
+        UploadResponse uploadResponse = new UploadResponse("user/1/profile.jpeg");
 
         when(s3StorageService.upload(mockMultipartFile, "profiles", authUser, userId))
                 .thenReturn(uploadResponse);

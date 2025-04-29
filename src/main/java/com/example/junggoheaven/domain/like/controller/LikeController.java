@@ -25,35 +25,35 @@ import com.example.junggoheaven.global.common.response.ResponseDto;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class LikeController {
 
 	private final LikeService likeService;
 
-	@PostMapping("/likes")
+	@PostMapping("/v1/likes")
 	public ResponseDto<LikeResponseDto> createLike(@AuthenticationPrincipal AuthUser authUser,
 		@RequestBody LikeRequestDto requestDto) {
 		return ResponseDto.success(likeService.createLike(authUser.getId(), requestDto));
 	}
 
-	@GetMapping("/likes/my")
+	@GetMapping("/v1/likes/my")
 	public ResponseDto<Page<LikeProductResponseDto>> getMyLikeProducts(@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		return ResponseDto.success(likeService.getMyLikeProducts(authUser.getId(), pageNumber, pageSize));
 	}
 
-	@GetMapping("/likes/products/{productId}")
+	@GetMapping("/v1/likes/products/{productId}")
 	public ResponseDto<LikeResponseDto> getProductLikes(@PathVariable Long productId) {
 		return ResponseDto.success(likeService.getProductLikes(productId));
 	}
 
-	@GetMapping("/likes/best")
+	@GetMapping("/v1/likes/best")
 	public ResponseDto<List<LikeProductResponseDto>> getPopularProducts() {
 		return ResponseDto.success(likeService.getPopularProducts());
 	}
 
-	@DeleteMapping("/likes/{likeId}")
+	@DeleteMapping("/v1/likes/{likeId}")
 	public ResponseDto<Void> deleteProductLikes(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable Long likeId) {
 		likeService.deleteProductLikes(authUser.getId(), likeId);
@@ -61,7 +61,7 @@ public class LikeController {
 	}
 
 	@Secured(UserRole.Authority.ADMIN)
-	@GetMapping("/likes/users/{userId}")
+	@GetMapping("/v1/likes/users/{userId}")
 	public ResponseDto<Page<LikeProductResponseDto>> getProductsOfUser(@PathVariable Long userId,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		return ResponseDto.success(likeService.getProductsOfUser(userId, pageNumber, pageSize));

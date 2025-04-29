@@ -14,5 +14,5 @@ public class InquiryStatusRequestDto {
 	private Long inquiryId;
 	@NotBlank(message = "변경하려는 상태 코드를 입력해주세요.")
 	@ValidEnum(enumClass = InquiryStatus.class, message = "WAITING, COMPLETED, DELETED 중 하나만 입력 가능합니다.")
-	private InquiryStatus status;
+	private String status;
 }

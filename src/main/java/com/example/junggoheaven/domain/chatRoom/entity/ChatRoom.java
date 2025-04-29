@@ -3,6 +3,7 @@ package com.example.junggoheaven.domain.chatRoom.entity;
 import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "chat_room",
         uniqueConstraints = @UniqueConstraint(columnNames = {"product_id", "buyer_id"}))
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,11 +40,15 @@ public class ChatRoom {
         this.sellerExited = id;
     }
 
-    public ChatRoom(Product product, User buyer) {
+    private ChatRoom(Product product, User buyer) {
         this.product = product;
         this.buyer = buyer;
         this.buyerExited = null;
         this.sellerExited = null;
+    }
+
+    public static ChatRoom of(Product product, User buyer) {
+        return new ChatRoom(product, buyer);
     }
 
 }

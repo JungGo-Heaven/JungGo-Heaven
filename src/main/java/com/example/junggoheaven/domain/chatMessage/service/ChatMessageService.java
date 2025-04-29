@@ -5,8 +5,10 @@ import com.example.junggoheaven.domain.chatMessage.dto.request.ChatMessageReques
 import com.example.junggoheaven.domain.chatMessage.dto.request.ChatReadRequestDto;
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageResponseDto;
 import com.example.junggoheaven.domain.chatMessage.entity.ChatMessage;
+import com.example.junggoheaven.domain.chatMessage.enums.MessageType;
 import com.example.junggoheaven.domain.chatMessage.exception.ChatRoomMissMatchException;
-import com.example.junggoheaven.domain.chatMessage.exception.NoPermissionToDelete;
+import com.example.junggoheaven.domain.chatMessage.exception.NoPermissionToChatMessage;
+import com.example.junggoheaven.domain.chatMessage.redis.dto.RedisChatMessageDto;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageChecker;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageFinder;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageWriter;
@@ -14,58 +16,80 @@ import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
 import com.example.junggoheaven.domain.chatRoom.service.component.ChatRoomFinder;
 import com.example.junggoheaven.domain.chatRoom.service.component.ChatRoomWriter;
 import com.example.junggoheaven.domain.product.entity.Product;
-import com.example.junggoheaven.domain.product.repository.ProductRepository;
+import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.global.common.entity.IdGenerator;
+import com.example.junggoheaven.global.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ChatMessageService {
-    private final ChatMessageChecker chatMessageChecker;
     private final ChatMessageFinder chatMessageFinder;
     private final ChatMessageWriter chatMessageWriter;
 
-    private final ProductRepository productRepository; // productFinder가 구현되면 수정 예정
+    private  final ProductFinder productFinder;
 
     private final ChatRoomFinder chatRoomFinder;
     private final ChatRoomWriter chatRoomWriter;
 
     private final UserFinder userFinder;
 
+    private final RedisService redisService;
+
+    @Transactional
     public ChatMessageResponseDto createMessage(ChatMessageRequestDto requestDto, Long userId) {
         User user = userFinder.findByUserId(userId);
         ChatRoom chatRoom;
-        ChatMessage chatMessage;
+        RedisChatMessageDto redisChatMessageDto;
 
         if(requestDto.getChatRoomId() != null) {
             chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
-            chatMessage = new ChatMessage(chatRoom, user, requestDto.getMessage(), requestDto.getMessageType());
-        } else {
-            Product product = productRepository.findById(requestDto.getProductId()).orElse(null);
-            ChatRoom newChatRoom = new ChatRoom(product, user);
-            ChatRoom savedChatRoom = chatRoomWriter.save(newChatRoom);
-            chatMessage = new ChatMessage(savedChatRoom, user, requestDto.getMessage(), requestDto.getMessageType());
-        }
+            redisChatMessageDto = new RedisChatMessageDto(
+                    chatRoom.getId(),
+                    user.getId(),
+                    IdGenerator.generateId(),
+                    requestDto.getMessage(),
+                    null,
+                    null,
+                    MessageType.TEXT
+            );
+            chatNotification(chatRoom, user, requestDto.getMessage());
 
-        ChatMessage savedMessage = chatMessageWriter.save(chatMessage);
+        } else {
+            Product product = productFinder.findProductById(requestDto.getProductId());
+            ChatRoom newChatRoom = ChatRoom.of(product, user);
+            ChatRoom savedChatRoom = chatRoomWriter.save(newChatRoom);
+            redisChatMessageDto = new RedisChatMessageDto(
+                    savedChatRoom.getId(),
+                    user.getId(),
+                    IdGenerator.generateId(),
+                    requestDto.getMessage(),
+                    null,
+                    null,
+                    MessageType.TEXT
+            );
+            chatNotification(savedChatRoom, user, requestDto.getMessage());
+        }
+        redisService.saveChatMessageToZSet(redisChatMessageDto);
 
         return new ChatMessageResponseDto(
-                savedMessage.getChatRoom().getId(),
-                savedMessage.getId(),
-                savedMessage.getSender().getId(),
-                savedMessage.getMessage(),
-                savedMessage.getChatRoomImage() != null ? savedMessage.getChatRoomImage().getChatRoomImageUrl() : null,
-                savedMessage.getSendAt(),
-                savedMessage.getMessageType()
+                redisChatMessageDto.getChatRoomId(),
+                redisChatMessageDto.getChatMessageId(),
+                redisChatMessageDto.getSenderId(),
+                redisChatMessageDto.getMessage(),
+                null,
+                redisChatMessageDto.getSendAt(),
+                redisChatMessageDto.getMessageType(),
+                false
         );
     }
-
+    @Transactional
     public void isRead(ChatReadRequestDto requestDto, Long userId) {
         ChatRoom chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
         User user = userFinder.findByUserId(userId);
@@ -85,12 +109,43 @@ public class ChatMessageService {
 
         for(ChatMessage message : messages) {
             if(!message.getSender().getId().equals(userId)) {
-                throw new NoPermissionToDelete();
+                throw new NoPermissionToChatMessage();
             }
             if (!message.getChatRoom().getId().equals(requestDto.getChatRoomId())) {
                 throw new ChatRoomMissMatchException();
             }
             message.isDeleted();
         }
+    }
+    @Transactional
+    public void saveAll(List<RedisChatMessageDto> batch) {
+        List<ChatMessage> messages = batch.stream()
+                .map(dto -> ChatMessage.of(
+                        dto.getChatMessageId(),
+                        chatRoomFinder.findByChatRoomId(dto.getChatRoomId()),
+                        userFinder.findByUserId(dto.getSenderId()),
+                        dto.getMessage(),
+                        dto.getMessageType(),
+                        dto.getSendAt(),
+                        dto.getIsRead()
+                ))
+                .toList();
+        chatMessageWriter.saveAll(messages);
+    }
+
+
+    private void chatNotification(ChatRoom chatRoom, User sender, String message) {
+        Long sellerId = chatRoom.getProduct().getUser().getId();
+        Long buyerId = chatRoom.getBuyer().getId();
+
+        Long receiverId;
+        if (buyerId.equals(sender.getId())) {
+            receiverId = sellerId;
+        } else {
+            receiverId = buyerId;
+        }
+
+        // todo: 알림 이벤트 추가 알림을 받을 사람 = receiverId 알림 문구는  "sender.getname : message"
+
     }
 }

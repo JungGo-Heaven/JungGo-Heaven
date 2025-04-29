@@ -10,7 +10,7 @@ import com.example.junggoheaven.global.message.dto.MatchedUserDto;
 import com.example.junggoheaven.global.message.entity.NotificationDeliveryLog;
 import com.example.junggoheaven.global.message.enums.ChannelType;
 import com.example.junggoheaven.global.message.event.pusher.PushByKakaoEvent;
-import com.example.junggoheaven.global.message.service.component.writer.NotificationDeliveryEventWriter;
+import com.example.junggoheaven.global.message.service.notificationChannel.component.writer.NotificationDeliveryEventWriter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

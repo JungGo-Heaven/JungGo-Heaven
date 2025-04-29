@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.image.controller;
 
 import com.example.junggoheaven.domain.chatMessage.dto.response.ChatMessageResponseDto;
+import com.example.junggoheaven.domain.chatMessage.redis.RedisChatMessagePublisher;
 import com.example.junggoheaven.domain.image.dto.MultipleUploadResponse;
 import com.example.junggoheaven.domain.image.dto.UploadContext;
 import com.example.junggoheaven.domain.image.dto.UploadResponse;
@@ -30,7 +31,7 @@ public class UploadController {
     private final ProductImageService productImageService;
     private final ChatRoomImageService chatRoomImageService;
 
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final RedisChatMessagePublisher redisChatMessagePublisher;
 
 
     @PostMapping("/files/profiles/{userId}")
@@ -84,10 +85,7 @@ public class UploadController {
         );
 
         for (ChatMessageResponseDto dto : responseDtos) {
-            simpMessagingTemplate.convertAndSend(
-                    "/sub/chat/room/" + chatRoomId,
-                    dto
-            );
+            redisChatMessagePublisher.publish("chat.message", dto);
         }
     }
 }

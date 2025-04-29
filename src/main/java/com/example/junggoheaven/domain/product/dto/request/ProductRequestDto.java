@@ -22,9 +22,9 @@ public class ProductRequestDto {
 	@NotNull(message = "가격을 입력해 주세요")
 	private final Long price;
 
+	@NotBlank(message = "주소를 입력하세요.")
+	private final String address;
+
 	private final Long productImageId;
-
-
-
 
 }

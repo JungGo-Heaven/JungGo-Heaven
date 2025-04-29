@@ -1,5 +1,6 @@
 package com.example.junggoheaven.domain.user.service.component;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -38,5 +39,13 @@ public class UserFinder {
 
 	public Page<User> findUsersForAdmin(String status, String email, Pageable pageable) {
 		return userRepository.findAllByStatusAndEmail(status, email, pageable);
+	}
+
+	public List<User> findAllUsers() {
+		return userRepository.findAll();
+	}
+
+	public User findByCustomerKey(String customerKey) {
+		return userRepository.findByCustomerKey(customerKey).orElseThrow(UserNotFoundException::new);
 	}
 }

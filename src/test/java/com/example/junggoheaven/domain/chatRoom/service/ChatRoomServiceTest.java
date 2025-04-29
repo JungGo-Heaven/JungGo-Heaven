@@ -7,10 +7,13 @@ import com.example.junggoheaven.domain.chatRoom.dto.response.ChatRoomEnterRespon
 import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
 import com.example.junggoheaven.domain.chatRoom.exception.ChatRoomForbidden;
 import com.example.junggoheaven.domain.chatRoom.service.component.ChatRoomFinder;
+import com.example.junggoheaven.domain.location.service.LocationVerificationService;
 import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.product.enums.SellStatus;
+import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.enums.UserRole;
+import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,12 +24,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +45,15 @@ public class ChatRoomServiceTest {
 
     @Mock
     private ChatMessageFinder chatMessageFinder;
+
+    @Mock
+    private UserFinder userFinder;
+
+    @Mock
+    private ProductFinder productFinder;
+
+    @Mock
+    private LocationVerificationService locationVerificationService;
 
     User buyerUser;
     User sellerUser;
@@ -54,20 +69,27 @@ public class ChatRoomServiceTest {
 
         product = new Product(sellerUser, "test name", "Product test", 1000L);
         ReflectionTestUtils.setField(product, "id", 1L);
+        ReflectionTestUtils.setField(product, "longitude", 127.001); // 예시 값
+        ReflectionTestUtils.setField(product, "latitude", 37.567);   // 예시 값
 
-        chatRoom = new ChatRoom(product, buyerUser);
+        chatRoom = ChatRoom.of(product, buyerUser);
         ReflectionTestUtils.setField(chatRoom, "id", 1L);
     }
 
     @Test
     public void 존재하는_채팅방_입장() {
         // given
-        List<ChatMessage> messages = Arrays.asList(new ChatMessage(chatRoom, buyerUser, "testtest", MessageType.TEXT));
+        List<ChatMessage> messages = Arrays.asList(ChatMessage.of(1L, chatRoom, buyerUser, "testtest", MessageType.TEXT, LocalDateTime.now(), false));
+
+        AuthUser authUser = new AuthUser(1L, "buyer@n.com", UserRole.ROLE_USER, "Buyer");
+
+        when(userFinder.findByUserId(1L)).thenReturn(buyerUser);
+        when(productFinder.findProductById(1L)).thenReturn(product);
+        when(locationVerificationService.authenticateLocation(any())).thenReturn(true);
+        doNothing().when(locationVerificationService).updateLastVerified(any());
 
         when(chatRoomFinder.findByProductIdAndBuyerIdOpt(anyLong(), anyLong())).thenReturn(Optional.of(chatRoom));
         when(chatMessageFinder.findByChatRoomIdOrderBySendAtAsc(1L)).thenReturn(messages);
-
-        AuthUser authUser = new AuthUser(1L, "buyer@n.com", UserRole.ROLE_USER, "Buyer");
 
         // when
         ResponseDto<ChatRoomEnterResponseDto> response = chatRoomService.enterChatRoom(1L, authUser);
@@ -84,6 +106,11 @@ public class ChatRoomServiceTest {
         when(chatRoomFinder.findByProductIdAndBuyerIdOpt(anyLong(), anyLong())).thenReturn(Optional.empty());
 
         AuthUser authUser = new AuthUser(1L, "buyer@n.com", UserRole.ROLE_USER, "Buyer");
+
+        when(userFinder.findByUserId(1L)).thenReturn(buyerUser);
+        when(productFinder.findProductById(1L)).thenReturn(product);
+        when(locationVerificationService.authenticateLocation(any())).thenReturn(true);
+        doNothing().when(locationVerificationService).updateLastVerified(any());
 
         // when
         ResponseDto<ChatRoomEnterResponseDto> response = chatRoomService.enterChatRoom(1L, authUser);

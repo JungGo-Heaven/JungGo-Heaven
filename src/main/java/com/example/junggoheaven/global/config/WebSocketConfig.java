@@ -18,15 +18,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chat")
+        registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*");
         //        .withSockJS(); // 웹소켓을 지원하지 않는 브라우저일 경우 http 방식으로 전환하기 위함
     }
 
     @Override 
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/sub");
+        registry.enableSimpleBroker("/sub", "/queue");
         registry.setApplicationDestinationPrefixes("/pub");
+        registry.setUserDestinationPrefix("/user");
     }
 
     @Override

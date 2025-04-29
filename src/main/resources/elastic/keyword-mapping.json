@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "email": {
+      "type": "keyword"
+    },
+    "keywords": {
+      "type": "nested",
+      "properties": {
+        "keyword": {
+          "type": "text"
+        },
+        "exclude_keywords": {
+          "type": "text"
+        }
+      }
+    },
+    "channels": {
+      "properties": {
+        "channel": {
+          "type": "keyword"
+        },
+        "token": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

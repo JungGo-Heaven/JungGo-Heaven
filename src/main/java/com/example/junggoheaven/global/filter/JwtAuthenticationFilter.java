@@ -99,12 +99,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private void setAuthentication(Claims claims) {
-		Long suerId = Long.valueOf(claims.getSubject());
+		Long userId = Long.valueOf(claims.getSubject());
 		String email = claims.get("email", String.class);
 		String name = claims.get("name", String.class);
 		UserRole userRole = UserRole.of(claims.get("userRole", String.class));
 
-		AuthUser authUser = new AuthUser(suerId, email, userRole, name);
+		AuthUser authUser = new AuthUser(userId, email, userRole, name);
 		JwtToken authenticationToken = new JwtToken(authUser);
 		SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 	}

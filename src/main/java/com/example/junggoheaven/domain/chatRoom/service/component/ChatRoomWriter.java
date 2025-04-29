@@ -4,9 +4,11 @@ import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
 import com.example.junggoheaven.domain.chatRoom.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChatRoomWriter {
     private final ChatRoomRepository chatRoomRepository;
 

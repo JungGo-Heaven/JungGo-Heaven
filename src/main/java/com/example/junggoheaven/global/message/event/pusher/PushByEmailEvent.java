@@ -11,10 +11,8 @@ import lombok.Getter;
 
 @Getter
 public final class PushByEmailEvent extends NotificationEvent {
-	private final List<MatchedUserDto> userList;
 
 	public PushByEmailEvent(Object source, Long userId, NotificationType notificationType, String notificationMessage) {
 		super(source, userId, notificationType, notificationMessage);
-		this.userList = new ArrayList<>();
 	}
 }

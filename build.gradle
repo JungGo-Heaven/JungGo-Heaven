@@ -27,6 +27,11 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // JAVA MAIL
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -64,6 +69,31 @@ dependencies {
 
     //webSocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    //RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    //redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
+
+    // ElasticSearch
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'co.elastic.clients:elasticsearch-java:8.18.0'
+
+    //JsonParser
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
+    //GeometryFactory
+    implementation 'org.locationtech.jts:jts-core:1.18.2'
+    implementation 'org.hibernate:hibernate-spatial:6.6.11.Final'
+
+    //GenericJackson2JsonRedisSerializer 날짜 직렬화
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    //tsid
+    implementation 'com.github.f4b6a3:tsid-creator:5.2.6'
+
+
 
 }
 

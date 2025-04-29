@@ -31,6 +31,12 @@ public class ProductResponseDto {
 
 	private final LocalDateTime pullAt;
 
+	private final String address;
+
+	private final Double longitude;
+
+	private final Double latitude;
+
 
 	// Product 를 받는 생성자
 	public ProductResponseDto(Product product) {
@@ -43,6 +49,9 @@ public class ProductResponseDto {
 		this.deletedAt = product.getDeletedAt(); // 반드시 null
 		this.pullAt = product.getPullAt();
 		this.productImage = product.getProductImage();
+		this.address = product.getAddress();
+		this.longitude = product.getLongitude();;
+		this.latitude = product.getLatitude();
 	}
 
 
@@ -57,7 +66,10 @@ public class ProductResponseDto {
 			product.getProductImage(),
 			product.getSellStatus(),
 			product.getDeletedAt(),
-			product.getPullAt()
+			product.getPullAt(),
+				product.getAddress(),
+				product.getLongitude(),
+				product.getLatitude()
 		);
 	}
 
