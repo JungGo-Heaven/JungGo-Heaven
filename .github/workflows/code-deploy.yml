@@ -55,7 +55,6 @@ jobs:
                 runas: ubuntu
           EOF
 
-#        docker-compose.yml 설정
       - name: Create docker-compose.yml
         run: |
           cat > docker-compose.yml << 'DOCKERCOMPOSE'
@@ -65,32 +64,6 @@ jobs:
       - name: Create deployment scripts
         run: |
           mkdir -p scripts
-          mkdir -p elasticsearch kibana
-
-#           Elasticsearch Dockerfile 생성
-          cat > elasticsearch/Dockerfile.elasticsearch << 'EOF'
-          FROM docker.elastic.co/elasticsearch/elasticsearch:8.12.0
-          COPY elasticsearch.yml /usr/share/elasticsearch/config/
-          USER root
-          RUN chown elasticsearch:elasticsearch /usr/share/elasticsearch/config/elasticsearch.yml
-          USER elasticsearch
-          EOF
-
-#           Elasticsearch 설정 파일을 secrets에서 불러와서 작성
-          cat > elasticsearch/elasticsearch.yml << 'EOF'
-          ${{ secrets.ELASTICSEARCH_YML }}
-          EOF
-
-#           Kibana Dockerfile 생성
-          cat > kibana/Dockerfile.kibana << 'EOF'
-          FROM docker.elastic.co/kibana/kibana:8.12.0
-          COPY kibana.yml /usr/share/kibana/config/
-          EOF
-
-#           Kibana 설정 파일을 secrets에서 불러와서 작성
-          cat > kibana/kibana.yml << 'EOF'
-          ${{ secrets.KIBANA_YML }}
-          EOF
 
 #           현재 실행 중인 프로그램 백업
           cat > scripts/before_install.sh << 'EOF'
@@ -127,9 +100,9 @@ jobs:
 #           애플리케이션 실행
           cat > scripts/start_application.sh << 'EOF'
                
-#           Docker 이미지 푸시
+#           Docker 이미지 풀
           cd /home/ubuntu/app
-          docker-compose pull app || true
+          docker-compose pull redis rabbitmq || true
 
 #           Docker Compose로 서비스 시작
           docker-compose up -d
@@ -167,8 +140,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+#      Docker-compose 배포 번들 생성
       - name: Create deployment bundle
-        run: zip -r deploy.zip appspec.yml scripts/ docker-compose.yml elasticsearch/ kibana/
+        run: zip -r deploy.zip appspec.yml scripts/ docker-compose.yml
 
       - name: Deploy to AWS CodeDeploy
         run: |
