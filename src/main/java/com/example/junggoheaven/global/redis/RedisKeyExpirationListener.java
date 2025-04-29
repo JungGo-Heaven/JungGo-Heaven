@@ -18,19 +18,19 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class RedisKeyExpirationListner extends KeyExpirationEventMessageListener {
+public class RedisKeyExpirationListener extends KeyExpirationEventMessageListener {
     private final AuctionFinder auctionFinder;
     private final AuctionWriter auctionWriter;
     private final RedisService redisService;
     private final BidFinder bidFinder;
     private final UserFinder userFinder;
 
-    public RedisKeyExpirationListner(AuctionFinder auctionFinder,
-                                     AuctionWriter auctionWriter,
-                                     RedisService redisService,
-                                     BidFinder bidFinder,
-                                     UserFinder userFinder,
-                                     RedisMessageListenerContainer redisMessageListenerContainer) {
+    public RedisKeyExpirationListener(AuctionFinder auctionFinder,
+                                      AuctionWriter auctionWriter,
+                                      RedisService redisService,
+                                      BidFinder bidFinder,
+                                      UserFinder userFinder,
+                                      RedisMessageListenerContainer redisMessageListenerContainer) {
         super(redisMessageListenerContainer);
         this.auctionFinder = auctionFinder;
         this.auctionWriter = auctionWriter;
@@ -62,6 +62,8 @@ public class RedisKeyExpirationListner extends KeyExpirationEventMessageListener
                 auction.successfulAuction();
                 User user = userFinder.findByUserId(bid.get().getBidder().getId());
                 auction.updateWinner(user);
+                // todo: user가 낙찰된 사람이고, auction.getAuctionProduct.getSeller.getId가 경매 판매자입니다.
+                // 이 두 사용자에게 “낙찰이 확정 되었습니다.”로 알림 보내주시면 됩니다!
             }
             auctionWriter.save(auction);
         }

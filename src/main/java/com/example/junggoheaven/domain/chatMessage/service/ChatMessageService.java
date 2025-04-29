@@ -59,6 +59,8 @@ public class ChatMessageService {
                     null,
                     MessageType.TEXT
             );
+            chatNotification(chatRoom, user, requestDto.getMessage());
+
         } else {
             Product product = productFinder.findProductById(requestDto.getProductId());
             ChatRoom newChatRoom = ChatRoom.of(product, user);
@@ -72,6 +74,7 @@ public class ChatMessageService {
                     null,
                     MessageType.TEXT
             );
+            chatNotification(savedChatRoom, user, requestDto.getMessage());
         }
         redisService.saveChatMessageToZSet(redisChatMessageDto);
 
@@ -128,5 +131,21 @@ public class ChatMessageService {
                 ))
                 .toList();
         chatMessageWriter.saveAll(messages);
+    }
+
+
+    private void chatNotification(ChatRoom chatRoom, User sender, String message) {
+        Long sellerId = chatRoom.getProduct().getUser().getId();
+        Long buyerId = chatRoom.getBuyer().getId();
+
+        Long receiverId;
+        if (buyerId.equals(sender.getId())) {
+            receiverId = sellerId;
+        } else {
+            receiverId = buyerId;
+        }
+
+        // todo: 알림 이벤트 추가 알림을 받을 사람 = receiverId 알림 문구는  "sender.getname : message"
+
     }
 }
