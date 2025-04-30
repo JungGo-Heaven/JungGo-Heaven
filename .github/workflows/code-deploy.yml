@@ -2,10 +2,14 @@ name: Deploy with AWS CodeDeploy
 
 on:
   workflow_run:
-    workflows: ["Build and Docker Push"]
+    workflows:
+      - "Build and Docker Push"
     types:
       - completed
   workflow_dispatch:
+  push:
+    branches:
+      - feat/workflow
 
 jobs:
   deploy:
