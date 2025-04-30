@@ -25,6 +25,11 @@ jobs:
           name: image-tag
         if: ${{ github.event_name != 'workflow_dispatch' }}
 
+      # 다운로드 확인
+      - name: Check downloaded tag file
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: cat image-tag.txt
+
       - name: Set image tag
         id: set-tag
         run: |
