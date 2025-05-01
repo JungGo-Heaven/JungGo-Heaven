@@ -68,9 +68,10 @@ public class ProductController {
 	*/
 	@GetMapping("/v1/products/{productId}")
 	public ResponseDto<ProductResponseDto> findProductById(
+		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("productId") Long productId) {
 
-		ProductResponseDto productResponseDto = productService.findProductById(productId);
+		ProductResponseDto productResponseDto = productService.findProductById(authUser, productId);
 
 		return ResponseDto.success(productResponseDto);
 	}

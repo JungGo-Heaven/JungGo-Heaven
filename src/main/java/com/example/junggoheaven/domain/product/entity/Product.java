@@ -84,6 +84,36 @@ public class Product extends TimeStamp {
 	@CreatedDate // 최초 생성 시각 스탬프
 	private LocalDateTime pullAt;
 
+	@Column
+	private Long productCategory;
+
+	// productCategory 추가
+	public Product(
+		User user,
+		String name,
+		String information,
+		Long price,
+		ProductImage productImage,
+		String address,
+		Double longitude,
+		Double latitude,
+		Point location,
+		Long productCategory
+	) {
+		this.user = user;
+		this.name = name;
+		this.information = information;
+		this.price = price;
+		this.sellStatus = SellStatus.ONSALE;
+		this.productImage = productImage;
+		this.status = ProductStatus.NORMAL;
+		this.address = address;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.location = location;
+		this.productCategory = productCategory;
+	}
+
 
 	public Product(
 		User user,
