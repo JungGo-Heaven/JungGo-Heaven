@@ -1,6 +1,7 @@
 package com.example.junggoheaven.domain.product.service;
 
 
+import com.example.junggoheaven.domain.bespokeinfo.service.BespokeInfoService;
 import com.example.junggoheaven.domain.image.entity.ProductImage;
 import com.example.junggoheaven.domain.image.exception.UnexpectedErrorException;
 import com.example.junggoheaven.domain.image.repository.ProductImageRepository;
@@ -58,6 +59,9 @@ public class ProductService {
 
 	private final LocationVerificationService locationVerificationService;
 
+	private final BespokeInfoService bespokeInfoService;
+
+
 	/*
 		상품 등록 메서드
 	*/
@@ -96,11 +100,18 @@ public class ProductService {
 					productRequestDto.getAddress(),
 					currentLocation.getLongitude(),
 					currentLocation.getLatitude(),
-					location
+					location,
+				productRequestDto.getProductCategory() // 카테고리 추가
 			);
 
 			productWriter.saveProduct(product);
 			eventPublisher.publishEventAfterTransaction(new ProductRegisteredEvent(this, user.getId(), product.getName()));
+
+			// 상품 조회 로그 스냅샷 저장
+			if(bespokeInfoService.isBespokeAgree(authUser)) {
+				bespokeInfoService.saveProductLog(authUser, product);
+			}
+
 
 			return new ProductResponseDto(product);
 		}
@@ -119,12 +130,19 @@ public class ProductService {
 				productRequestDto.getAddress(),
 				currentLocation.getLongitude(),
 				currentLocation.getLatitude(),
-				location
+				location,
+			productRequestDto.getProductCategory()
 		);
 
 		productWriter.saveProduct(product);
 
 		eventPublisher.publishEventAfterTransaction(new ProductRegisteredEvent(this, user.getId(), product.getName()));
+
+		// 상품 조회 로그 스냅샷 저장
+		if(bespokeInfoService.isBespokeAgree(authUser)) {
+			bespokeInfoService.saveProductLog(authUser, product);
+		}
+
 		return new ProductResponseDto(product);
 	}
 
@@ -151,9 +169,14 @@ public class ProductService {
 		상품 단건 조회 메서드
 	*/
 	@Transactional
-	public ProductResponseDto findProductById(Long productId) {
+	public ProductResponseDto findProductById(AuthUser authUser, Long productId) {
 
 		Product product = productFinder.findProductById(productId);
+
+		// 상품 조회 로그 스냅샷 저장
+		if(bespokeInfoService.isBespokeAgree(authUser)) {
+			bespokeInfoService.saveProductLog(authUser, product);
+		}
 
 		return new ProductResponseDto(product);
 	}

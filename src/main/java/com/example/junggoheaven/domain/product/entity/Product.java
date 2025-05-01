@@ -94,8 +94,11 @@ public class Product extends TimeStamp {
 		String information,
 		Long price,
 		ProductImage productImage,
+		String address,
+		Double longitude,
+		Double latitude,
+		Point location,
 		Long productCategory
-
 	) {
 		this.user = user;
 		this.name = name;
@@ -104,6 +107,10 @@ public class Product extends TimeStamp {
 		this.sellStatus = SellStatus.ONSALE;
 		this.productImage = productImage;
 		this.status = ProductStatus.NORMAL;
+		this.address = address;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.location = location;
 		this.productCategory = productCategory;
 	}
 

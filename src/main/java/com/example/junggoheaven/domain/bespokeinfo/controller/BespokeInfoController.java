@@ -11,6 +11,7 @@ import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import com.example.junggoheaven.global.common.response.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -86,6 +87,15 @@ public class BespokeInfoController {
 
 
 
+	/*
+		상품추천 분석 서버 호출
+	*/
+	@GetMapping("/v1/bespokes/recommends")
+	public ResponseDto<String> getBespokeProduct(@AuthenticationPrincipal AuthUser authUser) {
+		String response = bespokeInfoService.getBespokeProduct(authUser);
+
+		return ResponseDto.success(response);
+	}
 
 
 

@@ -29,15 +29,28 @@ public class ProductBespokeInfo extends TimeStamp {
 	private Product product;
 
 	@Column(nullable = false)
-	private int productCategory;
+	private Long productCategory;
 
 	@Column(nullable = false)
-	private int gender;
+	private Long gender;
 
 	@Column(nullable = false)
-	private int location;
+	private Long location;
 
 	@Column(nullable = false)
-	private int ageGroup;
+	private Long ageGroup;
+
+	private ProductBespokeInfo(UserBespokeInfo userBespokeInfo, Product product) {
+		this.product =product;
+		this.productCategory = product.getProductCategory();
+		this.gender = userBespokeInfo.getGender();
+		this.location = userBespokeInfo.getLocation();
+		this.ageGroup = userBespokeInfo.getAgeGroup();
+	}
+
+
+	public static ProductBespokeInfo of(UserBespokeInfo userBespokeInfo, Product product) {
+		return new ProductBespokeInfo(userBespokeInfo, product);
+	}
 
 }

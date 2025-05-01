@@ -4,11 +4,13 @@ import com.example.junggoheaven.domain.bespokeinfo.dto.request.UserBespokeAgreeR
 import com.example.junggoheaven.domain.bespokeinfo.dto.request.UserBespokeInfoRequestDto;
 import com.example.junggoheaven.domain.bespokeinfo.dto.response.UserBespokeAgreeResponseDto;
 import com.example.junggoheaven.domain.bespokeinfo.dto.response.UserBespokeInfoResponseDto;
+import com.example.junggoheaven.domain.bespokeinfo.entity.ProductBespokeInfo;
 import com.example.junggoheaven.domain.bespokeinfo.entity.UserBespokeInfo;
 import com.example.junggoheaven.domain.bespokeinfo.exception.NotAgreeException;
 import com.example.junggoheaven.domain.bespokeinfo.exception.SameAgreeException;
 import com.example.junggoheaven.domain.bespokeinfo.repository.ProductBespokeInfoRepository;
 import com.example.junggoheaven.domain.bespokeinfo.repository.UserBespokeInfoRepository;
+import com.example.junggoheaven.domain.product.entity.Product;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.repository.UserRepository;
 import com.example.junggoheaven.domain.user.service.UserService;
@@ -17,12 +19,18 @@ import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 public class BespokeInfoService {
 
+	private final RestTemplate restTemplate;
 	private final ProductBespokeInfoRepository productBespokeInfoRepository;
 	private final UserBespokeInfoRepository userBespokeInfoRepository;
 
@@ -91,7 +99,7 @@ public class BespokeInfoService {
 
 
 	/*
-		맞춤 정보 수정
+		사용자 맞춤 정보 수정
 	*/
 	@Transactional
 	public UserBespokeInfoResponseDto updateBespokeInfo(AuthUser authUser,
@@ -103,33 +111,36 @@ public class BespokeInfoService {
 			throw new NotAgreeException();
 		}
 
-		UserBespokeInfo userBespokeInfo = userBespokeInfoRepository.findByUsersId(authUser.getId());
+		UserBespokeInfo userBespokeInfo = userBespokeInfoRepository.findByUsersId(user);
 
 		userBespokeInfo.updateUserBespokeInfo(userBespokeInfoRequestDto);
 
 		userBespokeInfoRepository.save(userBespokeInfo);
 
-		//userBespokeInfoRepository.findByUserId()
 		return UserBespokeInfoResponseDto.of(userBespokeInfo);
 
 	}
 
 
-
-
-	// product service 부분
 	/*
-		상품 등록시 로그 저장
+		product service 부분
+		상품 맞춤정보 로그 스냅샷저장
 	*/
 	@Transactional
-	public void saveProductLog() {
+	public void saveProductLog(AuthUser authUser, Product product) {
+		User user = userFinder.findByUserId(authUser.getId());
+
+		if (user.getBespokeAgree() == false) {
+			throw new NotAgreeException();
+		}
+
+		UserBespokeInfo userBespokeInfo = userBespokeInfoRepository.findByUsersId(user);
+
+		ProductBespokeInfo productBespokeInfo = ProductBespokeInfo.of(userBespokeInfo, product);
+
+		productBespokeInfoRepository.save(productBespokeInfo);
 
 	}
-
-
-
-
-
 
 
 	/*
@@ -149,6 +160,32 @@ public class BespokeInfoService {
 	}
 
 
+	/*
+		상품추천 분석 서버 호출
+	*/
+	public String getBespokeProduct(AuthUser authUser) {
+		String url = "http://127.0.0.1:5000/mlserver";
+
+		User user = userFinder.findByUserId(authUser.getId());
+
+		if (user.getBespokeAgree() == false) {
+			throw new NotAgreeException();
+		}
+
+		UserBespokeInfo userBespokeInfo = userBespokeInfoRepository.findByUsersId(user);
+
+		UserBespokeInfoRequestDto userBespokeInfoRequestDto = new UserBespokeInfoRequestDto(userBespokeInfo.getGender(),
+			userBespokeInfo.getLocation(), userBespokeInfo.getAgeGroup());
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		HttpEntity<UserBespokeInfoRequestDto> entity = new HttpEntity<>(userBespokeInfoRequestDto, headers);
+
+		ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+		return response.getBody();
+	}
 
 
 
