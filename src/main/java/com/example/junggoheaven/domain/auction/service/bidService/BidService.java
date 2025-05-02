@@ -41,7 +41,6 @@ public class BidService {
 
     @Transactional
     public void createBid(Long authUserId, Long auctionId, Integer bidPrice){
-//        Auction auction = auctionFinder.findAuctionByIdForBid(auctionId); //비관적락
         Auction auction = auctionFinder.findAuctionById(auctionId);
         User bidder = userFinder.findByUserId(authUserId);
 
@@ -57,5 +56,39 @@ public class BidService {
 
         redisBidPublisher.publish("auction.broadcast", broadcastDto);
     }
+
+    //비관적락 테스트를 위한 코드
+    @Transactional
+    @Deprecated
+    public void createBidDBLock(Long authUserId, Long auctionId, Integer bidPrice){
+        Auction auction = auctionFinder.findAuctionByIdForBid(auctionId);
+        Optional<Bid> findBid = bidFinder.findTopByAuctionOrderByBidPriceDesc(auction);
+        User bidder = userFinder.findByUserId(authUserId);
+
+        Bid bid;
+        if(!findBid.isPresent()){
+            int startPrice = auction.getStart_price();
+            if(startPrice < bidPrice){
+                bid = Bid.of(auction, bidder, bidPrice);
+                bidWriter.save(bid);
+            }
+        } else {
+            if(findBid.get().getBidPrice() < bidPrice){
+                bid = Bid.of(auction, bidder, bidPrice);
+                bidWriter.save(bid);
+            }
+        }
+
+        BroadcastBidResponseDto broadcastDto = new BroadcastBidResponseDto(
+                auctionId,
+                bidPrice,
+                bidder.getName(),
+                null
+        );
+
+        redisBidPublisher.publish("auction.broadcast", broadcastDto);
+    }
+
+
 
 }

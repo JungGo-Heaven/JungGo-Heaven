@@ -14,9 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -26,7 +24,7 @@ public class ChatMessageScheduler {
     private final ChatMessageService chatMessageService;
     private final ChatRoomImageService chatRoomImageService;
 
-    @Scheduled(cron = "30 55 22 * * *")
+    @Scheduled(cron = "00 00 02 * * *")
     public void syncChatMessagesToDb() {
         // 분산 락 획득
         Boolean acquired = redisTemplate.opsForValue()
@@ -35,14 +33,15 @@ public class ChatMessageScheduler {
         if (!Boolean.TRUE.equals(acquired)) {
             return;
         }
-
         try {
             log.info("채팅 메시지 동기화 작업 시작");
             List<RedisChatMessageDto> batchText = new ArrayList<>();
             List<RedisChatMessageDto> batchImage = new ArrayList<>();
+            Map<String, Set<Object>> zremTargetMap = new HashMap<>();  // chatRoom:1 → [메시지1, 메시지2], chatRoom:2 → [메시지3, 메시지4, 메시지5] 이런 구조
+
 
             long now = System.currentTimeMillis();
-            long threshold = now - 1000L * 60; // 7일 전
+            long threshold = now - 1000L * 60 * 60 * 24 * 7; // 7일 전
 
             ScanOptions scanOptions = ScanOptions.scanOptions().match("chat:chatRoom:*").count(100).build();
             try (Cursor<byte[]> cursor = redisTemplate.getRequiredConnectionFactory().getConnection().scan(scanOptions)) {
@@ -51,6 +50,8 @@ public class ChatMessageScheduler {
                     Set<Object> expired = redisTemplate.opsForZSet().rangeByScore(key, 0, threshold);
 
                     if (expired == null || expired.isEmpty()) continue;
+
+                    zremTargetMap.put(key, expired); // 삭제용으로 key별 보관
 
                     for (Object item : expired) {
                         try {
@@ -69,17 +70,12 @@ public class ChatMessageScheduler {
             }
             if (!batchText.isEmpty()) {
                 chatMessageService.saveAll(batchText);
-                for (RedisChatMessageDto dto : batchText) {
-                    String key = "chat:chatRoom:" + dto.getChatRoomId();
-                    redisTemplate.opsForZSet().remove(key, dto);
-                }
             }
-            if(!batchImage.isEmpty()){
+            if (!batchImage.isEmpty()) {
                 chatRoomImageService.saveAll(batchImage);
-                for (RedisChatMessageDto dto : batchImage) {
-                    String key = "chat:chatRoom:" + dto.getChatRoomId();
-                    redisTemplate.opsForZSet().remove(key, dto);
-                }
+            }
+            for (Map.Entry<String, Set<Object>> entry : zremTargetMap.entrySet()) {
+                redisTemplate.opsForZSet().remove(entry.getKey(), entry.getValue().toArray());
             }
             log.info("채팅 메시지 동기화 작업 완료");
         } catch (Exception e) {

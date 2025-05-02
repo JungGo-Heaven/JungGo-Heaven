@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -42,39 +43,38 @@ public class ChatMessageService {
 
     private final RedisService redisService;
 
+    //redis에 저장하는 로직
     @Transactional
     public ChatMessageResponseDto createMessage(ChatMessageRequestDto requestDto, Long userId) {
-        User user = userFinder.findByUserId(userId);
-        ChatRoom chatRoom;
         RedisChatMessageDto redisChatMessageDto;
-
         if(requestDto.getChatRoomId() != null) {
-            chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
+
             redisChatMessageDto = new RedisChatMessageDto(
-                    chatRoom.getId(),
-                    user.getId(),
+                    requestDto.getChatRoomId(),
+                    userId,
                     IdGenerator.generateId(),
                     requestDto.getMessage(),
                     null,
                     null,
                     MessageType.TEXT
             );
-            chatNotification(chatRoom, user, requestDto.getMessage());
 
+            chatNotification(chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId()), userId, requestDto.getMessage());
         } else {
+            User user = userFinder.findByUserId(userId);
             Product product = productFinder.findProductById(requestDto.getProductId());
-            ChatRoom newChatRoom = ChatRoom.of(product, user);
-            ChatRoom savedChatRoom = chatRoomWriter.save(newChatRoom);
+            ChatRoom savedChatRoom = chatRoomWriter.save(ChatRoom.of(product, user));
+
             redisChatMessageDto = new RedisChatMessageDto(
                     savedChatRoom.getId(),
-                    user.getId(),
+                    userId,
                     IdGenerator.generateId(),
                     requestDto.getMessage(),
                     null,
                     null,
                     MessageType.TEXT
             );
-            chatNotification(savedChatRoom, user, requestDto.getMessage());
+            chatNotification(savedChatRoom, userId, requestDto.getMessage());
         }
         redisService.saveChatMessageToZSet(redisChatMessageDto);
 
@@ -89,6 +89,58 @@ public class ChatMessageService {
                 false
         );
     }
+
+    //데이터베이스에 저장하는 로직
+    @Deprecated
+    @Transactional
+    public ChatMessageResponseDto createMessageDB(ChatMessageRequestDto requestDto, Long userId) {
+        User user = userFinder.findByUserId(userId);
+        ChatMessage chatMessage;
+
+        if(requestDto.getChatRoomId() != null) {
+            ChatRoom chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
+            chatMessage = ChatMessage.of(
+                    IdGenerator.generateId(),
+                    chatRoom,
+                    user,
+                    requestDto.getMessage(),
+                    MessageType.TEXT,
+                    LocalDateTime.now(),
+                    false
+            );
+
+            chatNotification(chatRoom, userId, requestDto.getMessage());
+
+        } else {
+            Product product = productFinder.findProductById(requestDto.getProductId());
+            ChatRoom newChatRoom = ChatRoom.of(product, user);
+            ChatRoom savedChatRoom = chatRoomWriter.save(newChatRoom);
+            chatMessage = ChatMessage.of(
+                    IdGenerator.generateId(),
+                    savedChatRoom,
+                    user,
+                    requestDto.getMessage(),
+                    MessageType.TEXT,
+                    LocalDateTime.now(),
+                    false
+            );
+
+            chatNotification(savedChatRoom, userId, requestDto.getMessage());
+        }
+        chatMessageWriter.save(chatMessage);
+
+        return new ChatMessageResponseDto(
+                chatMessage.getChatRoom().getId(),
+                chatMessage.getId(),
+                chatMessage.getSender().getId(),
+                chatMessage.getMessage(),
+                null,
+                chatMessage.getSendAt(),
+                chatMessage.getMessageType(),
+                false
+        );
+    }
+
     @Transactional
     public void isRead(ChatReadRequestDto requestDto, Long userId) {
         ChatRoom chatRoom = chatRoomFinder.findByChatRoomId(requestDto.getChatRoomId());
@@ -134,12 +186,12 @@ public class ChatMessageService {
     }
 
 
-    private void chatNotification(ChatRoom chatRoom, User sender, String message) {
+    private void chatNotification(ChatRoom chatRoom, Long userId, String message) {
         Long sellerId = chatRoom.getProduct().getUser().getId();
         Long buyerId = chatRoom.getBuyer().getId();
 
         Long receiverId;
-        if (buyerId.equals(sender.getId())) {
+        if (buyerId.equals(userId)) {
             receiverId = sellerId;
         } else {
             receiverId = buyerId;
