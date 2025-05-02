@@ -19,25 +19,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # artifact를 업로드한 workflow 파일 이름을 지정하여 다운로드
       - name: Download image tag
         uses: actions/download-artifact@v4
         with:
           name: image-tag
+          path: .
+          run-id: ${{ github.event.workflow_run.id }}
+          repository: JungGo-Heaven/JungGo-Heaven
+          github-token: ${{ secrets.ACCESS_TOKEN }}
         if: ${{ github.event_name != 'workflow_dispatch' }}
-
-      # 다운로드 확인
-      - name: Check downloaded tag file
-        if: ${{ github.event_name != 'workflow_dispatch' }}
-        run: cat image-tag.txt
 
       - name: Set image tag
-        id: set-tag
-        run: |
-          if [ -f "image-tag.txt" ]; then
-            echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-          fi
+        run: echo "IMAGE_TAG=${{ steps.tags.outputs.version || 'latest' }}" >> $GITHUB_ENV
 
       - name: Create appspec.yml
         run: |
