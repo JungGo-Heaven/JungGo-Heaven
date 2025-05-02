@@ -61,6 +61,7 @@ public class User extends TimeStamp {
 	private LocalDateTime lastVerifiedAt;
 	@Column(unique = true)
 	private String customerKey;
+	private Boolean bespokeAgree;
 
 	@Builder
 	private User(String email, String password, String name, String phoneNumber, String address, LocalDateTime lastVerifiedAt) {
@@ -72,6 +73,7 @@ public class User extends TimeStamp {
 		this.role = UserRole.ROLE_USER;
 		this.status = UserStatus.ACTIVE;
 		this.lastVerifiedAt = lastVerifiedAt;
+		this.bespokeAgree = false;
 	}
 
 	@Builder
@@ -81,6 +83,7 @@ public class User extends TimeStamp {
 		this.phoneNumber = phoneNumber;
 		this.role = UserRole.ROLE_GUEST;
 		this.status = UserStatus.ACTIVE;
+		this.bespokeAgree = false;
 	}
 
 	public static User of(String email, String password, String name, String phoneNumber, String address) {
@@ -136,4 +139,6 @@ public class User extends TimeStamp {
 			this.customerKey = UUID.nameUUIDFromBytes(("user-" + this.id).getBytes()).toString();
 		}
 	}
+
+	public void updateBespokeAgree(boolean bespokeAgree) { this.bespokeAgree = bespokeAgree; }
 }

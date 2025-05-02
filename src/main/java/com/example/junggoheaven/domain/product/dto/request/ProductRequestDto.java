@@ -27,4 +27,7 @@ public class ProductRequestDto {
 
 	private final Long productImageId;
 
+	@NotNull(message = "상품 카테고리를 입력하세요")
+	private final Long productCategory;
+
 }

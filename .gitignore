@@ -51,3 +51,5 @@ application-s3.yml
 
 ### 의존성 ###
 #build.gradle
+
+jmeter.log

@@ -19,7 +19,6 @@ public class RedisBidSubscriber implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         BroadcastBidResponseDto dto = (BroadcastBidResponseDto)
                 serializer.deserialize(message.getBody());
-
         messagingTemplate.convertAndSend("/sub/auctions/" + dto.getAuctionId(), dto);
     }
 }

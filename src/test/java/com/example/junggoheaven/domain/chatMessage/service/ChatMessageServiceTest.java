@@ -95,7 +95,6 @@ public class ChatMessageServiceTest {
         // given
         ChatMessageRequestDto requestDto = new ChatMessageRequestDto(1L, 1L, "test message");
         when(chatRoomFinder.findByChatRoomId(1L)).thenReturn(chatRoom);
-        when(userFinder.findByUserId(anyLong())).thenReturn(buyerUser);
         // when
         ChatMessageResponseDto response = chatMessageService.createMessage(requestDto, 1L);
 
