@@ -84,12 +84,12 @@ jobs:
             docker-compose down || true
           fi
           EOF
-          
+
           # 애플리케이션 설정 파일 생성
           cat > scripts/after_install.sh << 'EOF'
           #!/bin/bash
           set -e
-          
+
           # /home/ubuntu/app 디렉토리에 ubuntu 권한 부여
           sudo chown -R ubuntu:ubuntu /home/ubuntu/app
           sudo chmod -R 755 /home/ubuntu/app
@@ -110,10 +110,10 @@ jobs:
 
           # Docker 이미지 풀
           cd /home/ubuntu/app
-          docker-compose pull redis rabbitmq || true
+          docker-compose pull app redis es kibana rabbitmq || true
 
           # Docker Compose로 서비스 시작
-          docker-compose up -d
+          docker-compose up --build -d
           sleep 20
 
           # 컨테이너 실행 확인
@@ -128,7 +128,7 @@ jobs:
               rm -rf /home/ubuntu/app/*
               cp -r $BACKUP_DIR/* /home/ubuntu/app/
               cd /home/ubuntu/app
-              docker-compose up -d
+              docker-compose up --build -d
             fi
             exit 1
           else
