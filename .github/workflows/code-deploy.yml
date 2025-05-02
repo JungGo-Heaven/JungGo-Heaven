@@ -84,9 +84,13 @@ jobs:
             docker-compose down || true
           fi
           EOF
-
+          
           # 애플리케이션 설정 파일 생성
           cat > scripts/after_install.sh << 'EOF'
+          
+          # /home/ubuntu/app 디렉토리에 ubuntu 사용자에게 필요한 권한 부여
+          sudo chown -R ubuntu:ubuntu /home/ubuntu/app
+          sudo chmod -R 755 /home/ubuntu/app
 
           # application.yml 파일을 secrets에서 불러와서 작성
           mkdir -p /home/ubuntu/app/config
