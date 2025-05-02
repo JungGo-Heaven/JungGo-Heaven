@@ -13,7 +13,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
-    # "Build and Docker Push"가 성공했을 때 or 직접 workflow 실행했을 때 실행
+    # "Build and Docker Push"가 성공했을 때 or 직접 workflow 실행했을 때 실행 .
 
     steps:
       - name: Checkout repository
@@ -21,17 +21,26 @@ jobs:
 
       # artifact를 업로드한 workflow 파일 이름을 지정하여 다운로드
       - name: Download image tag
+        id: download-artifact
         uses: actions/download-artifact@v4
         with:
           name: image-tag
-          path: .
+          path: ./artifacts
           run-id: ${{ github.event.workflow_run.id }}
           repository: JungGo-Heaven/JungGo-Heaven
           github-token: ${{ secrets.ACCESS_TOKEN }}
         if: ${{ github.event_name != 'workflow_dispatch' }}
+        continue-on-error: true
 
-      - name: Set image tag
-        run: echo "IMAGE_TAG=${{ steps.tags.outputs.version || 'latest' }}" >> $GITHUB_ENV
+      - name: Extract image tag
+        id: extract-tag
+        run: |
+          if [ -f "./artifacts/image-tag.txt" ]; then
+            echo "IMAGE_TAG=$(cat ./artifacts/image-tag.txt)" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          fi
+          echo "Using image tag: $IMAGE_TAG"
 
       - name: Create appspec.yml
         run: |
@@ -58,11 +67,11 @@ jobs:
 
       - name: Create docker-compose.yml
         run: |
-          cat > docker-compose.yml << 'DOCKERCOMPOSE'
-          ${{ secrets.DOCKER_COMPOSE }}
-          DOCKERCOMPOSE
+          # DOCKER_COMPOSE 시크릿에서 가져와 환경 변수로 대체
+          DOCKER_COMPOSE_CONTENT=$(echo '${{ secrets.DOCKER_COMPOSE }}' | sed "s/IMAGE_TAG/$IMAGE_TAG/g")
+          echo "$DOCKER_COMPOSE_CONTENT" > docker-compose.yml
 
-        # 현재 실행 중인 프로그램 백업
+      # 현재 실행 중인 프로그램 백업
       - name: Create deployment scripts
         run: |
           mkdir -p scripts
