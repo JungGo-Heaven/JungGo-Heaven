@@ -67,8 +67,8 @@ jobs:
 
       - name: Create docker-compose.yml
         run: |
-          # DOCKER_COMPOSE 시크릿에서 가져와 환경 변수로 대체
-          DOCKER_COMPOSE_CONTENT=$(echo '${{ secrets.DOCKER_COMPOSE }}' | sed "s/IMAGE_TAG/$IMAGE_TAG/g")
+          IMAGE_TAG_VALUE="${IMAGE_TAG}"
+          DOCKER_COMPOSE_CONTENT=$(echo '${{ secrets.DOCKER_COMPOSE }}' | sed "s/\${IMAGE_TAG:-latest}/\${IMAGE_TAG_VALUE:-latest}/g")
           echo "$DOCKER_COMPOSE_CONTENT" > docker-compose.yml
 
       # 현재 실행 중인 프로그램 백업
@@ -117,8 +117,18 @@ jobs:
           #!/bin/bash
           set -e
 
-          # Docker 이미지 풀
+          # Docker 이미지 pull
           cd /home/ubuntu/app
+          export IMAGE_TAG=${IMAGE_TAG:-latest}
+          
+          # Docker 컴포즈 환경 변수 출력 확인
+          echo "Using IMAGE_TAG: $IMAGE_TAG"
+          
+          # 새로운 docker-compose.yml 파일 생성
+          awk -v tag="$IMAGE_TAG" '{gsub(/\${IMAGE_TAG:-latest}/, tag); print}' docker-compose.yml > temp_compose.yml
+          mv temp_compose.yml docker-compose.yml
+          
+          # 이미지 pull
           docker-compose pull app redis es kibana rabbitmq || true
 
           # Docker Compose로 서비스 시작
