@@ -21,6 +21,7 @@ import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.product.service.component.ProductWriter;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
+import com.example.junggoheaven.global.message.publisher.EventPublisher;
 import com.example.junggoheaven.global.redis.RedisService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,9 @@ public class ChatMessageServiceTest {
 
     @Mock
     private RedisService redisService;
+
+    @Mock
+    private EventPublisher eventPublisher;
 
 
     private User buyerUser;
