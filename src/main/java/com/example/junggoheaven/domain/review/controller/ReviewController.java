@@ -39,7 +39,7 @@ public class ReviewController {
         reviewService.updateReview(reviewId, authUser.getId(), requestDto);
     }
 
-    @PatchMapping("/reviews/{reviewId}")
+    @DeleteMapping("/reviews/{reviewId}")
     public void deleteReview(@PathVariable Long reviewId,
                              @AuthenticationPrincipal AuthUser authUser) {
         reviewService.deleteReview(reviewId, authUser.getId());
