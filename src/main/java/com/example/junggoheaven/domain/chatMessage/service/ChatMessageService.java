@@ -9,7 +9,6 @@ import com.example.junggoheaven.domain.chatMessage.enums.MessageType;
 import com.example.junggoheaven.domain.chatMessage.exception.ChatRoomMissMatchException;
 import com.example.junggoheaven.domain.chatMessage.exception.NoPermissionToChatMessage;
 import com.example.junggoheaven.domain.chatMessage.redis.dto.RedisChatMessageDto;
-import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageChecker;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageFinder;
 import com.example.junggoheaven.domain.chatMessage.service.component.ChatMessageWriter;
 import com.example.junggoheaven.domain.chatRoom.entity.ChatRoom;
@@ -20,6 +19,8 @@ import com.example.junggoheaven.domain.product.service.component.ProductFinder;
 import com.example.junggoheaven.domain.user.entity.User;
 import com.example.junggoheaven.domain.user.service.component.UserFinder;
 import com.example.junggoheaven.global.common.entity.IdGenerator;
+import com.example.junggoheaven.global.message.event.finder.ChatMessageEvent;
+import com.example.junggoheaven.global.message.publisher.EventPublisher;
 import com.example.junggoheaven.global.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,8 @@ public class ChatMessageService {
     private final UserFinder userFinder;
 
     private final RedisService redisService;
+
+    private final EventPublisher eventPublisher;
 
     //redis에 저장하는 로직
     @Transactional
@@ -186,17 +189,22 @@ public class ChatMessageService {
 
 
     private void chatNotification(ChatRoom chatRoom, Long userId, String message) {
-        Long sellerId = chatRoom.getProduct().getUser().getId();
-        Long buyerId = chatRoom.getBuyer().getId();
+        User sender;
+        User receiver;
 
-        Long receiverId;
-        if (buyerId.equals(userId)) {
-            receiverId = sellerId;
+        if (chatRoom.getBuyer().getId().equals(userId)) {
+            sender = chatRoom.getBuyer();
+            receiver = chatRoom.getProduct().getUser();
         } else {
-            receiverId = buyerId;
+            sender = chatRoom.getProduct().getUser();
+            receiver = chatRoom.getBuyer();
         }
 
-        // todo: 알림 이벤트 추가 알림을 받을 사람 = receiverId 알림 문구는  "sender.getname : message"
-
+        eventPublisher.publishEventAfterTransaction(
+            new ChatMessageEvent(
+                this,
+                receiver.getId(),
+                sender.getName() + ": " + message)
+        );
     }
 }

@@ -26,7 +26,7 @@ public class TestController {
 
 	@GetMapping("/v1/publish/{name}")
 	public ResponseEntity<?> testPublishV1(@PathVariable String name) {
-		testEventPublisher.publishProductRegisteredEvent("v1", name);
+		testEventPublisher.publishProductRegisteredEvent(name);
 		return ResponseEntity.ok().build();
 	}
 
@@ -42,9 +42,9 @@ public class TestController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/v2/publish/{name}")
-	public ResponseEntity<?> testPublishV2(@PathVariable String name) {
-		testEventPublisher.publishProductRegisteredEvent("v2", name);
+	@PostMapping("/v2/publish")
+	public ResponseEntity<?> testPublishV2(@RequestBody String name) {
+		testEventPublisher.publishProductRegisteredEvent(name);
 		return ResponseEntity.ok().build();
 	}
 

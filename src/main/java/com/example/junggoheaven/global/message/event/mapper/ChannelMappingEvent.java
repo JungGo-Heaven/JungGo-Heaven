@@ -9,6 +9,7 @@ import com.example.junggoheaven.global.message.enums.NotificationType;
 import com.example.junggoheaven.global.message.event.NotificationEvent;
 import com.example.junggoheaven.global.message.event.pusher.PushByEmailEvent;
 import com.example.junggoheaven.global.message.event.pusher.PushByFCMEvent;
+import com.example.junggoheaven.global.message.event.pusher.PushByKakaoEvent;
 import com.example.junggoheaven.global.message.event.pusher.PushByWebPushEvent;
 
 import lombok.Getter;
@@ -26,7 +27,8 @@ public class ChannelMappingEvent extends NotificationEvent {
 		return Map.of(
 			ChannelType.EMAIL, new PushByEmailEvent(this, this.getUserId(), this.getNotificationType(), this.getNotificationMessage()),
 			ChannelType.FCM, new PushByFCMEvent(this, this.getUserId(), this.getNotificationType(), this.getNotificationMessage()),
-			ChannelType.WEB_PUSH, new PushByWebPushEvent(this, this.getUserId(), this.getNotificationType(), this.getNotificationMessage())
+			ChannelType.WEB_PUSH, new PushByWebPushEvent(this, this.getUserId(), this.getNotificationType(), this.getNotificationMessage()),
+			ChannelType.KAKAO_TALK, new PushByKakaoEvent(this, this.getUserId(), this.getNotificationType(), this.getNotificationMessage())
 		);
 	}
 }

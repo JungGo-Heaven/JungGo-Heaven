@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.example.junggoheaven.global.message.dto.MatchedUserDto;
@@ -33,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UserChannelMapper {
 	private final EventPublisher eventPublisher;
 
-	@Async
 	@EventListener
 	public void channelMapper(ChannelMappingEvent event) {
 
@@ -49,16 +47,10 @@ public class UserChannelMapper {
 			}
 		});
 
-		log.info("총 사용자 수: {}, Email 사용자 수: {}, FCM 사용자 수: {}, Web Push 사용자 수: {}",
-			userList.size(),
-			events.get(ChannelType.EMAIL).getUserList().size(),
-			events.get(ChannelType.FCM).getUserList().size(),
-			events.get(ChannelType.WEB_PUSH).getUserList().size()
-		);
-
 		events.values().stream().filter(e -> !e.getUserList().isEmpty()).forEach(eventPublisher::publishEvent);
 	}
 
+	@Deprecated
 	public void channelMapperBeforeRefactoring(ChannelMappingEvent event) {
 		List<MatchedUserDto> userList = event.getUserList();
 		PushByEmailEvent email = new PushByEmailEvent(event.getSource(), event.getUserId(), event.getNotificationType(),

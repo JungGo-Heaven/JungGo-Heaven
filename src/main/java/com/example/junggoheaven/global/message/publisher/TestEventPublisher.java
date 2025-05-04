@@ -21,10 +21,8 @@ import lombok.RequiredArgsConstructor;
 public class TestEventPublisher {
 	private final EventPublisher eventPublisher;
 
-	public void publishProductRegisteredEvent(String version, String name) {
-		if (version.equals("v1")) {
-			eventPublisher.publishEvent(new ProductRegisteredEvent(this, 2L, name));
-		}
+	public void publishProductRegisteredEvent(String name) {
+		eventPublisher.publishEvent(new ProductRegisteredEvent(this, 1L, name));
 	}
 
 	public void publishOrderStatusChangedEvent(Long userId) {
@@ -35,13 +33,13 @@ public class TestEventPublisher {
 		PushByEmailEvent event = new PushByEmailEvent(this, userId, NotificationType.PRODUCT_REGISTRATION, "Email");
 
 		List<KeywordDocument.Channel> channels = List.of(
-			KeywordDocument.Channel.of(ChannelType.EMAIL, "a@a.com"));
+			KeywordDocument.Channel.of(ChannelType.EMAIL, "ahkiler@naver.com"));
 
-		MatchedUserDto dto1 = new MatchedUserDto(userId, "a@a.com",
+		MatchedUserDto dto1 = new MatchedUserDto(userId, "ahkiler@naver.com",
 			NotificationChannelDto.ofList(channels));
-		MatchedUserDto dto2 = new MatchedUserDto(userId, "a@a.com",
+		MatchedUserDto dto2 = new MatchedUserDto(userId, "ahkiler@naver.com",
 			NotificationChannelDto.ofList(channels));
-		MatchedUserDto dto3 = new MatchedUserDto(userId, "a@a.com",
+		MatchedUserDto dto3 = new MatchedUserDto(userId, "ahkiler@naver.com",
 			NotificationChannelDto.ofList(channels));
 
 		event.getUserList().addAll(List.of(dto1, dto2, dto3));

@@ -30,6 +30,7 @@ public class UserKeywordRepositoryImpl implements UserKeywordCustomRepository{
 
 		return jpaQueryFactory
 			.from(user)
+			.distinct()
 			.leftJoin(userKeyword)
 			.on(user.id.eq(userKeyword.user.id))
 			.leftJoin(notificationChannel)

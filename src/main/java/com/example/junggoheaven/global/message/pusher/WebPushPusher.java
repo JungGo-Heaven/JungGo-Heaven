@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WebPushPusher {
 	private final NotificationDeliveryEventWriter notificationDeliveryEventWriter;
 
-	@Async
+	// @Async
 	@EventListener
 	public void productRegisteredMessagePusher(PushByWebPushEvent event) {
 		List<MatchedUserDto> userList = event.getUserList();
