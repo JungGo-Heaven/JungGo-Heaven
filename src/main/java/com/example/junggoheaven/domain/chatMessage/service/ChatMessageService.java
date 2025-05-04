@@ -48,7 +48,6 @@ public class ChatMessageService {
     public ChatMessageResponseDto createMessage(ChatMessageRequestDto requestDto, Long userId) {
         RedisChatMessageDto redisChatMessageDto;
         if(requestDto.getChatRoomId() != null) {
-
             redisChatMessageDto = new RedisChatMessageDto(
                     requestDto.getChatRoomId(),
                     userId,
