@@ -1,0 +1,185 @@
+name: Deploy with AWS CodeDeploy
+
+on:
+  workflow_run:
+    workflows:
+      - "Build and Docker Push"
+    types:
+      - completed
+  workflow_dispatch:
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # "Build and Docker Push"가 성공했을 때 or 직접 workflow 실행했을 때 실행 .
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # artifact를 업로드한 workflow 파일 이름을 지정하여 다운로드
+      - name: Download image tag
+        id: download-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: image-tag
+          path: ./artifacts
+          run-id: ${{ github.event.workflow_run.id }}
+          repository: JungGo-Heaven/JungGo-Heaven
+          github-token: ${{ secrets.ACCESS_TOKEN }}
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        continue-on-error: true
+
+      - name: Extract image tag
+        id: extract-tag
+        run: |
+          if [ -f "./artifacts/image-tag.txt" ]; then
+            echo "IMAGE_TAG=$(cat ./artifacts/image-tag.txt)" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          fi
+          echo "Using image tag: $IMAGE_TAG"
+
+      - name: Create appspec.yml
+        run: |
+          cat > appspec.yml << EOF
+          version: 0.0
+          os: linux
+          files:
+            - source: /
+              destination: /home/ubuntu/app
+          hooks:
+            BeforeInstall:
+              - location: scripts/before_install.sh
+                timeout: 300
+                runas: ubuntu
+            AfterInstall:
+              - location: scripts/after_install.sh
+                timeout: 300
+                runas: ubuntu
+            ApplicationStart:
+              - location: scripts/start_application.sh
+                timeout: 300
+                runas: ubuntu
+          EOF
+
+      - name: Create docker-compose.yml
+        run: |
+          IMAGE_TAG_VALUE="${IMAGE_TAG}"
+          DOCKER_COMPOSE_CONTENT=$(echo '${{ secrets.DOCKER_COMPOSE }}' | sed "s/\${IMAGE_TAG:-latest}/\${IMAGE_TAG_VALUE:-latest}/g")
+          echo "$DOCKER_COMPOSE_CONTENT" > docker-compose.yml
+
+      # 현재 실행 중인 프로그램 백업
+      - name: Create deployment scripts
+        run: |
+          mkdir -p scripts
+          cat > scripts/before_install.sh << 'EOF'
+
+          # Docker Compose가 설치되어 있는지 확인
+          if ! command -v docker-compose &> /dev/null; then
+            echo "Installing Docker Compose..."
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+
+          # 서비스가 실행 중인 경우 백업
+          if [ -f "/home/ubuntu/app/docker-compose.yml" ]; then
+            cd /home/ubuntu/app
+            BACKUP_DIR="/home/ubuntu/app_backup_$(date +'%Y%m%d%H%M%S')"
+            mkdir -p $BACKUP_DIR
+            cp -r * $BACKUP_DIR/
+            docker-compose down || true
+          fi
+          EOF
+
+          # 애플리케이션 설정 파일 생성
+          cat > scripts/after_install.sh << 'EOF'
+          #!/bin/bash
+          set -e
+
+          # /home/ubuntu/app 디렉토리에 ubuntu 권한 부여
+          sudo chown -R ubuntu:ubuntu /home/ubuntu/app
+          sudo chmod -R 755 /home/ubuntu/app
+
+          # application.yml 파일을 secrets에서 불러와서 작성
+          mkdir -p /home/ubuntu/app/config
+          cat > /home/ubuntu/app/config/application.yml << 'APPYML'
+          ${{ secrets.APPLICATION_YML }}
+          APPYML
+
+          chmod -R 755 /home/ubuntu/app
+          EOF
+
+          # 애플리케이션 실행
+          cat > scripts/start_application.sh << 'EOF'
+          #!/bin/bash
+          set -e
+
+          # Docker 이미지 pull
+          cd /home/ubuntu/app
+          export IMAGE_TAG=${IMAGE_TAG:-latest}
+          
+          # Docker 컴포즈 환경 변수 출력 확인
+          echo "Using IMAGE_TAG: $IMAGE_TAG"
+          
+          # 새로운 docker-compose.yml 파일 생성
+          awk -v tag="$IMAGE_TAG" '{gsub(/\${IMAGE_TAG:-latest}/, tag); print}' docker-compose.yml > temp_compose.yml
+          mv temp_compose.yml docker-compose.yml
+          
+          # 이미지 pull
+          docker-compose pull app redis es kibana rabbitmq || true
+
+          # Docker Compose로 서비스 시작
+          docker-compose up --build -d
+          sleep 20
+
+          # 컨테이너 실행 확인
+          APP_RUNNING=$(docker ps -q -f name=app)
+          if [ -z "$APP_RUNNING" ]; then
+            echo "Application failed to start, rolling back..."
+
+            # 백업이 있는 경우 복원
+            BACKUP_DIR=$(find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d | sort -r | head -n 1)
+            if [ ! -z "$BACKUP_DIR" ]; then
+              echo "Restoring from backup: $BACKUP_DIR"
+              rm -rf /home/ubuntu/app/*
+              cp -r $BACKUP_DIR/* /home/ubuntu/app/
+              cd /home/ubuntu/app
+              docker-compose up --build -d
+            fi
+            exit 1
+          else
+            echo "Application started successfully"
+            # 백업 및 이미지 정리
+            find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d -mtime +7 -exec rm -rf {} \;
+            docker system prune -af --volumes
+          fi
+          EOF
+
+          chmod +x scripts/*.sh
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+        # Docker-compose 배포 번들 생성
+      - name: Create deployment bundle
+        run: zip -r deploy.zip appspec.yml scripts/ docker-compose.yml
+
+      # S3 업로드
+      - name: Upload deployment bundle to S3
+        run: aws s3 cp deploy.zip s3://${{ secrets.AWS_S3_BUCKET }}/deploy.zip
+
+      - name: Deploy to AWS CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name ${{ secrets.AWS_CODEDEPLOY_APP_NAME }} \
+            --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --s3-location bucket=${{ secrets.AWS_S3_BUCKET }},bundleType=zip,key=deploy.zip \
+            --file-exists-behavior OVERWRITE

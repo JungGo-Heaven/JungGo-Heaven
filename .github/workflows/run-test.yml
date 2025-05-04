@@ -1,4 +1,4 @@
-name: java ci with gradle
+name: Java CI with Gradle
 
 on:
   push:
@@ -23,7 +23,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Docker Hub 로그인
+      - name: Setup Java and Gradle
+        uses: ./.github/actions
+
+      - name: Docker Hub Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Setup MySQL
@@ -35,12 +38,6 @@ jobs:
           mysql database: testdb
           mysql user: 'test'
           mysql password: 'test_password'
-
-      - name: Setup Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '17'
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2

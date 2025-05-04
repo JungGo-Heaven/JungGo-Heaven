@@ -50,7 +50,7 @@ public class AuctionController {
         auctionService.updateAuction(authUser.getId(), auctionId, requestDto);
     }
 
-    @PutMapping("/{auctionId}")
+    @DeleteMapping("/{auctionId}")
     public void deleteAuction (
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long auctionId
