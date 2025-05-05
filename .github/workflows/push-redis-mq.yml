@@ -55,14 +55,13 @@ jobs:
         run: docker push "$ECR_REGISTRY/$RABBITMQ_IMAGE_NAME:latest"
 
       - name: Save image URIs
-        id: save-image-uris
         run: |
           mkdir -p .github/workflows/output
-          echo "$ECR_REPOSITORY_URI:$IMAGE_TAG" > .github/workflows/output/es_kibana_image_uris.txt
+          echo "$ECR_REPOSITORY_URI:$IMAGE_TAG" > .github/workflows/output/redis_mq_image_uris.txt
 
       - name: Upload image URIs as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: es-kibana-image-uris
-          path: .github/workflows/output/es_kibana_image_uris.txt
+          name: redis_mq_image_uris
+          path: .github/workflows/output/redis_mq_image_uris.txt
           retention-days: 1
