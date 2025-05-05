@@ -103,6 +103,9 @@ jobs:
           cat > appspec.yml << EOF
           version: 0.0
           os: linux
+          files:
+            - source: scripts
+              destination: /home/ubuntu/app/scripts
           hooks:
             BeforeInstall:
               - location: scripts/before_install.sh
@@ -143,7 +146,6 @@ jobs:
           sudo chown -R ubuntu:ubuntu /home/ubuntu/app
           sudo chmod 755 /home/ubuntu/app/scripts/*.sh
           
-          rm -rf /tmp/*
           echo "After Install script finished"
           exit 0
           EOF
@@ -172,15 +174,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # 배포 번들 생성
       - name: Upload appspec.yml and scripts to S3
         run: |
-          aws s3 cp appspec.yml s3://${{ env.S3_BUCKET }}/appspec.yml
-          aws s3 cp --recursive scripts s3://${{ env.S3_BUCKET }}/scripts
+          zip -r deploy.zip appspec.yml scripts
 
+      # S3 업로드
+      - name: Upload deployment bundle to S3
+        run: aws s3 cp deploy.zip s3://${{ env.S3_BUCKET }}/deploy.zip
+
+      # CodeDeploy 배포
       - name: Deploy to EC2 with CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name "${{ env.CODE_DEPLOY_APPLICATION_NAME }}" \
             --deployment-group-name "${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }}" \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --revision '{"revisionType":"S3","s3Location":{"bucket":"${{ env.S3_BUCKET }}","key":"appspec.yml"}}'
+            --revision '{"revisionType":"S3","s3Location":{"bucket":"${{ env.S3_BUCKET }}","key":"deploy.zip","bundleType":"zip"}}'
