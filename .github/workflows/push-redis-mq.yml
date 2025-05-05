@@ -41,6 +41,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
 
       - name: Push Redis Docker image to ECR
         run: docker push "$ECR_REGISTRY/$REDIS_IMAGE_NAME:latest"
@@ -55,13 +57,12 @@ jobs:
       - name: Save image URIs
         id: save-image-uris
         run: |
-          echo "REDIS_IMAGE_URI=$ECR_REGISTRY/$REDIS_IMAGE_NAME:latest" >> $GITHUB_OUTPUT
-          echo "RABBITMQ_IMAGE_URI=$ECR_REGISTRY/$RABBITMQ_IMAGE_NAME:latest" >> $GITHUB_OUTPUT
+          mkdir -p .github/workflows/output
+          echo "$ECR_REPOSITORY_URI:$IMAGE_TAG" > .github/workflows/output/es_kibana_image_uris.txt
 
       - name: Upload image URIs as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: redis-rabbitmq-image-uris
-          path: .github/workflows/output/redis_rabbitmq_image_uris.txt
-          if: always()
-        continue-on-error: true
+          name: es-kibana-image-uris
+          path: .github/workflows/output/es_kibana_image_uris.txt
+          retention-days: 1
