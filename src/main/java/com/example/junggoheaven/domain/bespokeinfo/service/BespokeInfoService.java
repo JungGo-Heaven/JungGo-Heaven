@@ -19,6 +19,7 @@ import com.example.junggoheaven.domain.user.service.component.UserWriter;
 import com.example.junggoheaven.global.auth.dto.user.AuthUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -37,6 +38,8 @@ public class BespokeInfoService {
 	private final UserFinder userFinder;
 	private final UserWriter userWriter;
 
+	@Value("${bespoke.url}")
+	private String bespokeUrl;
 
 	/*
 		맞춤 정보 동의 여부 판단 메서드
@@ -164,7 +167,6 @@ public class BespokeInfoService {
 		상품추천 분석 서버 호출
 	*/
 	public String getBespokeProduct(AuthUser authUser) {
-		String url = "http://127.0.0.1:5000/mlserver";
 
 		User user = userFinder.findByUserId(authUser.getId());
 
@@ -182,7 +184,7 @@ public class BespokeInfoService {
 
 		HttpEntity<UserBespokeInfoRequestDto> entity = new HttpEntity<>(userBespokeInfoRequestDto, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+		ResponseEntity<String> response = restTemplate.postForEntity(bespokeUrl, entity, String.class);
 
 		return response.getBody();
 	}
