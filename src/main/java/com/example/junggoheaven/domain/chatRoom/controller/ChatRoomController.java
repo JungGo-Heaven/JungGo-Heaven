@@ -33,7 +33,7 @@ public class ChatRoomController {
         return chatRoomService.getChatRooms(authUser.getId(), pageable);
     }
 
-    @PutMapping("/{chatRoomId}")
+    @PatchMapping("/{chatRoomId}")
     public void exitChatRoom(
             @PathVariable Long chatRoomId,
             @AuthenticationPrincipal AuthUser authUser

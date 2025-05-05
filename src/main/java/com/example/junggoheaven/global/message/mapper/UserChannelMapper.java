@@ -1,10 +1,10 @@
 package com.example.junggoheaven.global.message.mapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.example.junggoheaven.global.message.dto.MatchedUserDto;
@@ -32,18 +32,42 @@ import lombok.extern.slf4j.Slf4j;
 public class UserChannelMapper {
 	private final EventPublisher eventPublisher;
 
-	@Async
 	@EventListener
 	public void channelMapper(ChannelMappingEvent event) {
+
 		List<MatchedUserDto> userList = event.getUserList();
-		PushByEmailEvent email = new PushByEmailEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
-		PushByFCMEvent fcm = new PushByFCMEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
-		PushByWebPushEvent web = new PushByWebPushEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage());
+
+		Map<ChannelType, NotificationEvent> events = event.getNotificationEventMap();
+
+		userList.forEach(user -> {
+			List<ChannelType> channelTypes = user.getChannels().stream().map(NotificationChannelDto::getChannelType).toList();
+
+			for (ChannelType channelType : channelTypes) {
+				events.get(channelType).getUserList().add(user);
+			}
+		});
+
+		events.values().stream().filter(e -> !e.getUserList().isEmpty()).forEach(eventPublisher::publishEvent);
+	}
+
+	@Deprecated
+	public void channelMapperBeforeRefactoring(ChannelMappingEvent event) {
+		List<MatchedUserDto> userList = event.getUserList();
+		PushByEmailEvent email = new PushByEmailEvent(event.getSource(), event.getUserId(), event.getNotificationType(),
+			event.getNotificationMessage());
+		PushByFCMEvent fcm = new PushByFCMEvent(event.getSource(), event.getUserId(), event.getNotificationType(),
+			event.getNotificationMessage());
+		PushByWebPushEvent web = new PushByWebPushEvent(event.getSource(), event.getUserId(),
+			event.getNotificationType(), event.getNotificationMessage());
 
 		List<NotificationEvent> events = List.of(email, fcm, web);
 
 		userList.forEach(user -> {
-			List<ChannelType> channelTypes = user.getChannels().stream().map(NotificationChannelDto::getChannelType).toList();
+			List<ChannelType> channelTypes = user.getChannels()
+				.stream()
+				.map(NotificationChannelDto::getChannelType)
+				.toList();
+
 			for (ChannelType channelType : channelTypes) {
 				switch (channelType) {
 					case EMAIL:
@@ -58,14 +82,5 @@ public class UserChannelMapper {
 				}
 			}
 		});
-
-		log.info("총 사용자 수: {}, Email 사용자 수: {}, FCM 사용자 수: {}, Web Push 사용자 수: {}",
-			userList.size(),
-			email.getUserList().size(),
-			fcm.getUserList().size(),
-			web.getUserList().size()
-		);
-
-		events.stream().filter(e -> !e.getUserList().isEmpty()).forEach(eventPublisher::publishEvent);
 	}
 }

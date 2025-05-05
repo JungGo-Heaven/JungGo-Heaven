@@ -15,6 +15,7 @@ import com.example.junggoheaven.domain.user.exception.AlreadyDeletedUserExceptio
 import com.example.junggoheaven.domain.user.exception.EmailNotFoundException;
 import com.example.junggoheaven.domain.user.exception.UserNotFoundException;
 import com.example.junggoheaven.domain.user.repository.UserRepository;
+import com.example.junggoheaven.global.message.dto.MatchedUserDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,5 +48,9 @@ public class UserFinder {
 
 	public User findByCustomerKey(String customerKey) {
 		return userRepository.findByCustomerKey(customerKey).orElseThrow(UserNotFoundException::new);
+	}
+
+	public MatchedUserDto findMatchedUserDtoById(Long userId) {
+		return userRepository.findMatchedUserDtoById(userId);
 	}
 }

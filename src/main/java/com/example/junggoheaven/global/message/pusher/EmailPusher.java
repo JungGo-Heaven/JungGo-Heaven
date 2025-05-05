@@ -23,7 +23,7 @@ public class EmailPusher {
 	private final NotificationDeliveryEventWriter notificationDeliveryEventWriter;
 	private final EmailService emailService;
 
-	@Async
+	// @Async
 	@EventListener
 	public void productRegisteredMessagePusher(PushByEmailEvent event) {
 		List<MatchedUserDto> userList = event.getUserList();
@@ -31,7 +31,7 @@ public class EmailPusher {
 
 		for (MatchedUserDto user : userList) {
 			// push 알림
-			emailService.sendEmail(user.getEmail(), event.getNotificationType().name(), event.getNotificationMessage());
+			// emailService.sendEmail(user.getEmail(), event.getNotificationType().name(), event.getNotificationMessage());
 			count++;
 		}
 

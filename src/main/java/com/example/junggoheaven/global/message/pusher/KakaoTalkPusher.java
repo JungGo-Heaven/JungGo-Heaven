@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class KakaoTalkPusher {
 	private final NotificationDeliveryEventWriter notificationDeliveryEventWriter;
 
-	@Async
+	// @Async
 	@EventListener
 	public void productRegisteredMessagePusher(PushByKakaoEvent event) {
 		List<MatchedUserDto> userList = event.getUserList();

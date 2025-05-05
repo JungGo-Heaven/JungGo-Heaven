@@ -33,7 +33,6 @@ public class EventPublisher {
 			.message(event.getNotificationMessage())
 			.build();
 
-
 		event.setNotificationEventLog(notificationEventLogWriter.write(eventLog));
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {

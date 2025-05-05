@@ -27,6 +27,8 @@ public class KeywordMatchedUserFinder {
 	* 선별 후 채널을 분류하는 ChannelMapper 를 호출한다.
 	* Mysql DataBase 에서 Like Query 를 통해서 선별한다.
 	* */
+
+	@Deprecated
 	@Async
 	// @EventListener
 	public void findKeywordMatchedUser(ProductRegisteredEvent event) {
@@ -34,6 +36,7 @@ public class KeywordMatchedUserFinder {
 		String name = event.getNotificationMessage();
 
 		List<MatchedUserDto> userList = userKeywordRepository.findAllUserIdByProductName(name);
+
 		log.info("Mysql End: {}", System.currentTimeMillis() - startedAt);
 		log.info("Total Users by Mysql are {}", userList.size());
 		eventPublisher.publishEvent( new ChannelMappingEvent(event.getSource(), event.getUserId(), event.getNotificationType(), event.getNotificationMessage(), userList));
