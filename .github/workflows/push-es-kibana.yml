@@ -1,0 +1,68 @@
+name: Elasticsearch and Kibana to ECR
+
+on:
+  workflow_run:
+    workflows:
+      - "Build and Docker Push"
+    types:
+      - completed
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  ELASTICSEARCH_IMAGE_NAME: elasticsearch
+  KIBANA_IMAGE_NAME: kibana
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java and Gradle
+        uses: ./.github/actions
+
+      - name: Build with Gradle
+        run: ./gradlew bootJar
+
+      # Elasticsearch 빌드 및 푸시
+      - name: Build Elasticsearch Docker image
+        run: docker build -t "$ECR_REGISTRY/$ELASTICSEARCH_IMAGE_NAME:latest" -f Dockerfile .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Push Elasticsearch Docker image to ECR
+        run: docker push "$ECR_REGISTRY/$ELASTICSEARCH_IMAGE_NAME:latest"
+
+      # Kibana 빌드 및 푸시
+      - name: Build Kibana Docker image
+        run: docker build -t "$ECR_REGISTRY/$KIBANA_IMAGE_NAME:latest" -f Dockerfile .
+
+      - name: Push Kibana Docker image to ECR
+        run: docker push "$ECR_REGISTRY/$KIBANA_IMAGE_NAME:latest"
+
+      - name: Save image URIs
+        id: save-image-uris
+        run: |
+          echo "ELASTICSEARCH_IMAGE_URI=$ECR_REGISTRY/$ELASTICSEARCH_IMAGE_NAME:latest" >> $GITHUB_OUTPUT
+          echo "KIBANA_IMAGE_URI=$ECR_REGISTRY/$KIBANA_IMAGE_NAME:latest" >> $GITHUB_OUTPUT
+
+      - name: Upload image URIs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: es-kibana-image-uris
+          path: .github/workflows/output/es_kibana_image_uris.txt
+          if: always()
+        continue-on-error: true

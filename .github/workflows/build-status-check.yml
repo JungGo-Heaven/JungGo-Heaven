@@ -1,0 +1,53 @@
+name: Check Build Status
+
+on:
+  workflow_run:
+    workflows:
+      - "Build and Docker Push"
+      - "Elasticsearch and Kibana to ECR"
+      - "Redis and RabbitMQ to ECR"
+    types:
+      - success
+  workflow_dispatch:
+
+jobs:
+  check-status:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.check-success.outputs.DEPLOY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get workflow runs
+        uses: octokit/graphql-action@v2
+        id: get-runs
+        with:
+        query: |
+            query getWorkflowRuns($owner: String!, $repo: String!, $workflowNames: [String!]!) {
+              repository(owner: $owner, name: $repo) {
+                workflowRuns(
+                  first: 10
+                  orderBy: { field: CREATED_AT, direction: DESC }
+                  filter: { workflowName: $workflowNames, status: SUCCESS }
+                ) {
+                  totalCount
+                }
+              }
+            }
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.repository }}
+          workflowNames: '["Build and Docker Push", "Elasticsearch and Kibana to ECR", "Redis and RabbitMQ to ECR"]'
+
+      - name: Check if all workflows succeeded
+        id: check-success
+        run: |
+          import json
+          runs = json.loads('${{ steps.get-runs.outputs.data }}')
+          total_successful_runs = runs['repository']['workflowRuns']['totalCount']
+          if [[ $total_successful_runs -ge 3 ]]; then
+            echo "DEPLOY=true" >> $GITHUB_OUTPUT
+          else
+            echo "DEPLOY=false" >> $GITHUB_OUTPUT
+            echo "Not all build workflows have succeeded yet."
+          fi
