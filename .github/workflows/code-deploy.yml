@@ -103,9 +103,6 @@ jobs:
           cat > appspec.yml << EOF
           version: 0.0
           os: linux
-          files:
-            - source: /scripts
-              destination: /home/ubuntu/app/scripts
           hooks:
             BeforeInstall:
               - location: scripts/before_install.sh
@@ -175,10 +172,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Upload appspec.yml and scripts to S3
+        run: |
+          aws s3 cp appspec.yml s3://${{ env.S3_BUCKET }}/appspec.yml
+          aws s3 cp --recursive scripts s3://${{ env.S3_BUCKET }}/scripts
+
       - name: Deploy to EC2 with CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name "${{ env.CODE_DEPLOY_APPLICATION_NAME }}" \
             --deployment-group-name "${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }}" \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --revision '{"revisionType":"S3","s3Location":{"bucket":"${{ env.S3_BUCKET }}","key":"appspec.yml","bundleType":"zip"}}'
+            --revision '{"revisionType":"S3","s3Location":{"bucket":"${{ env.S3_BUCKET }}","key":"appspec.yml"}}'
