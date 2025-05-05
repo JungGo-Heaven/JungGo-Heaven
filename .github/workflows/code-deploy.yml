@@ -1,47 +1,109 @@
-name: Deploy with AWS CodeDeploy
+name: Deploy from ECR to EC2
 
 on:
   workflow_run:
     workflows:
-      - "Build and Docker Push"
+      - "Check Build Status"
     types:
-      - completed
+      - success
   workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  ELASTICSEARCH_IMAGE_NAME: elasticsearch
+  KIBANA_IMAGE_NAME: kibana
+  REDIS_IMAGE_NAME: redis
+  RABBITMQ_IMAGE_NAME: rabbitmq
+  SPRING_IMAGE_NAME: junggoheaven
+  CODE_DEPLOY_APPLICATION_NAME: ${{ secrets.AWS_CODEDEPLOY_APP_NAME }}
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: Git-Development-Group
+  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
-    # "Build and Docker Push"가 성공했을 때 or 직접 workflow 실행했을 때 실행 .
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # artifact를 업로드한 workflow 파일 이름을 지정하여 다운로드
-      - name: Download image tag
-        id: download-artifact
+      # 각 workflow artifact 다운로드
+      # Elasticsearch & Kibana
+      - name: Download Elasticsearch Kibana image URIs
+        id: download-es-kibana-uris
         uses: actions/download-artifact@v4
         with:
-          name: image-tag
-          path: ./artifacts
+          name: es-kibana-image-uris
+          path: ./artifacts-es-kibana
           run-id: ${{ github.event.workflow_run.id }}
-          repository: JungGo-Heaven/JungGo-Heaven
-          github-token: ${{ secrets.ACCESS_TOKEN }}
-        if: ${{ github.event_name != 'workflow_dispatch' }}
-        continue-on-error: true
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract image tag
-        id: extract-tag
+      - name: Extract Elasticsearch Kibana image URIs
+        id: extract-es-kibana-uris
         run: |
-          if [ -f "./artifacts/image-tag.txt" ]; then
-            echo "IMAGE_TAG=$(cat ./artifacts/image-tag.txt)" >> $GITHUB_ENV
+          if [ -f "./artifacts-es-kibana/es_kibana_image_uris.txt" ]; then
+            source "./artifacts-es-kibana/es_kibana_image_uris.txt"
+            echo "ELASTICSEARCH_IMAGE_URI=$ELASTICSEARCH_IMAGE_URI" >> $GITHUB_ENV
+            echo "KIBANA_IMAGE_URI=$KIBANA_IMAGE_URI" >> $GITHUB_ENV
           else
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+            echo "ELASTICSEARCH_IMAGE_URI=$ECR_REGISTRY/$ELASTICSEARCH_IMAGE_NAME:latest" >> $GITHUB_ENV
+            echo "KIBANA_IMAGE_URI=$ECR_REGISTRY/$KIBANA_IMAGE_NAME:latest" >> $GITHUB_ENV
           fi
-          echo "Using image tag: $IMAGE_TAG"
+          echo "Elasticsearch Image URI: $ELASTICSEARCH_IMAGE_URI"
+          echo "Kibana Image URI: $Kibana_IMAGE_URI"
 
-      - name: Create appspec.yml
+      # Redis & RabbitMQ
+      - name: Download Redis RabbitMQ image URIs
+        id: download-redis-rabbitmq-uris
+        uses: actions/download-artifact@v4
+        with:
+          name: redis-rabbitmq-image-uris
+          path: ./artifacts-redis-rabbitmq
+          run-id: ${{ github.event.workflow_run.id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Redis RabbitMQ image URIs
+        id: extract-redis-rabbitmq-uris
+        run: |
+          if [ -f "./artifacts-redis-rabbitmq/redis_rabbitmq_image_uris.txt" ]; then
+            source "./artifacts-redis-rabbitmq/redis_rabbitmq_image_uris.txt"
+            echo "REDIS_IMAGE_URI=$REDIS_IMAGE_URI" >> $GITHUB_ENV
+            echo "RABBITMQ_IMAGE_URI=$RABBITMQ_IMAGE_URI" >> $GITHUB_ENV
+          else
+            echo "REDIS_IMAGE_URI=$ECR_REGISTRY/$REDIS_IMAGE_NAME:latest" >> $GITHUB_ENV
+            echo "RABBITMQ_IMAGE_URI=$ECR_REGISTRY/$RABBITMQ_IMAGE_NAME:latest" >> $GITHUB_ENV
+          fi
+          echo "Redis Image URI: $REDIS_IMAGE_URI"
+          echo "RabbitMQ Image URI: $RABBITMQ_IMAGE_URI"
+
+      # Spring Application Image
+      - name: Download Spring image URI
+        id: download-spring-uri
+        uses: actions/download-artifact@v4
+        with:
+          name: spring-image-uri
+          path: ./artifacts-spring
+          run-id: ${{ github.event.workflow_run.id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Spring image URI
+        id: extract-spring-uri
+        run: |
+          if [ -f "./artifacts-spring/spring_image_uri.txt" ]; then
+            source "./artifacts-spring/spring_image_uri.txt"
+            echo "SPRING_IMAGE_URI=$SPRING_IMAGE_URI" >> $GITHUB_ENV
+          else
+            echo "SPRING_IMAGE_URI=$ECR_REGISTRY/$SPRING_IMAGE_NAME:latest" >> $GITHUB_ENV
+          fi
+          echo "Spring Image URI: $SPRING_IMAGE_URI"
+
+      # appspec.yml 생성
+      - name: Create appspec.yml for EC2
         run: |
           cat > appspec.yml << EOF
           version: 0.0
@@ -60,152 +122,66 @@ jobs:
                 runas: ubuntu
             ApplicationStart:
               - location: scripts/start_application.sh
-                timeout: 300
+                timeout: 600
                 runas: ubuntu
           EOF
 
-      # 현재 실행 중인 프로그램 백업
-      - name: Create deployment scripts
+      # 배포 스크립트 생성
+      - name: Create deployment scripts for EC2
         run: |
           mkdir -p scripts
           cat > scripts/before_install.sh << 'EOF'
           #!/bin/bash
           set -e
           echo "Before Install script started"
-
-          BACKUP_DIR="/home/ubuntu/backup"
-          ARCHIVE_DIR="/home/ubuntu/backup_archive"
-          sudo mkdir -p "$BACKUP_DIR" "$ARCHIVE_DIR"
-
-          backup_container() {
-            CONTAINER_NAME="$1"
-            BACKUP_FILE="$BACKUP_DIR/${CONTAINER_NAME}.tar"
-            ARCHIVED_FILE="$ARCHIVE_DIR/${CONTAINER_NAME}_$(date +'%Y%m%d%H%M%S').tar"
-
-            if docker ps -a --format "{{.Names}}" | grep -q "$CONTAINER_NAME"; then
-              if [ -f "$BACKUP_FILE" ]; then
-                echo "Moving previous backup of $CONTAINER_NAME to archive: $ARCHIVED_FILE"
-                sudo mv "$BACKUP_FILE" "$ARCHIVED_FILE"
-              fi
-              echo "Backing up current $CONTAINER_NAME container..."
-              docker export "$CONTAINER_NAME" > "$BACKUP_FILE"
-              echo "Backup of $CONTAINER_NAME created: $BACKUP_FILE"
-            fi
-          }
-
-          backup_container "jungo-heaven-app-container"
+          if ! command -v jq &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y jq
+          fi
           echo "Before Install script finished"
           exit 0
           EOF
 
-          # 애플리케이션 설정 파일 생성
           cat > scripts/after_install.sh << 'EOF'
           #!/bin/bash
           set -e
           echo "After Install script started"
-
-          # /home/ubuntu/app 디렉토리에 ubuntu 권한 부여
+          
+          # 권한 설정
           sudo chown -R ubuntu:ubuntu /home/ubuntu/app
-          sudo chmod -R 755 /home/ubuntu/app
-
-          # application.yml 파일을 secrets에서 불러와서 작성
-          mkdir -p /home/ubuntu/app/config
-          cat > /home/ubuntu/app/config/application.yml << 'APPYML'
-          ${{ secrets.APPLICATION_YML }}
-          APPYML
-
-          chmod -R 755 /home/ubuntu/app
-
+          sudo chmod 755 /home/ubuntu/app/scripts/*.sh
+          
+          rm -rf /tmp/*
           echo "After Install script finished"
           exit 0
           EOF
 
-          # 애플리케이션 실행 (docker run - 다른 EC2에서 이미지 pull)
           cat > scripts/start_application.sh << 'EOF'
           #!/bin/bash
           set -e
           echo "Start Application script started"
-
-          # Spring Boot 애플리케이션 빌드
-          echo "Building Spring Boot application..."
-          cd /home/ubuntu/app
-          ./gradlew build -x test # 또는 ./mvnw clean package
-          echo "Spring Boot application build complete."
-
-          # Docker 이미지 빌드
-          echo "Building Docker image..."
-          docker build -t junggo-heaven-app:latest -f Dockerfile .
-          echo "Docker image built: junggo-heaven-app:latest"
-
-          REMOTE_REGISTRY_ELK="10.0.142.85:5000"
-          REMOTE_REGISTRY_REDIMQ="10.0.135.254:5000"
-
-          # Elastic Search & Kibana 관련 컨테이너 이미지 pull 및 실행
-          echo "Pulling elk image from $REMOTE_REGISTRY_ELK/elk:latest"
-          docker pull "$REMOTE_REGISTRY_ELK/elk:latest"
-          docker stop "elk-container" || true
-          docker rm "elk-container" || true
-          docker run -d --name "elk-container" -p 9200:9200 -p 5601:5601 "$REMOTE_REGISTRY_ELK/elk:latest"
-
-          # Redis&MQ 관련 컨테이너 이미지 pull 및 실행
-          echo "Pulling redismq image from $REMOTE_REGISTRY_REDIMQ/redismq:latest"
-          docker pull "$REMOTE_REGISTRY_REDIMQ/redismq:latest"
-          docker stop "redismq-container" || true
-          docker rm "redismq-container" || true
-          docker run -d --name "redismq-container" -p 6379:6379 -p 5672:5672 "$REMOTE_REGISTRY_REDIMQ/redismq:latest"
-
-          # Spring Boot 애플리케이션 컨테이너 실행
-          docker stop "jungo-heaven-app-container" || true
-          docker rm "jungo-heaven-app-container" || true
-          docker run -d --name "jungo-heaven-app-container" -p 8080:8080 \
-            -e SPRING_DATASOURCE_URL="jdbc:mysql://${{ secrets.RDS_HOST }}:${{ secrets.RDS_PORT }}/${{ secrets.RDS_DB_NAME }}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=true&useSSL=false" \
-            -e SPRING_DATASOURCE_USERNAME="${{ secrets.RDS_USERNAME }}" \
-            -e SPRING_DATASOURCE_PASSWORD="${{ secrets.RDS_PASSWORD }}" \
-            -e SPRING_REDIS_HOST="${{ secrets.REDIS_HOST }}" \
-            -e SPRING_REDIS_PORT="${{ secrets.REDIS_PORT }}" \
-            junggo-heaven-app:latest
-
-          sleep 20
-
-          # 컨테이너 상태 확인 (각 컨테이너에 대해 수행)
-          APP_STATUS=$(docker inspect -f '{{.State.Running}}' "jungo-heaven-app-container" 2>/dev/null)
-          ELK_STATUS=$(docker inspect -f '{{.State.Running}}' "elk-container" 2>/dev/null)
-          REDISMQ_STATUS=$(docker inspect -f '{{.State.Running}}' "redismq-container" 2>/dev/null)
-
-          if [ "$APP_STATUS" = "true" ] && [ "$ELK_STATUS" = "true" ] && [ "$REDISMQ_STATUS" = "true" ];
-          then
-            echo "All applications started successfully, connected to RDS"
-            docker system prune -af --volumes
-            exit 0
+          if [[ "${{ env.DEPLOY_SPRING_APP }}" == "true" ]]; then
+            echo "Pulling Spring application image: $SPRING_IMAGE_URI"
+            docker pull "$SPRING_IMAGE_URI"
+            docker stop spring-app-container || true
+            docker rm spring-app-container || true
+            docker run -d --name spring-app-container -p 8080:8080 "$SPRING_IMAGE_URI"
           else
-            echo "One or more applications failed to start"
-            exit 1
+            echo "Skipping Spring application deployment."
           fi
           echo "Start Application script finished"
           exit 0
           EOF
-          chmod +x scripts/*.sh
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Deploy to EC2 with CodeDeploy
+        uses: aws-actions/aws-cli@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-        # Docker-compose 배포 번들 생성
-      - name: Create deployment bundle
-        run: zip -r deploy.zip scripts/ Dockerfile build/ src/ build.gradle
-
-      # S3 업로드
-      - name: Upload deployment bundle to S3
-        run: aws s3 cp deploy.zip s3://${{ secrets.AWS_S3_BUCKET }}/deploy.zip
-
-      - name: Deploy to AWS CodeDeploy
-        run: |
-          aws deploy create-deployment \
-            --application-name ${{ secrets.AWS_CODEDEPLOY_APP_NAME }} \
-            --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
+        args: aws deploy create-deployment \
+            --application-name "${{ env.CODE_DEPLOY_APPLICATION_NAME }}" \
+            --deployment-group-name "${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }}" \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=${{ secrets.AWS_S3_BUCKET }},bundleType=zip,key=deploy.zip \
-            --file-exists-behavior OVERWRITE
+            --revision "{\"revisionType\":\"S3\",\"s3Location\":{\"bucket\":\"${{ env.S3_BUCKET }}\",\"key\":\"appspec.yml\",\"bundleType\":\"zip\"}}"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
