@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FCMPusher {
 	private final NotificationDeliveryEventWriter notificationDeliveryEventWriter;
 
-	@Async
+	// @Async
 	@EventListener
 	public void productRegisteredMessagePusher(PushByFCMEvent event) {
 		List<MatchedUserDto> userList = event.getUserList();
