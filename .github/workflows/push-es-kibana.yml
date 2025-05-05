@@ -1,12 +1,11 @@
 name: Elasticsearch and Kibana to ECR
 
 on:
-  workflow_run:
-    workflows:
-      - "Build and Docker Push"
-    types:
-      - completed
   workflow_dispatch:
+  push:
+    branches:
+      - feat/workflow
+      - main
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
