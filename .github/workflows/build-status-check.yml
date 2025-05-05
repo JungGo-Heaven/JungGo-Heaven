@@ -7,47 +7,81 @@ on:
       - "Elasticsearch and Kibana to ECR"
       - "Redis and RabbitMQ to ECR"
     types:
-      - success
+      - completed
   workflow_dispatch:
 
 jobs:
   check-status:
     runs-on: ubuntu-latest
     outputs:
-      deploy: ${{ steps.check-success.outputs.DEPLOY }}
+      deploy: ${{ steps.check-success.outputs.deploy }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Get workflow runs
-        uses: octokit/graphql-action@v2
+        uses: octokit/graphql-action@v2.3.2
         id: get-runs
         with:
-        query: |
-            query getWorkflowRuns($owner: String!, $repo: String!, $workflowNames: [String!]!) {
+          query: |
+            query getWorkflowRuns($owner: String!, $repo: String!) {
               repository(owner: $owner, name: $repo) {
-                workflowRuns(
-                  first: 10
-                  orderBy: { field: CREATED_AT, direction: DESC }
-                  filter: { workflowName: $workflowNames, status: SUCCESS }
-                ) {
-                  totalCount
+                buildPushWorkflow: workflow(name: "Build and Docker Push") {
+                  runs(first: 1, orderBy: {field: CREATED_AT, direction: DESC}) {
+                    nodes {
+                      status
+                      conclusion
+                    }
+                  }
+                }
+                esKibanaWorkflow: workflow(name: "Elasticsearch and Kibana to ECR") {
+                  runs(first: 1, orderBy: {field: CREATED_AT, direction: DESC}) {
+                    nodes {
+                      status
+                      conclusion
+                    }
+                  }
+                }
+                redisRabbitWorkflow: workflow(name: "Redis and RabbitMQ to ECR") {
+                  runs(first: 1, orderBy: {field: CREATED_AT, direction: DESC}) {
+                    nodes {
+                      status
+                      conclusion
+                    }
+                  }
                 }
               }
             }
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository }}
-          workflowNames: '["Build and Docker Push", "Elasticsearch and Kibana to ECR", "Redis and RabbitMQ to ECR"]'
+          variables: |
+            {
+              "owner": "${{ github.repository_owner }}",
+              "repo": "${{ github.event.repository.name }}"
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check if all workflows succeeded
         id: check-success
         run: |
-          import json
-          runs = json.loads('${{ steps.get-runs.outputs.data }}')
-          total_successful_runs = runs['repository']['workflowRuns']['totalCount']
-          if [[ $total_successful_runs -ge 3 ]]; then
-            echo "DEPLOY=true" >> $GITHUB_OUTPUT
+          echo 'Checking workflow statuses...'
+          
+          # Parse the GraphQL response
+          RESPONSE='${{ steps.get-runs.outputs.data }}'
+          
+          # Extract status for each workflow
+          BUILD_PUSH_STATUS=$(echo $RESPONSE | jq -r '.repository.buildPushWorkflow.runs.nodes[0].conclusion // "MISSING"')
+          ES_KIBANA_STATUS=$(echo $RESPONSE | jq -r '.repository.esKibanaWorkflow.runs.nodes[0].conclusion // "MISSING"')
+          REDIS_RABBIT_STATUS=$(echo $RESPONSE | jq -r '.repository.redisRabbitWorkflow.runs.nodes[0].conclusion // "MISSING"')
+          
+          echo "Build and Push status: $BUILD_PUSH_STATUS"
+          echo "ES and Kibana status: $ES_KIBANA_STATUS"
+          echo "Redis and RabbitMQ status: $REDIS_RABBIT_STATUS"
+          
+          # Check if all workflows succeeded
+          if [ "$BUILD_PUSH_STATUS" = "SUCCESS" ] && [ "$ES_KIBANA_STATUS" = "SUCCESS" ] && [ "$REDIS_RABBIT_STATUS" = "SUCCESS" ]; then
+            echo "All required workflows have succeeded"
+            echo "deploy=true" >> $GITHUB_OUTPUT
           else
-            echo "DEPLOY=false" >> $GITHUB_OUTPUT
-            echo "Not all build workflows have succeeded yet."
+            echo "Not all required workflows have succeeded yet"
+            echo "deploy=false" >> $GITHUB_OUTPUT
           fi
