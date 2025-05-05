@@ -8,8 +8,6 @@ on:
       - completed
   workflow_dispatch:
 
-
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -49,8 +47,8 @@ jobs:
           version: 0.0
           os: linux
           files:
-            - source: /
-              destination: /home/ubuntu/app
+            - source: /scripts
+              destination: /home/ubuntu/app/scripts
           hooks:
             BeforeInstall:
               - location: scripts/before_install.sh
@@ -66,39 +64,45 @@ jobs:
                 runas: ubuntu
           EOF
 
-      - name: Create docker-compose.yml
-        run: |
-          IMAGE_TAG_VALUE="${IMAGE_TAG}"
-          DOCKER_COMPOSE_CONTENT=$(echo '${{ secrets.DOCKER_COMPOSE }}' | sed "s/\${IMAGE_TAG:-latest}/\${IMAGE_TAG_VALUE:-latest}/g")
-          echo "$DOCKER_COMPOSE_CONTENT" > docker-compose.yml
-
       # 현재 실행 중인 프로그램 백업
       - name: Create deployment scripts
         run: |
           mkdir -p scripts
           cat > scripts/before_install.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          echo "Before Install script started"
 
-          # Docker Compose가 설치되어 있는지 확인
-          if ! command -v docker-compose &> /dev/null; then
-            echo "Installing Docker Compose..."
-            sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-          fi
+          BACKUP_DIR="/home/ubuntu/backup"
+          ARCHIVE_DIR="/home/ubuntu/backup_archive"
+          sudo mkdir -p "$BACKUP_DIR" "$ARCHIVE_DIR"
 
-          # 서비스가 실행 중인 경우 백업
-          if [ -f "/home/ubuntu/app/docker-compose.yml" ]; then
-            cd /home/ubuntu/app
-            BACKUP_DIR="/home/ubuntu/app_backup_$(date +'%Y%m%d%H%M%S')"
-            mkdir -p $BACKUP_DIR
-            cp -r * $BACKUP_DIR/
-            docker-compose down || true
-          fi
+          backup_container() {
+            CONTAINER_NAME="$1"
+            BACKUP_FILE="$BACKUP_DIR/${CONTAINER_NAME}.tar"
+            ARCHIVED_FILE="$ARCHIVE_DIR/${CONTAINER_NAME}_$(date +'%Y%m%d%H%M%S').tar"
+
+            if docker ps -a --format "{{.Names}}" | grep -q "$CONTAINER_NAME"; then
+              if [ -f "$BACKUP_FILE" ]; then
+                echo "Moving previous backup of $CONTAINER_NAME to archive: $ARCHIVED_FILE"
+                sudo mv "$BACKUP_FILE" "$ARCHIVED_FILE"
+              fi
+              echo "Backing up current $CONTAINER_NAME container..."
+              docker export "$CONTAINER_NAME" > "$BACKUP_FILE"
+              echo "Backup of $CONTAINER_NAME created: $BACKUP_FILE"
+            fi
+          }
+
+          backup_container "jungo-heaven-app-container"
+          echo "Before Install script finished"
+          exit 0
           EOF
 
           # 애플리케이션 설정 파일 생성
           cat > scripts/after_install.sh << 'EOF'
           #!/bin/bash
           set -e
+          echo "After Install script started"
 
           # /home/ubuntu/app 디렉토리에 ubuntu 권한 부여
           sudo chown -R ubuntu:ubuntu /home/ubuntu/app
@@ -111,54 +115,75 @@ jobs:
           APPYML
 
           chmod -R 755 /home/ubuntu/app
+
+          echo "After Install script finished"
+          exit 0
           EOF
 
-          # 애플리케이션 실행
+          # 애플리케이션 실행 (docker run - 다른 EC2에서 이미지 pull)
           cat > scripts/start_application.sh << 'EOF'
           #!/bin/bash
           set -e
+          echo "Start Application script started"
 
-          # Docker 이미지 pull
+          # Spring Boot 애플리케이션 빌드
+          echo "Building Spring Boot application..."
           cd /home/ubuntu/app
-          export IMAGE_TAG=${IMAGE_TAG:-latest}
-          
-          # Docker 컴포즈 환경 변수 출력 확인
-          echo "Using IMAGE_TAG: $IMAGE_TAG"
-          
-          # 새로운 docker-compose.yml 파일 생성
-          awk -v tag="$IMAGE_TAG" '{gsub(/\${IMAGE_TAG:-latest}/, tag); print}' docker-compose.yml > temp_compose.yml
-          mv temp_compose.yml docker-compose.yml
-          
-          # 이미지 pull
-          docker-compose pull app redis es kibana rabbitmq || true
+          ./gradlew build -x test # 또는 ./mvnw clean package
+          echo "Spring Boot application build complete."
 
-          # Docker Compose로 서비스 시작
-          docker-compose up --build -d
+          # Docker 이미지 빌드
+          echo "Building Docker image..."
+          docker build -t junggo-heaven-app:latest -f Dockerfile .
+          echo "Docker image built: junggo-heaven-app:latest"
+
+          REMOTE_REGISTRY_ELK="10.0.142.85:5000"
+          REMOTE_REGISTRY_REDIMQ="10.0.135.254:5000"
+
+          # Elastic Search & Kibana 관련 컨테이너 이미지 pull 및 실행
+          echo "Pulling elk image from $REMOTE_REGISTRY_ELK/elk:latest"
+          docker pull "$REMOTE_REGISTRY_ELK/elk:latest"
+          docker stop "elk-container" || true
+          docker rm "elk-container" || true
+          docker run -d --name "elk-container" -p 9200:9200 -p 5601:5601 "$REMOTE_REGISTRY_ELK/elk:latest"
+
+          # Redis&MQ 관련 컨테이너 이미지 pull 및 실행
+          echo "Pulling redismq image from $REMOTE_REGISTRY_REDIMQ/redismq:latest"
+          docker pull "$REMOTE_REGISTRY_REDIMQ/redismq:latest"
+          docker stop "redismq-container" || true
+          docker rm "redismq-container" || true
+          docker run -d --name "redismq-container" -p 6379:6379 -p 5672:5672 "$REMOTE_REGISTRY_REDIMQ/redismq:latest"
+
+          # Spring Boot 애플리케이션 컨테이너 실행
+          docker stop "jungo-heaven-app-container" || true
+          docker rm "jungo-heaven-app-container" || true
+          docker run -d --name "jungo-heaven-app-container" -p 8080:8080 \
+            -e SPRING_DATASOURCE_URL="jdbc:mysql://${{ secrets.RDS_HOST }}:${{ secrets.RDS_PORT }}/${{ secrets.RDS_DB_NAME }}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=true&useSSL=false" \
+            -e SPRING_DATASOURCE_USERNAME="${{ secrets.RDS_USERNAME }}" \
+            -e SPRING_DATASOURCE_PASSWORD="${{ secrets.RDS_PASSWORD }}" \
+            -e SPRING_REDIS_HOST="${{ secrets.REDIS_HOST }}" \
+            -e SPRING_REDIS_PORT="${{ secrets.REDIS_PORT }}" \
+            junggo-heaven-app:latest
+
           sleep 20
 
-          # 컨테이너 실행 확인
-          APP_RUNNING=$(docker ps -q -f name=app)
-          if [ -z "$APP_RUNNING" ]; then
-            echo "Application failed to start, rolling back..."
+          # 컨테이너 상태 확인 (각 컨테이너에 대해 수행)
+          APP_STATUS=$(docker inspect -f '{{.State.Running}}' "jungo-heaven-app-container" 2>/dev/null)
+          ELK_STATUS=$(docker inspect -f '{{.State.Running}}' "elk-container" 2>/dev/null)
+          REDISMQ_STATUS=$(docker inspect -f '{{.State.Running}}' "redismq-container" 2>/dev/null)
 
-            # 백업이 있는 경우 복원
-            BACKUP_DIR=$(find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d | sort -r | head -n 1)
-            if [ ! -z "$BACKUP_DIR" ]; then
-              echo "Restoring from backup: $BACKUP_DIR"
-              rm -rf /home/ubuntu/app/*
-              cp -r $BACKUP_DIR/* /home/ubuntu/app/
-              cd /home/ubuntu/app
-              docker-compose up --build -d
-            fi
-            exit 1
-          else
-            echo "Application started successfully"
-            # 백업 및 이미지 정리
-            find /home/ubuntu -maxdepth 1 -name "app_backup_*" -type d -mtime +7 -exec rm -rf {} \;
+          if [ "$APP_STATUS" = "true" ] && [ "$ELK_STATUS" = "true" ] && [ "$REDISMQ_STATUS" = "true" ];
+          then
+            echo "All applications started successfully, connected to RDS"
             docker system prune -af --volumes
+            exit 0
+          else
+            echo "One or more applications failed to start"
+            exit 1
           fi
+          echo "Start Application script finished"
+          exit 0
           EOF
-
           chmod +x scripts/*.sh
 
       - name: Configure AWS credentials
@@ -170,7 +195,7 @@ jobs:
 
         # Docker-compose 배포 번들 생성
       - name: Create deployment bundle
-        run: zip -r deploy.zip appspec.yml scripts/ docker-compose.yml
+        run: zip -r deploy.zip scripts/ Dockerfile build/ src/ build.gradle
 
       # S3 업로드
       - name: Upload deployment bundle to S3
