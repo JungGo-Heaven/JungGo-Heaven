@@ -24,72 +24,65 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    # Check Build Status 워크플로우가 성공했을 때만 실행
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 각 workflow artifact 다운로드
-      # Elasticsearch & Kibana
+      # Elasticsearch & Kibana Artifact 다운로드
+      - name: Get Elasticsearch and Kibana workflow run ID
+        id: get-es-kibana-run-id
+        run: |
+          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/workflows/push-es-kibana.yml/runs?status=success&per_page=1"
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].id')
+          echo "PUSH_ES_KIBANA_RUN_ID=$RUN_ID" >> $GITHUB_ENV
+
       - name: Download Elasticsearch Kibana image URIs
         id: download-es-kibana-uris
         uses: actions/download-artifact@v4
         with:
           name: es-kibana-image-uris
           path: ./artifacts-es-kibana
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ env.PUSH_ES_KIBANA_RUN_ID }}
           repository: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Elasticsearch Kibana image URIs
-        id: extract-es-kibana-uris
+      # Redis & RabbitMQ Artifact 다운로드
+      - name: Get Redis and RabbitMQ workflow run ID
+        id: get-redis-rabbitmq-run-id
         run: |
-          if [ -f "./artifacts-es-kibana/es_kibana_image_uris.txt" ]; then
-            source "./artifacts-es-kibana/es_kibana_image_uris.txt"
-            echo "ELASTICSEARCH_IMAGE_URI=$ELASTICSEARCH_IMAGE_URI" >> $GITHUB_ENV
-            echo "KIBANA_IMAGE_URI=$KIBANA_IMAGE_URI" >> $GITHUB_ENV
-          else
-            echo "ELASTICSEARCH_IMAGE_URI=$ECR_REGISTRY/$ELASTICSEARCH_IMAGE_NAME:latest" >> $GITHUB_ENV
-            echo "KIBANA_IMAGE_URI=$ECR_REGISTRY/$KIBANA_IMAGE_NAME:latest" >> $GITHUB_ENV
-          fi
-          echo "Elasticsearch Image URI: $ELASTICSEARCH_IMAGE_URI"
-          echo "Kibana Image URI: $Kibana_IMAGE_URI"
+          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/workflows/push-redis-mq.yml/runs?status=success&per_page=1"
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].id')
+          echo "REDIS_RABBITMQ_RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-      # Redis & RabbitMQ
       - name: Download Redis RabbitMQ image URIs
         id: download-redis-rabbitmq-uris
         uses: actions/download-artifact@v4
         with:
-          name: redis-rabbitmq-image-uris
+          name: redis_mq_image_uris
           path: ./artifacts-redis-rabbitmq
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ env.REDIS_RABBITMQ_RUN_ID }}
           repository: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Redis RabbitMQ image URIs
-        id: extract-redis-rabbitmq-uris
+      # Spring Application Image Artifact 다운로드
+      - name: Get Build and Docker Push workflow run ID
+        id: get-build-push-run-id
         run: |
-          if [ -f "./artifacts-redis-rabbitmq/redis_rabbitmq_image_uris.txt" ]; then
-            source "./artifacts-redis-rabbitmq/redis_rabbitmq_image_uris.txt"
-            echo "REDIS_IMAGE_URI=$REDIS_IMAGE_URI" >> $GITHUB_ENV
-            echo "RABBITMQ_IMAGE_URI=$RABBITMQ_IMAGE_URI" >> $GITHUB_ENV
-          else
-            echo "REDIS_IMAGE_URI=$ECR_REGISTRY/$REDIS_IMAGE_NAME:latest" >> $GITHUB_ENV
-            echo "RABBITMQ_IMAGE_URI=$ECR_REGISTRY/$RABBITMQ_IMAGE_NAME:latest" >> $GITHUB_ENV
-          fi
-          echo "Redis Image URI: $REDIS_IMAGE_URI"
-          echo "RabbitMQ Image URI: $RABBITMQ_IMAGE_URI"
+          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/workflows/build-push.yml/runs?status=success&per_page=1"
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].id')
+          echo "BUILD_PUSH_RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-      # Spring Application Image
       - name: Download Spring image URI
         id: download-spring-uri
         uses: actions/download-artifact@v4
         with:
           name: spring-image-uri
           path: ./artifacts-spring
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ env.BUILD_PUSH_RUN_ID }}
           repository: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
